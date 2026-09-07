@@ -238,6 +238,9 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
   (`/api/cron/medya-temizle`, Pazartesi 04:00 UTC, `CRON_SECRET` Bearer; anahtar yoksa 503) + yerelde `pnpm media:cleanup`
   (varsayılan kuru çalışma, `--apply`, `--grace=SAAT`).
 - **CI:** e2e üretim derlemesine karşı koşar (`pnpm start`), yerelde dev sunucusu. Lighthouse build sonrası ayrı adım.
+- **İlk CI koşusu dersi (07.09.2026):** `PageProps`/`LayoutProps` Next'in `.next/types` altına ürettiği global tipler;
+  yerelde `next dev` ürettiği için `tsc` geçiyordu, temiz CI ortamında `.next` olmadığından 21 hata düştü. `pnpm typecheck`
+  artık `next typegen && tsc --noEmit` (tam build yapmadan rota tiplerini üretir). `next-env.d.ts` de bu yüzden commit'lenmez.
 - **axe turunun bulguları (07.09.2026, hepsi düzeltildi):** gizli dosya girdisi (`ImageUploadButton`) etiketsizdi →
   `aria-label` + `tabIndex=-1`; Sheet/Dialog kapatma düğmesinin ekran okuyucu metni İngilizce "Close" idi →
   `tr.common.close`; kampanya kartı h3'ü `/kampanyalar`'da h1'in altına düşüyordu → `headingLevel`. Ölçüm notu:
