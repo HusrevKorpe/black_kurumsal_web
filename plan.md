@@ -236,10 +236,13 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
   siteye ~85 KB gz ekledi, kaldırıldı. Ana sayfa JS'i 228 KB gz (07.09.2026: 290 → Sentry tembel 246 → Sheet tembel 228;
   kalan: react-dom+Next ~140, base-ui Button çekirdeği ~21, sayfa bileşenleri). Kural: açık site
   bileşenlerine Zod/Supabase/Prisma sızmaz; `pnpm build` sonrası `.next/server/app/index.html` script listesi kontrol edilir.
-- **Lighthouse ısıtma (07.09.2026):** CI'da "/" ilk koşusu 0,63 (TBT 2,4 s) ölçüldü; sonraki koşular 0,93. Sebep soğuk
-  ilk istek (rota modülleri + Prisma bağlantısı) ile Lighthouse'un ilk turunun aynı CPU'da çakışması. Sunucu artık
-  `scripts/lighthouse-server.sh` ile açılıyor: her URL ölçümden önce bir kez ısıtılır. Medyan-3 tek sapmayı tolere
-  ediyordu; ısıtma ikinci sapma riskini kaldırır. Yerelde 3000 doluysa `PORT=3100 pnpm lighthouse`.
+- **Lighthouse ilk koşu sapması (07.09.2026):** CI'da "/" ilk koşusu 0,63 (TBT 2,4 s), sonrakiler 0,93. Sunucu artık
+  `scripts/lighthouse-server.sh` ile açılıyor ve her URL ölçümden önce ısıtılıyor; bu, sunucu tarafındaki soğuk
+  başlangıcı kaldırdı ama ilk koşu yine 0,63 (TBT 1,2 s, benchmarkIndex o anda en düşük). Kalan sebep Chrome'un ilk
+  açılışı (kod önbelleği yok, GPU/JIT ısınması); yalnızca oturumun ilk koşusunda görülür, medyan-3 tolere eder.
+  Medyanlar runner hızına göre 0,91–0,93 (benchmarkIndex 2400 ≈ 0,91–0,92; 2900 ≈ 0,93). Marj 0,01–0,03; düşerse
+  sıradaki kaldıraç açık sitede base-ui Button yerine düz `<button>` + `buttonVariants` (~14 KB gz).
+  Yerelde 3000 doluysa `PORT=3100 pnpm lighthouse`.
 - **İlk patron (07.09.2026):** `features/staff/bootstrap.ts` → `ensureOwner`: seed ve `pnpm staff:owner` ortak kullanır.
   Auth kullanıcısı silinip yeniden açılmışsa (kimlik değişir) e-postayla duran StaffUser kaydı yeni kimliğe taşınır;
   FK'ler `onUpdate: Cascade` (Prisma varsayılanı) olduğundan atama/yükleme/günlük kayıtları korunur. Şifre CLI'da

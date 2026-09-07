@@ -2,7 +2,8 @@
 # Lighthouse için üretim sunucusu: `next start` açılır, verilen URL'ler ölçümden önce bir kez ısıtılır,
 # sonra LIGHTHOUSE_READY basılır (lighthouserc.cjs bunu bekler). LHCI bitince süreç ağacını kendisi kapatır.
 # Sebep: ilk istekte rota modülleri ve Prisma bağlantısı yüklenirken CI runner'ın CPU'su Lighthouse'un
-# ilk koşusuyla çakışıyordu ("/" ilk koşu 0,63, TBT 2,4 s; sonrakiler 0,93).
+# ilk koşusuyla çakışıyordu. Isıtma sunucu tarafını çözer; Chrome'un ilk açılışından gelen sapma (oturumun
+# ilk koşusu) kalır, medyan-3 onu tolere eder (bkz. plan.md §12 "Lighthouse ilk koşu sapması").
 # Kullanım: sh scripts/lighthouse-server.sh URL1 [URL2 ...]   (port: PORT ortam değişkeni, varsayılan 3000)
 set -eu
 [ "$#" -ge 1 ] || { echo "Kullanım: $0 URL..." >&2; exit 2; }
