@@ -13,7 +13,7 @@ export interface DashboardData {
 
 /** Patron tüm siteyi, sorumlu yalnızca kendi dükkanlarını sayar. */
 export async function getDashboardData(staff: StaffContext): Promise<DashboardData> {
-  const shopWhere = accessibleShopFilter(staff)
+  const shopWhere = { ...accessibleShopFilter(staff), deletedAt: null }
   const shopIds = isOwner(staff) ? undefined : [...staff.shopIds]
   const [shopsTotal, shopsActive, liveCampaigns, galleryImages, shops] = await Promise.all([
     db.shop.count({ where: shopWhere }),

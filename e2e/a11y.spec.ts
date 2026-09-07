@@ -78,6 +78,7 @@ test.describe('Erişilebilirlik (axe)', () => {
       '/admin/kullanicilar',
       '/admin/kullanicilar/yeni',
       '/admin/ayarlar',
+      '/admin/cop',
       '/admin/gunluk',
     ]) {
       await page.goto(path)

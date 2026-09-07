@@ -1,5 +1,5 @@
 import { parseHm } from './time'
-import type { DayOfWeek, HoursEntry } from './types'
+import type { DayOfWeek, DaySchedule } from './types'
 
 export const DAY_NAMES: Record<DayOfWeek, string> = {
   1: 'Pazartesi',
@@ -21,8 +21,8 @@ export const DAY_NAMES_SHORT: Record<DayOfWeek, string> = {
   7: 'Paz',
 }
 
-/** "10:00 – 02:00", "24 saat", "Kapalı" */
-export function formatHoursEntry(entry: HoursEntry): string {
+/** "10:00 – 02:00", "24 saat", "Kapalı". Haftalık kayıt da istisna gün de bu şekli sağlar. */
+export function formatHoursEntry(entry: DaySchedule): string {
   if (entry.isClosed || !entry.opensAt || !entry.closesAt) return 'Kapalı'
   const opens = parseHm(entry.opensAt)
   const closes = parseHm(entry.closesAt)

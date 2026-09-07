@@ -10,7 +10,7 @@ import { Gallery } from '@/components/public/gallery'
 import { HoursTable } from '@/components/public/hours-table'
 import { OpenStatusBadge } from '@/components/public/open-status-badge'
 import { PriceList } from '@/components/public/price-list'
-import { resolveHours } from '@/features/hours'
+import { resolveExceptions, resolveHours, toExceptionEntries } from '@/features/hours'
 import { toPriceCategoryViews } from '@/features/pricing/view'
 import { resolveContact } from '@/features/shops/contact'
 import { buildShopJsonLd, serializeJsonLd } from '@/features/shops/json-ld'
@@ -58,6 +58,11 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
   if (!shop) notFound()
 
   const { week, source } = resolveHours(shop.hours, shop.location?.hours)
+  const exceptions = resolveExceptions(
+    source,
+    toExceptionEntries(shop.hoursExceptions),
+    shop.location ? toExceptionEntries(shop.location.hoursExceptions) : null,
+  )
   const contact = resolveContact(shop, shop.location)
   const categories = toPriceCategoryViews(shop.priceCategories)
   const campaigns = [...shop.campaigns, ...(shop.location?.campaigns ?? [])]
@@ -80,6 +85,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
     phone: contact.phone,
     address: contact.address,
     week,
+    exceptions,
   })
 
   return (
@@ -122,7 +128,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
             ) : null}
           </div>
           <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{shop.name}</h1>
-          <OpenStatusBadge week={week} detailed className="mt-2 text-sm" />
+          <OpenStatusBadge week={week} exceptions={exceptions} detailed className="mt-2 text-sm" />
           <ContactButtons contact={contact} whatsappMessage={whatsappMessage} className="mt-5" />
         </header>
 
@@ -179,7 +185,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
               <h2 id="saatler" className="mb-3 font-semibold">
                 {tr.common.hours}
               </h2>
-              <HoursTable week={week} note={hoursNote} />
+              <HoursTable week={week} exceptions={exceptions} note={hoursNote} />
             </section>
             <ShopContactCard contact={contact} />
           </aside>

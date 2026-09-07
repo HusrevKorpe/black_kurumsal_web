@@ -35,12 +35,13 @@ export interface CampaignTargets {
 export async function listCampaignTargets(staff: StaffContext): Promise<CampaignTargets> {
   const [shops, locations] = await Promise.all([
     db.shop.findMany({
-      where: isOwner(staff) ? {} : { id: { in: [...staff.shopIds] } },
+      where: { ...(isOwner(staff) ? {} : { id: { in: [...staff.shopIds] } }), deletedAt: null },
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       select: { id: true, name: true },
     }),
     isOwner(staff)
       ? db.location.findMany({
+          where: { deletedAt: null },
           orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
           select: { id: true, name: true },
         })

@@ -131,33 +131,38 @@ describe('setShopCover', () => {
   })
 })
 
-describe('deleteShop', () => {
-  it('dükkanı, galerisini ve medya kayıtlarını siler; dosyalar depodan kaldırılır', async () => {
+describe('deleteShop (çöp kutusuna alır)', () => {
+  it('dükkanı çöp kutusuna alır; içerik ve dosyalar yerinde kalır', async () => {
     const shop = await makeShop()
     const owner = await createOwner()
-    const m1 = await createMedia(`shop/${shop.id}/g1.webp`)
-    const m2 = await createMedia(`shop/${shop.id}/g2.webp`)
-    await db.galleryImage.createMany({
-      data: [
-        { mediaId: m1.id, shopId: shop.id, sortOrder: 0 },
-        { mediaId: m2.id, shopId: shop.id, sortOrder: 1 },
-      ],
-    })
+    const media = await createMedia(`shop/${shop.id}/g1.webp`)
+    await db.galleryImage.create({ data: { mediaId: media.id, shopId: shop.id, sortOrder: 0 } })
     await db.openingHours.create({
       data: { shopId: shop.id, dayOfWeek: 1, opensAt: '09:00', closesAt: '18:00' },
     })
 
     const result = await deleteShop(owner, shop.id)
     expect(result.ok).toBe(true)
-    expect(await db.shop.count()).toBe(0)
-    expect(await db.media.count()).toBe(0)
-    expect(await db.openingHours.count()).toBe(0)
-    expect(removeObjects).toHaveBeenCalledWith(expect.arrayContaining([m1.path, m2.path]))
+    const row = await db.shop.findUniqueOrThrow({ where: { id: shop.id } })
+    expect(row.deletedAt).toBeInstanceOf(Date)
+    expect(await db.galleryImage.count()).toBe(1)
+    expect(await db.media.count()).toBe(1)
+    expect(await db.openingHours.count()).toBe(1)
+    expect(removeObjects).not.toHaveBeenCalled()
   })
 
   it('sorumlu silemez', async () => {
     const shop = await makeShop()
     const manager = await createManager([shop.id])
     await expect(deleteShop(manager, shop.id)).rejects.toBeInstanceOf(AuthorizationError)
+  })
+
+  it('çöp kutusundaki slug yeni dükkanda kullanılamaz, yol gösteren hata döner', async () => {
+    const owner = await createOwner()
+    const shop = await makeShop({ slug: 'tavuk' })
+    await deleteShop(owner, shop.id)
+    const result = await createShop(owner, validShopInput('tavuk'))
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error).toContain('çöp kutusundaki')
   })
 })

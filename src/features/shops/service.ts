@@ -1,16 +1,31 @@
 import 'server-only'
 import { logAudit } from '@/features/audit/log'
-import { removeObjects } from '@/features/media/storage'
 import type { Shop } from '@/generated/prisma/client'
-import { fromZodError, ok, type ActionResult } from '@/lib/actions/result'
+import { fail, fromZodError, ok, type ActionResult } from '@/lib/actions/result'
 import { assertOwner, assertShopAccess, isOwner, type StaffContext } from '@/lib/auth/authorize'
 import { db } from '@/lib/db'
-import { managerShopFormSchema, shopFormSchema } from './schema'
+import { tr } from '@/lib/i18n/tr'
+import {
+  managerShopFormSchema,
+  shopFormSchema,
+  type ManagerShopFormInput,
+  type ShopFormInput,
+} from './schema'
+
+/**
+ * Çöp kutusundaki dükkan slug'ını korur (geri alınınca adresi değişmesin). Bu yüzden çakışma
+ * P2002'nin genel "zaten kullanılıyor" mesajı yerine nereye bakılacağını söyleyen mesajla döner.
+ */
+async function slugHeldInTrash(slug: string): Promise<boolean> {
+  const held = await db.shop.count({ where: { slug, deletedAt: { not: null } } })
+  return held > 0
+}
 
 export async function createShop(staff: StaffContext, input: unknown): Promise<ActionResult<Shop>> {
   assertOwner(staff)
   const parsed = shopFormSchema.safeParse(input)
   if (!parsed.success) return fromZodError(parsed.error)
+  if (await slugHeldInTrash(parsed.data.slug)) return fail(tr.admin.shops.slugInTrash)
 
   const shop = await db.$transaction(async (tx) => {
     const created = await tx.shop.create({ data: parsed.data })
@@ -33,19 +48,32 @@ export async function updateShop(
   input: unknown,
 ): Promise<ActionResult<Shop>> {
   assertShopAccess(staff, shopId)
-  const schema = isOwner(staff) ? shopFormSchema : managerShopFormSchema
-  const parsed = schema.safeParse(input)
+  // Sorumlunun formunda slug yok; adres yalnızca patron tarafından değiştirilir, kontrolü de orada.
+  if (!isOwner(staff)) {
+    const parsed = managerShopFormSchema.safeParse(input)
+    if (!parsed.success) return fromZodError(parsed.error)
+    return persistShopUpdate(staff, shopId, parsed.data)
+  }
+  const parsed = shopFormSchema.safeParse(input)
   if (!parsed.success) return fromZodError(parsed.error)
+  if (await slugHeldInTrash(parsed.data.slug)) return fail(tr.admin.shops.slugInTrash)
+  return persistShopUpdate(staff, shopId, parsed.data)
+}
 
+async function persistShopUpdate(
+  staff: StaffContext,
+  shopId: string,
+  data: ShopFormInput | ManagerShopFormInput,
+): Promise<ActionResult<Shop>> {
   const shop = await db.$transaction(async (tx) => {
-    const updated = await tx.shop.update({ where: { id: shopId }, data: parsed.data })
+    const updated = await tx.shop.update({ where: { id: shopId }, data })
     await logAudit(tx, {
       staffId: staff.id,
       action: 'shop.update',
       entityType: 'Shop',
       entityId: shopId,
       summary: `${updated.name} bilgileri güncellendi`,
-      data: { fields: Object.keys(parsed.data) },
+      data: { fields: Object.keys(data) },
     })
     return updated
   })
@@ -81,41 +109,24 @@ export async function setShopCover(
 }
 
 /**
- * Dükkanı ve ona bağlı her şeyi siler. Dosyalar DB işlemi bittikten sonra Storage'dan kaldırılır.
- * Yalnızca patron. Geri alınamaz; arayüz onay ister.
+ * Dükkanı çöp kutusuna alır: siteden ve panelden düşer, hiçbir şey silinmez. Geri alınabilir;
+ * kalıcı silme çöp kutusundan yapılır (`features/trash`). Yalnızca patron.
  */
 export async function deleteShop(staff: StaffContext, shopId: string): Promise<ActionResult<null>> {
   assertOwner(staff)
-  const paths = await db.$transaction(async (tx) => {
-    const shop = await tx.shop.findUnique({
-      where: { id: shopId },
-      select: {
-        name: true,
-        gallery: { select: { media: { select: { id: true, path: true } } } },
-        campaigns: { select: { image: { select: { id: true, path: true } } } },
-        priceCategories: {
-          select: { items: { select: { image: { select: { id: true, path: true } } } } },
-        },
-      },
+  await db.$transaction(async (tx) => {
+    const shop = await tx.shop.update({
+      where: { id: shopId, deletedAt: null },
+      data: { deletedAt: new Date() },
+      select: { name: true },
     })
-    if (!shop) return []
-    const media = [
-      ...shop.gallery.map((g) => g.media),
-      ...shop.campaigns.map((c) => c.image),
-      ...shop.priceCategories.flatMap((c) => c.items.flatMap((i) => (i.image ? [i.image] : []))),
-    ]
-    await tx.shop.delete({ where: { id: shopId } })
-    if (media.length > 0)
-      await tx.media.deleteMany({ where: { id: { in: media.map((m) => m.id) } } })
     await logAudit(tx, {
       staffId: staff.id,
       action: 'shop.delete',
       entityType: 'Shop',
       entityId: shopId,
-      summary: `${shop.name} dükkanı silindi`,
+      summary: `${shop.name} dükkanı çöp kutusuna alındı`,
     })
-    return media.map((m) => m.path)
   })
-  await removeObjects(paths)
   return ok(null)
 }

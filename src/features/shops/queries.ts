@@ -1,28 +1,53 @@
 import 'server-only'
 import { cache } from 'react'
 import { activeCampaignWhere } from '@/features/campaigns/active'
+import { exceptionDateFilter, MAX_EXCEPTIONS } from '@/features/hours'
 import type { Prisma } from '@/generated/prisma/client'
 import { db } from '@/lib/db'
 
+/** Sitede görünen dükkan: yayında ve çöp kutusunda değil. */
+export const publicShopWhere = { isActive: true, deletedAt: null } satisfies Prisma.ShopWhereInput
+
+/** Geçmiş istisnalar sorguda elenir; sayfa yükü birkaç satırda kalır. */
+function exceptionsArgs(now: Date) {
+  return {
+    where: { date: exceptionDateFilter(now) },
+    orderBy: { date: 'asc' },
+    take: MAX_EXCEPTIONS,
+  } satisfies Prisma.Shop$hoursExceptionsArgs
+}
+
 /** Liste kartları için: kapak, mekan ve saatler (açık/kapalı rozeti için). */
-export const shopCardInclude = {
-  coverImage: true,
-  hours: true,
-  location: { select: { id: true, slug: true, name: true, kind: true, hours: true } },
-} satisfies Prisma.ShopInclude
+export function shopCardInclude(now: Date) {
+  return {
+    coverImage: true,
+    hours: true,
+    hoursExceptions: exceptionsArgs(now),
+    location: {
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        kind: true,
+        hours: true,
+        hoursExceptions: exceptionsArgs(now),
+      },
+    },
+  } satisfies Prisma.ShopInclude
+}
 
-export type ShopCardData = Prisma.ShopGetPayload<{ include: typeof shopCardInclude }>
+export type ShopCardData = Prisma.ShopGetPayload<{ include: ReturnType<typeof shopCardInclude> }>
 
-export async function getActiveShops(): Promise<ShopCardData[]> {
+export async function getActiveShops(now: Date = new Date()): Promise<ShopCardData[]> {
   return db.shop.findMany({
-    where: { isActive: true },
+    where: publicShopWhere,
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-    include: shopCardInclude,
+    include: shopCardInclude(now),
   })
 }
 
 export async function getActiveShopSlugs(): Promise<string[]> {
-  const rows = await db.shop.findMany({ where: { isActive: true }, select: { slug: true } })
+  const rows = await db.shop.findMany({ where: publicShopWhere, select: { slug: true } })
   return rows.map((r) => r.slug)
 }
 
@@ -31,9 +56,11 @@ function shopDetailInclude(now: Date) {
     coverImage: true,
     logoImage: true,
     hours: true,
+    hoursExceptions: exceptionsArgs(now),
     location: {
       include: {
         hours: true,
+        hoursExceptions: exceptionsArgs(now),
         campaigns: {
           where: activeCampaignWhere(now),
           include: { image: true },
@@ -57,9 +84,12 @@ function shopDetailInclude(now: Date) {
 
 export type ShopDetail = Prisma.ShopGetPayload<{ include: ReturnType<typeof shopDetailInclude> }>
 
-/** Yalnızca aktif dükkan; pasif veya yoksa null (sayfa 404 verir). */
+/** Yalnızca aktif dükkan; pasif, silinmiş veya yoksa null (sayfa 404 verir). */
 export const getShopBySlug = cache(
   async (slug: string, now: Date = new Date()): Promise<ShopDetail | null> => {
-    return db.shop.findFirst({ where: { slug, isActive: true }, include: shopDetailInclude(now) })
+    return db.shop.findFirst({
+      where: { slug, ...publicShopWhere },
+      include: shopDetailInclude(now),
+    })
   },
 )

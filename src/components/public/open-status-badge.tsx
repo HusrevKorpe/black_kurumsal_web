@@ -1,13 +1,20 @@
 'use client'
 
 import { useMemo } from 'react'
-import { DAY_NAMES, getOpenStatus, type WeeklyHours } from '@/features/hours'
+import {
+  DAY_NAMES,
+  getOpenStatus,
+  type HoursExceptionEntry,
+  type WeeklyHours,
+} from '@/features/hours'
 import { tr } from '@/lib/i18n/tr'
 import { cn } from '@/lib/utils'
 import { useMinuteTick } from './use-minute-tick'
 
 interface OpenStatusBadgeProps {
   week: WeeklyHours
+  /** Haftalık tabloyu ezen günler (bayram kapanışı gibi). */
+  exceptions?: readonly HoursExceptionEntry[]
   /** Kartta kısa, detay sayfasında açıklamalı. */
   detailed?: boolean
   className?: string
@@ -17,11 +24,16 @@ interface OpenStatusBadgeProps {
  * Sayfalar statik üretildiği için "şu an" tarayıcıda hesaplanır.
  * Sunucuda nötr görünür, yüklendikten sonra gerçek durum gelir ve her dakika yenilenir.
  */
-export function OpenStatusBadge({ week, detailed = false, className }: OpenStatusBadgeProps) {
+export function OpenStatusBadge({
+  week,
+  exceptions,
+  detailed = false,
+  className,
+}: OpenStatusBadgeProps) {
   const tick = useMinuteTick()
   const status = useMemo(
-    () => (tick === null ? null : getOpenStatus(week, new Date())),
-    [week, tick],
+    () => (tick === null ? null : getOpenStatus(week, { now: new Date(), exceptions })),
+    [week, exceptions, tick],
   )
 
   if (week.length === 0) return null

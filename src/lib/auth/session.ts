@@ -26,7 +26,8 @@ export const getCurrentStaff = cache(async (): Promise<CurrentStaff | null> => {
 
   const staff = await db.staffUser.findUnique({
     where: { id: user.id },
-    include: { assignments: { select: { shopId: true } } },
+    // Çöp kutusundaki dükkan atamadan düşer: sorumlu, silinmiş dükkanı doğrudan adresten de düzenleyemez.
+    include: { assignments: { where: { shop: { deletedAt: null } }, select: { shopId: true } } },
   })
   if (!staff || !staff.isActive) return null
 

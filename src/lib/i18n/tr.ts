@@ -23,6 +23,7 @@ export const tr = {
     closesAt: 'Kapanış',
     opensAt: 'Açılış',
     today: 'Bugün',
+    specialDays: 'Özel günler',
     seeAll: 'Tümünü Gör',
     back: 'Geri',
     loading: 'Yükleniyor…',

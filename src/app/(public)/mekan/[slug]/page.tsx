@@ -9,7 +9,7 @@ import { Gallery } from '@/components/public/gallery'
 import { HoursTable } from '@/components/public/hours-table'
 import { OpenStatusBadge } from '@/components/public/open-status-badge'
 import { ShopCard } from '@/components/public/shop-card'
-import { normalizeWeek } from '@/features/hours'
+import { normalizeWeek, toExceptionEntries } from '@/features/hours'
 import { getActiveLocationSlugs, getLocationBySlug } from '@/features/locations/queries'
 import { resolveContact } from '@/features/shops/contact'
 import { ROUTES } from '@/lib/constants/routes'
@@ -48,6 +48,7 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
 
   const isVenue = location.kind === 'VENUE'
   const week = location.hours.length > 0 ? normalizeWeek(location.hours) : []
+  const exceptions = week.length > 0 ? toExceptionEntries(location.hoursExceptions) : []
   const contact = resolveContact(
     { phone: null, whatsapp: null, address: null, mapUrl: null, instagramUrl: null },
     location,
@@ -86,7 +87,14 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
               {location.description}
             </p>
           ) : null}
-          {isVenue ? <OpenStatusBadge week={week} detailed className="mt-3 text-sm" /> : null}
+          {isVenue ? (
+            <OpenStatusBadge
+              week={week}
+              exceptions={exceptions}
+              detailed
+              className="mt-3 text-sm"
+            />
+          ) : null}
           {isVenue ? <ContactButtons contact={contact} className="mt-5" /> : null}
         </header>
 
@@ -135,7 +143,7 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
                   <h2 id="saatler" className="mb-3 font-semibold">
                     {tr.common.hours}
                   </h2>
-                  <HoursTable week={week} />
+                  <HoursTable week={week} exceptions={exceptions} />
                 </section>
                 {contact.address ? (
                   <section aria-labelledby="adres" className="rounded-xl border bg-card p-4">

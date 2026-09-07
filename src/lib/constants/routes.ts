@@ -40,5 +40,6 @@ export const ROUTES = {
     users: '/admin/kullanicilar',
     settings: '/admin/ayarlar',
     audit: '/admin/gunluk',
+    trash: '/admin/cop',
   },
 } as const

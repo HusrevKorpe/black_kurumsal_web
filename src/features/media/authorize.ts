@@ -16,13 +16,13 @@ export async function assertMediaOwnerAccess(
     case 'shop':
     case 'price-item': {
       assertShopAccess(staff, ownerId)
-      const exists = await db.shop.count({ where: { id: ownerId } })
+      const exists = await db.shop.count({ where: { id: ownerId, deletedAt: null } })
       if (exists === 0) throw new Error('Dükkan bulunamadı')
       return
     }
     case 'location': {
       assertOwner(staff)
-      const exists = await db.location.count({ where: { id: ownerId } })
+      const exists = await db.location.count({ where: { id: ownerId, deletedAt: null } })
       if (exists === 0) throw new Error('Mekan bulunamadı')
       return
     }

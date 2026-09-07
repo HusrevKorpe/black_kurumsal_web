@@ -1,13 +1,23 @@
-import { addDays, parseHm, previousDay, zonedNow } from './time'
-import { ISTANBUL_TZ, type HoursEntry, type OpenStatus, type WeeklyHours } from './types'
+import { addDays, addDaysToKey, parseHm, previousDay, zonedNow } from './time'
+import {
+  ISTANBUL_TZ,
+  type DayOfWeek,
+  type DaySchedule,
+  type HoursEntry,
+  type HoursExceptionEntry,
+  type OpenStatus,
+  type WeeklyHours,
+} from './types'
 
 interface Span {
   opens: number
   closes: number
 }
 
-function spanOf(entry: HoursEntry | undefined): Span | null {
-  if (!entry || entry.isClosed || !entry.opensAt || !entry.closesAt) return null
+const CLOSED: DaySchedule = { isClosed: true, opensAt: null, closesAt: null }
+
+function spanOf(entry: DaySchedule): Span | null {
+  if (entry.isClosed || !entry.opensAt || !entry.closesAt) return null
   const opens = parseHm(entry.opensAt)
   const closes = parseHm(entry.closesAt)
   if (opens === null || closes === null) return null
@@ -23,50 +33,68 @@ export function isAllDay(span: Span): boolean {
   return span.closes === span.opens
 }
 
+/** O günün geçerli saati: istisna varsa haftalık tabloyu tamamen ezer. */
+function scheduleFor(
+  dayOfWeek: DayOfWeek,
+  dateKey: string,
+  byDay: ReadonlyMap<DayOfWeek, HoursEntry>,
+  byDate: ReadonlyMap<string, HoursExceptionEntry>,
+): DaySchedule {
+  return byDate.get(dateKey) ?? byDay.get(dayOfWeek) ?? CLOSED
+}
+
+export interface OpenStatusOptions {
+  now?: Date
+  timeZone?: string
+  /** Haftalık tabloyu ezen günler. Geçmiş tarihler zararsızdır: eşleşmezler. */
+  exceptions?: readonly HoursExceptionEntry[]
+}
+
 /**
  * Verilen anda açık mı? Dünün gece yarısını geçen vardiyası da hesaba katılır
- * (PlayStation 10:00–02:00 ise saat 01:00'de hâlâ açıktır).
+ * (PlayStation 10:00–02:00 ise saat 01:00'de hâlâ açıktır). İstisna günler haftalık tabloyu ezer.
  */
-export function getOpenStatus(
-  week: WeeklyHours,
-  now: Date = new Date(),
-  timeZone: string = ISTANBUL_TZ,
-): OpenStatus {
+export function getOpenStatus(week: WeeklyHours, options: OpenStatusOptions = {}): OpenStatus {
+  const { now = new Date(), timeZone = ISTANBUL_TZ, exceptions = [] } = options
   if (week.length === 0) return { kind: 'unknown' }
 
-  const { dayOfWeek, minutes } = zonedNow(now, timeZone)
+  const { dayOfWeek, minutes, dateKey } = zonedNow(now, timeZone)
   const byDay = new Map(week.map((e) => [e.dayOfWeek, e]))
+  const byDate = new Map(exceptions.map((e) => [e.date, e]))
 
-  const yesterday = spanOf(byDay.get(previousDay(dayOfWeek)))
-  if (yesterday && isOvernight(yesterday) && minutes < yesterday.closes) {
-    return { kind: 'open', closesAt: byDay.get(previousDay(dayOfWeek))?.closesAt ?? null }
+  const yesterday = scheduleFor(previousDay(dayOfWeek), addDaysToKey(dateKey, -1), byDay, byDate)
+  const yesterdaySpan = spanOf(yesterday)
+  if (yesterdaySpan && isOvernight(yesterdaySpan) && minutes < yesterdaySpan.closes) {
+    return { kind: 'open', closesAt: yesterday.closesAt }
   }
 
-  const todayEntry = byDay.get(dayOfWeek)
-  const today = spanOf(todayEntry)
-  if (today) {
-    if (isAllDay(today)) return { kind: 'open', closesAt: null }
-    const openNow = isOvernight(today)
-      ? minutes >= today.opens
-      : minutes >= today.opens && minutes < today.closes
-    if (openNow) return { kind: 'open', closesAt: todayEntry?.closesAt ?? null }
+  const today = scheduleFor(dayOfWeek, dateKey, byDay, byDate)
+  const todaySpan = spanOf(today)
+  if (todaySpan) {
+    if (isAllDay(todaySpan)) return { kind: 'open', closesAt: null }
+    const openNow = isOvernight(todaySpan)
+      ? minutes >= todaySpan.opens
+      : minutes >= todaySpan.opens && minutes < todaySpan.closes
+    if (openNow) return { kind: 'open', closesAt: today.closesAt }
   }
 
-  return { kind: 'closed', nextOpen: findNextOpen(byDay, dayOfWeek, minutes) }
+  return { kind: 'closed', nextOpen: findNextOpen(byDay, byDate, dayOfWeek, dateKey, minutes) }
 }
 
 function findNextOpen(
-  byDay: Map<number, HoursEntry>,
-  dayOfWeek: HoursEntry['dayOfWeek'],
+  byDay: ReadonlyMap<DayOfWeek, HoursEntry>,
+  byDate: ReadonlyMap<string, HoursExceptionEntry>,
+  dayOfWeek: DayOfWeek,
+  dateKey: string,
   minutes: number,
-): { dayOfWeek: HoursEntry['dayOfWeek']; opensAt: string } | null {
+): { dayOfWeek: DayOfWeek; opensAt: string } | null {
   for (let offset = 0; offset < 7; offset += 1) {
     const day = addDays(dayOfWeek, offset)
-    const entry = byDay.get(day)
-    const span = spanOf(entry)
-    if (!span || !entry?.opensAt) continue
+    const schedule = scheduleFor(day, addDaysToKey(dateKey, offset), byDay, byDate)
+    const span = spanOf(schedule)
+    if (!span || !schedule.opensAt) continue
     if (offset === 0 && span.opens <= minutes) continue
-    return { dayOfWeek: day, opensAt: entry.opensAt }
+    return { dayOfWeek: day, opensAt: schedule.opensAt }
   }
   return null
 }

@@ -8,6 +8,7 @@ import {
   MegaphoneIcon,
   SettingsIcon,
   StoreIcon,
+  Trash2Icon,
   UsersIcon,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -23,6 +24,7 @@ const ICONS: Record<AdminNavIcon, LucideIcon> = {
   users: UsersIcon,
   settings: SettingsIcon,
   'clipboard-list': ClipboardListIcon,
+  trash: Trash2Icon,
 }
 
 interface AdminNavLinksProps {

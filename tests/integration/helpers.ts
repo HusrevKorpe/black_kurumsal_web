@@ -18,6 +18,7 @@ export async function resetDatabase(): Promise<void> {
     'PriceCategory',
     'GalleryImage',
     'OpeningHours',
+    'HoursException',
     'Shop',
     'Location',
     'Media',

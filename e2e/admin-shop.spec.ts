@@ -86,4 +86,60 @@ test.describe('Dükkan yönetimi', () => {
     await page.getByRole('dialog').getByRole('button', { name: 'Sil' }).click()
     await expect(page.getByRole('heading', { name: 'E2E Tatlılar' })).toHaveCount(0)
   })
+
+  test('özel gün eklenir, sitede görünür, sonra kaldırılır', async ({ page }) => {
+    // Testin bugüne bağlı olmaması için ileri bir tarih seçilir.
+    const date = '2027-04-23'
+    const shown = '23 Nisan'
+
+    await login(page, OWNER)
+    await page.goto('/admin/dukkanlar')
+    await page.getByRole('link', { name: /Black Tost Iyaş/ }).click()
+    await page.getByRole('link', { name: 'Saatler' }).click()
+
+    await page.locator('#exception-date').fill(date)
+    await page.locator('#exception-note').fill('Ulusal Egemenlik Bayramı')
+    await page.getByRole('button', { name: 'Özel gün ekle' }).click()
+    await expect(page.getByText('Özel gün kaydedildi.')).toBeVisible()
+
+    await page.goto('/black-tost-iyas')
+    const specialDays = page.getByText('Özel günler')
+    await expect(specialDays).toBeVisible()
+    await expect(page.getByText(shown)).toBeVisible()
+    await expect(page.getByText('Ulusal Egemenlik Bayramı')).toBeVisible()
+
+    // Temizlik: seed durumuna dön.
+    await page.goto('/admin/dukkanlar')
+    await page.getByRole('link', { name: /Black Tost Iyaş/ }).click()
+    await page.getByRole('link', { name: 'Saatler' }).click()
+    await page.getByRole('button', { name: new RegExp(`${shown}.*Kaldır`) }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Sil' }).click()
+    await expect(page.getByText('Özel gün kaldırıldı.')).toBeVisible()
+  })
+
+  test('dükkan çöp kutusuna alınır, siteden düşer, geri alınır', async ({ page }) => {
+    await login(page, OWNER)
+    await page.goto('/admin/dukkanlar')
+    await page.getByRole('link', { name: /Black Sushi/ }).click()
+    const slug = await page.getByLabel('Web adresi (slug)').inputValue()
+
+    await page.getByRole('button', { name: 'Sil' }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Sil' }).click()
+    await expect(page.getByText('Dükkan çöp kutusuna alındı.')).toBeVisible()
+    await expect(page).toHaveURL(/\/admin\/dukkanlar$/)
+    await expect(page.getByRole('link', { name: /Black Sushi/ })).toHaveCount(0)
+
+    // Sitede 404, panelde çöp kutusunda.
+    await page.goto(`/${slug}`)
+    await expect(page.getByText('Sayfa bulunamadı')).toBeVisible()
+
+    await page.goto('/admin/cop')
+    await expect(page.getByText('Black Sushi')).toBeVisible()
+    await page.getByRole('button', { name: 'Geri al' }).first().click()
+    await expect(page.getByText('Geri alındı.')).toBeVisible()
+
+    // Adresi korunarak döner.
+    await page.goto(`/${slug}`)
+    await expect(page.getByRole('heading', { level: 1, name: 'Black Sushi' })).toBeVisible()
+  })
 })

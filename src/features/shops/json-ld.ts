@@ -1,4 +1,4 @@
-import type { WeeklyHours } from '@/features/hours'
+import type { HoursExceptionEntry, WeeklyHours } from '@/features/hours'
 import type { ShopType } from '@/generated/prisma/enums'
 
 const SCHEMA_TYPE: Record<ShopType, string> = {
@@ -28,6 +28,21 @@ export interface ShopJsonLdInput {
   phone: string | null
   address: string | null
   week: WeeklyHours
+  exceptions?: readonly HoursExceptionEntry[]
+}
+
+/**
+ * Özel günler `validFrom`/`validThrough` ile işaretlenir; Google haftalık kaydın yerine bunu
+ * kullanır. Kapalı gün, saatleri 00:00–00:00 vererek bildirilir (schema.org'un kapalı gösterimi).
+ */
+function specialHoursSpecification(exceptions: readonly HoursExceptionEntry[]) {
+  return exceptions.map((exception) => ({
+    '@type': 'OpeningHoursSpecification',
+    validFrom: exception.date,
+    validThrough: exception.date,
+    opens: exception.isClosed ? '00:00' : (exception.opensAt ?? '00:00'),
+    closes: exception.isClosed ? '00:00' : (exception.closesAt ?? '00:00'),
+  }))
 }
 
 /** schema.org LocalBusiness verisi; Google'ın işletme kartı için. */
@@ -53,6 +68,9 @@ export function buildShopJsonLd(input: ShopJsonLdInput): Record<string, unknown>
       ? { address: { '@type': 'PostalAddress', streetAddress: input.address } }
       : {}),
     ...(openingHoursSpecification.length > 0 ? { openingHoursSpecification } : {}),
+    ...(input.exceptions && input.exceptions.length > 0
+      ? { specialOpeningHoursSpecification: specialHoursSpecification(input.exceptions) }
+      : {}),
   }
 }
 

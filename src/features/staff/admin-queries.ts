@@ -21,6 +21,7 @@ export async function getStaffById(id: string): Promise<StaffListItem | null> {
 
 export async function listShopOptions(): Promise<{ id: string; name: string }[]> {
   return db.shop.findMany({
+    where: { deletedAt: null },
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     select: { id: true, name: true },
   })

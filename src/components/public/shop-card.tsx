@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
-import { resolveHours } from '@/features/hours'
+import { resolveExceptions, resolveHours, toExceptionEntries } from '@/features/hours'
 import type { ShopCardData } from '@/features/shops/queries'
 import { shopLocationLabel } from '@/features/shops/view'
 import { ROUTES } from '@/lib/constants/routes'
@@ -15,7 +15,12 @@ interface ShopCardProps {
 }
 
 export function ShopCard({ shop, hideLocation = false }: ShopCardProps) {
-  const { week } = resolveHours(shop.hours, shop.location?.hours)
+  const { week, source } = resolveHours(shop.hours, shop.location?.hours)
+  const exceptions = resolveExceptions(
+    source,
+    toExceptionEntries(shop.hoursExceptions),
+    shop.location ? toExceptionEntries(shop.location.hoursExceptions) : null,
+  )
   const locationLabel = hideLocation ? '' : shopLocationLabel(shop.location)
 
   return (
@@ -38,7 +43,7 @@ export function ShopCard({ shop, hideLocation = false }: ShopCardProps) {
         <h3 className="text-base leading-tight font-semibold sm:text-lg">{shop.name}</h3>
         {locationLabel ? <p className="text-sm text-muted-foreground">{locationLabel}</p> : null}
         <div className="mt-auto pt-1">
-          <OpenStatusBadge week={week} />
+          <OpenStatusBadge week={week} exceptions={exceptions} />
         </div>
       </div>
     </Link>

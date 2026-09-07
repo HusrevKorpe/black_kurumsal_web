@@ -12,21 +12,25 @@ model Location {
   coverImageId String?
   sortOrder    Int          @default(0)
   isActive     Boolean      @default(true)
+  /// Dolu ise çöp kutusunda: sitede ve panelde görünmez, geri alınabilir. Kalıcı silme ayrı işlem.
+  deletedAt    DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  coverImage Media?         @relation("LocationCover", fields: [coverImageId], references: [id], onDelete: SetNull)
-  shops      Shop[]
-  hours      OpeningHours[]
-  gallery    GalleryImage[]
-  campaigns  Campaign[]
+  coverImage      Media?           @relation("LocationCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+  shops           Shop[]
+  hours           OpeningHours[]
+  hoursExceptions HoursException[]
+  gallery         GalleryImage[]
+  campaigns       Campaign[]
 
   @@index([isActive, sortOrder])
+  @@index([deletedAt])
 }
 
 model Shop {
-  id             String   @id @default(uuid(7))
-  slug           String   @unique
+  id             String    @id @default(uuid(7))
+  slug           String    @unique
   name           String
   type           ShopType
   /// Boş olabilir: bölgesi olmayan bağımsız dükkan (ör. apart).
@@ -38,20 +42,23 @@ model Shop {
   whatsapp       String?
   instagramUrl   String?
   /// Öne çıkan kısa özellikler: "PS5", "Ücretsiz WiFi", "Otopark"
-  features       String[] @default([])
+  features       String[]  @default([])
   coverImageId   String?
   logoImageId    String?
   seoTitle       String?
   seoDescription String?
-  sortOrder      Int      @default(0)
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  sortOrder      Int       @default(0)
+  isActive       Boolean   @default(true)
+  /// Dolu ise çöp kutusunda: sitede ve panelde görünmez, geri alınabilir. Kalıcı silme ayrı işlem.
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   location        Location?             @relation(fields: [locationId], references: [id], onDelete: SetNull)
   coverImage      Media?                @relation("ShopCover", fields: [coverImageId], references: [id], onDelete: SetNull)
   logoImage       Media?                @relation("ShopLogo", fields: [logoImageId], references: [id], onDelete: SetNull)
   hours           OpeningHours[]
+  hoursExceptions HoursException[]
   gallery         GalleryImage[]
   priceCategories PriceCategory[]
   campaigns       Campaign[]
@@ -59,6 +66,7 @@ model Shop {
 
   @@index([locationId])
   @@index([isActive, sortOrder])
+  @@index([deletedAt])
 }
 
 /// Dükkana VEYA mekana bağlı çalışma saati. Tam olarak biri dolu olur (CHECK kısıtı migration'da).
@@ -77,4 +85,29 @@ model OpeningHours {
 
   @@unique([shopId, dayOfWeek])
   @@unique([locationId, dayOfWeek])
+}
+
+/// Tek bir takvim gününün haftalık tabloyu ezmesi: bayram kapanışı, yarım gün.
+/// Tarih geçince kendiliğinden etkisiz kalır; haftalık tabloyu elle bozup geri düzeltmek gerekmez.
+/// Dükkana VEYA mekana bağlıdır (CHECK kısıtı migration'da); hangisinin geçerli olduğunu
+/// haftalık saatlerle aynı kural belirler: dükkanın kendi saati varsa kendi istisnaları, yoksa mekanınki.
+model HoursException {
+  id         String   @id @default(uuid(7))
+  shopId     String?
+  locationId String?
+  /// Saat dilimsiz takvim günü (Europe/Istanbul). @db.Date: UTC kaymasından etkilenmez.
+  date       DateTime @db.Date
+  isClosed   Boolean  @default(true)
+  opensAt    String?  @db.VarChar(5)
+  closesAt   String?  @db.VarChar(5)
+  /// Sitede tarihin yanında görünür: "Kurban Bayramı", "Yarım gün".
+  note       String?  @db.VarChar(80)
+  createdAt  DateTime @default(now())
+
+  shop     Shop?     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, date])
+  @@unique([locationId, date])
+  @@index([date])
 }

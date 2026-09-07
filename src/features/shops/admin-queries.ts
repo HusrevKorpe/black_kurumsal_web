@@ -1,7 +1,11 @@
 import 'server-only'
+import { exceptionDateFilter, MAX_EXCEPTIONS } from '@/features/hours'
 import type { Prisma } from '@/generated/prisma/client'
 import { accessibleShopFilter, assertShopAccess, type StaffContext } from '@/lib/auth/authorize'
 import { db } from '@/lib/db'
+
+/** Çöp kutusunda olmayan dükkan. Panelde düzenlenebilen kayıtlar; silinenler /admin/cop'ta. */
+export const notTrashedShopWhere = { deletedAt: null } satisfies Prisma.ShopWhereInput
 
 export const adminShopListInclude = {
   coverImage: { select: { bucket: true, path: true, alt: true } },
@@ -11,35 +15,55 @@ export const adminShopListInclude = {
 
 export type AdminShopListItem = Prisma.ShopGetPayload<{ include: typeof adminShopListInclude }>
 
-/** Patron: tüm dükkanlar. Sorumlu: atandığı dükkanlar. Pasifler de listelenir. */
+/** Patron: tüm dükkanlar. Sorumlu: atandığı dükkanlar. Pasifler de listelenir, silinenler değil. */
 export async function listShopsForStaff(staff: StaffContext): Promise<AdminShopListItem[]> {
   return db.shop.findMany({
-    where: accessibleShopFilter(staff),
+    where: { ...accessibleShopFilter(staff), ...notTrashedShopWhere },
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     include: adminShopListInclude,
   })
 }
 
-export const adminShopInclude = {
-  location: { select: { id: true, name: true, kind: true, hours: true } },
-  hours: true,
-  coverImage: true,
-  logoImage: true,
-} satisfies Prisma.ShopInclude
+export function adminShopInclude(now: Date) {
+  const exceptions = {
+    where: { date: exceptionDateFilter(now) },
+    orderBy: { date: 'asc' },
+    take: MAX_EXCEPTIONS,
+  } as const
+  return {
+    location: {
+      select: {
+        id: true,
+        name: true,
+        kind: true,
+        hours: true,
+        hoursExceptions: exceptions,
+      },
+    },
+    hours: true,
+    hoursExceptions: exceptions,
+    coverImage: true,
+    logoImage: true,
+  } satisfies Prisma.ShopInclude
+}
 
-export type AdminShop = Prisma.ShopGetPayload<{ include: typeof adminShopInclude }>
+export type AdminShop = Prisma.ShopGetPayload<{ include: ReturnType<typeof adminShopInclude> }>
 
-/** Erişim yoksa null (sayfa 404 verir; varlığı sızdırılmaz). */
+/** Erişim yoksa veya dükkan çöp kutusundaysa null (sayfa 404 verir; varlığı sızdırılmaz). */
 export async function getShopForAdmin(
   staff: StaffContext,
   shopId: string,
+  now: Date = new Date(),
 ): Promise<AdminShop | null> {
   try {
     assertShopAccess(staff, shopId)
   } catch {
     return null
   }
-  return db.shop.findUnique({ where: { id: shopId }, include: adminShopInclude })
+  return db.shop.findFirst({
+    where: { id: shopId, ...notTrashedShopWhere },
+    include: adminShopInclude(now),
+  })
 }
 
 export async function getShopGalleryForAdmin(staff: StaffContext, shopId: string) {
@@ -68,7 +92,7 @@ export interface LocationOption {
 
 export async function listLocationOptions(): Promise<LocationOption[]> {
   return db.location.findMany({
-    where: { isActive: true },
+    where: { isActive: true, deletedAt: null },
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     select: { id: true, name: true, kind: true },
   })

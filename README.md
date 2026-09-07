@@ -54,6 +54,10 @@ Seed hesapları: `patron@black.local / Patron123!` (Patron) · `sorumlu@black.lo
 
 ## Hata izleme ve bakım
 
+- Şema değişikliği canlıya çıkarken: deploy'dan önce `DOTENV_CONFIG_PATH=.env.canli pnpm db:deploy`.
+  Bekleyen migration: `20260907174949_hours_exceptions_and_soft_delete` (özel günler + çöp kutusu).
+- Çöp kutusu (`/admin/cop`, patron): silinen dükkan/mekan burada durur, geri alınabilir. Kalıcı
+  silme yalnızca buradan yapılır ve depodaki fotoğrafları da götürür.
 - Sentry: `NEXT_PUBLIC_SENTRY_DSN` doluysa açık, boşsa tamamen kapalı. Yalnızca hata izleme (tracing/replay paketten çıkarılmış).
   Kaynak haritası yüklemek için Vercel/CI'da `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`.
 - Yetim medya: canlıda haftalık Vercel Cron (`/api/cron/medya-temizle`, `CRON_SECRET` gerekli), yerelde `pnpm media:cleanup`.

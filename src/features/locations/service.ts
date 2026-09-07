@@ -1,12 +1,17 @@
 import 'server-only'
 import { logAudit } from '@/features/audit/log'
-import { removeObjects } from '@/features/media/storage'
 import type { Location } from '@/generated/prisma/client'
 import { fail, fromZodError, ok, type ActionResult } from '@/lib/actions/result'
 import { assertOwner, type StaffContext } from '@/lib/auth/authorize'
 import { db } from '@/lib/db'
 import { tr } from '@/lib/i18n/tr'
 import { locationFormSchema } from './schema'
+
+/** Çöp kutusundaki mekan slug'ını korur; çakışma nereye bakılacağını söyleyen mesajla döner. */
+async function slugHeldInTrash(slug: string): Promise<boolean> {
+  const held = await db.location.count({ where: { slug, deletedAt: { not: null } } })
+  return held > 0
+}
 
 export async function createLocation(
   staff: StaffContext,
@@ -15,6 +20,7 @@ export async function createLocation(
   assertOwner(staff)
   const parsed = locationFormSchema.safeParse(input)
   if (!parsed.success) return fromZodError(parsed.error)
+  if (await slugHeldInTrash(parsed.data.slug)) return fail(tr.admin.locations.slugInTrash)
   const location = await db.$transaction(async (tx) => {
     const created = await tx.location.create({ data: parsed.data })
     await logAudit(tx, {
@@ -37,6 +43,7 @@ export async function updateLocation(
   assertOwner(staff)
   const parsed = locationFormSchema.safeParse(input)
   if (!parsed.success) return fromZodError(parsed.error)
+  if (await slugHeldInTrash(parsed.data.slug)) return fail(tr.admin.locations.slugInTrash)
   const location = await db.$transaction(async (tx) => {
     const updated = await tx.location.update({ where: { id: locationId }, data: parsed.data })
     await logAudit(tx, {
@@ -78,41 +85,32 @@ export async function setLocationCover(
   return ok(null)
 }
 
-/** İçinde dükkan varsa silinmez: dükkanlar sessizce bağımsız kalmasın, patron bilinçli taşısın. */
+/**
+ * Mekanı çöp kutusuna alır: siteden ve panelden düşer, hiçbir şey silinmez. Geri alınabilir;
+ * kalıcı silme çöp kutusundan yapılır (`features/trash`).
+ * İçinde canlı dükkan varsa alınmaz: dükkanlar sessizce bağımsız kalmasın, patron bilinçli taşısın.
+ */
 export async function deleteLocation(
   staff: StaffContext,
   locationId: string,
 ): Promise<ActionResult<null>> {
   assertOwner(staff)
-  const shopCount = await db.shop.count({ where: { locationId } })
+  const shopCount = await db.shop.count({ where: { locationId, deletedAt: null } })
   if (shopCount > 0) return fail(tr.admin.locations.hasShops)
 
-  const paths = await db.$transaction(async (tx) => {
-    const location = await tx.location.findUnique({
-      where: { id: locationId },
-      select: {
-        name: true,
-        gallery: { select: { media: { select: { id: true, path: true } } } },
-        campaigns: { select: { image: { select: { id: true, path: true } } } },
-      },
+  await db.$transaction(async (tx) => {
+    const location = await tx.location.update({
+      where: { id: locationId, deletedAt: null },
+      data: { deletedAt: new Date() },
+      select: { name: true },
     })
-    if (!location) return []
-    const media = [
-      ...location.gallery.map((g) => g.media),
-      ...location.campaigns.map((c) => c.image),
-    ]
-    await tx.location.delete({ where: { id: locationId } })
-    if (media.length > 0)
-      await tx.media.deleteMany({ where: { id: { in: media.map((m) => m.id) } } })
     await logAudit(tx, {
       staffId: staff.id,
       action: 'location.delete',
       entityType: 'Location',
       entityId: locationId,
-      summary: `${location.name} mekanı silindi`,
+      summary: `${location.name} mekanı çöp kutusuna alındı`,
     })
-    return media.map((m) => m.path)
   })
-  await removeObjects(paths)
   return ok(null)
 }
