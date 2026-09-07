@@ -3,8 +3,8 @@ import type { LocationKind, ShopType } from '@/generated/prisma/enums'
 /**
  * Gerçek içerik iskeleti: markanın mekan/bölge ve dükkan yapısı (ad, adres/slug, tür, bağ, sıra).
  * Telefon, adres, saat, fiyat, açıklama ve görsel gibi ayrıntılar burada YOKTUR; onlar panelden girilir
- * (uydurma bilgi açık siteye çıkmasın). Canlı kurulumda `pnpm content:init` bu iskeleti açar; yerel
- * seed aynı iskeleti demo verisiyle doldurur (`prisma/seed/data.ts`). Tek doğruluk kaynağı burasıdır.
+ * (uydurma bilgi açık siteye çıkmasın). Canlı kurulumda `pnpm content:init` bu iskeleti açar; yerel seed ve
+ * `pnpm content:demo` aynı iskeleti demo verisiyle doldurur (`demo-data.ts`). Tek doğruluk kaynağı burasıdır.
  */
 export interface SkeletonLocation {
   slug: string

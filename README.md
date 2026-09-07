@@ -36,6 +36,7 @@ Seed hesapları: `patron@black.local / Patron123!` (Patron) · `sorumlu@black.lo
 | `pnpm staff:owner`      | İlk patron hesabı (canlı kurulum): `--email= --name=`; şifreyi üretip bir kez yazar, hesap varsa şifreyi sıfırlar         |
 | `pnpm storage:init`     | Medya bucket'ını oluşturur/ayarlarını doğrular (public, 10 MiB, görsel MIME); canlıda `DOTENV_CONFIG_PATH=.env.canli` ile |
 | `pnpm content:init`     | İçerik iskeleti (canlı ilk kurulum): site ayarı, 3 mekan/bölge, 11 dükkan; yalnızca eksikleri açar, var olana dokunmaz    |
+| `pnpm content:demo`     | Örnek içerik (gösterim): varsayılan 5 dükkanı + Garden + kampanyaları demo veriyle doldurur; yalnızca boş kayda yazar     |
 | `pnpm db:migrate`       | Şema değişikliğinden sonra migration üret ve uygula                                                                       |
 | `pnpm db:studio`        | Prisma Studio                                                                                                             |
 | `pnpm build`            | Üretim derlemesi (`prisma generate` dahil)                                                                                |
@@ -103,6 +104,10 @@ Sıra önemli; her adım bir öncekinin çıktısını kullanır. Hesap girişle
    kayıtları açar, panelden yapılan düzenlemelere dokunmaz, tekrar çalıştırmak güvenlidir; işlem günlüğüne düşer). Seed
    canlıda çalıştırılmaz: telefon, adres, saat, fiyat, açıklama, görsel ve sorumlular panelden girilir. Komut açık siteyi
    yenilemez (sayfalar 1 saat önbellekli); sonrasında deploy ya da panelden ilk düzenleme siteyi tazeler.
+   **Örnek içerik (gösterim için):** `DOTENV_CONFIG_PATH=.env.canli pnpm content:demo` varsayılan 5 dükkanı (PlayStation Çarşı,
+   İnternet Kafe Çarşı, Tost Iyaş, Tavuk Garden, Lavinya Apart), Black Garden mekanını ve 3 örnek kampanyayı uydurma ama
+   gerçekçi veriyle doldurur (`src/features/content/demo-data.ts`); yalnızca boş kayıtlara yazar, panelden girilmiş içeriğe
+   dokunmaz, günlüğe `content.demo` düşer. Patron panelden gerçeğini girer ya da siler; `--dukkan=slug,slug` ile seçim.
 5. **Domain.** `vercel domains add <domain>` + DNS kaydı (Vercel'in verdiği A/CNAME); sonra `NEXT_PUBLIC_SITE_URL` ve Supabase
    `site_url`/`additional_redirect_urls` domaine çekilir (`supabase config push`), yeniden deploy.
 6. **Duman testi.** Giriş; panelden görsel yükleme (prod Storage); "şu an açık" (Europe/Istanbul); telefon/WhatsApp
@@ -116,6 +121,6 @@ Sıra önemli; her adım bir öncekinin çıktısını kullanır. Hesap girişle
 ```
 src/app/(public)   açık site       src/features/<alan>  actions · service · queries · schema
 src/app/admin      panel           src/components       ui (shadcn) · public · admin
-src/lib            db, env, auth, i18n, utils           prisma/schema/*.prisma, prisma/seed
+src/lib            db, env, auth, i18n, utils           prisma/schema/*.prisma, prisma/seed.ts
 tests/integration  DB testleri     e2e/                 Playwright
 ```

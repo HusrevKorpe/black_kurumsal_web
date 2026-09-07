@@ -1,22 +1,19 @@
-import {
-  SKELETON_LOCATIONS,
-  SKELETON_SHOPS,
-  type SkeletonLocation,
-  type SkeletonLocationSlug,
-  type SkeletonShop,
-  type SkeletonShopSlug,
-} from '@/features/content/skeleton-data'
+import type { SkeletonLocationSlug, SkeletonShopSlug } from './skeleton-data'
 
 /**
- * Yerel geliştirme seed'i: gerçek iskeletin (ad/slug/tür/bağ) üstüne DEMO dolgu. Adres, telefon, saat,
- * fiyat ve görsel rengi örnektir; canlıya asla gitmez (canlıda yalnızca iskelet: `pnpm content:init`).
+ * Örnek (demo) içerik: iskeletteki mekan ve dükkanlar için uydurma ama gerçekçi ayrıntılar (açıklama, adres,
+ * telefon, saat, özellik, fiyat listesi, görsel rengi) ve örnek kampanyalar. İki yerde kullanılır:
+ *  - Yerel seed (`pnpm db:seed`): 11 dükkanın tamamını sıfırdan doldurur.
+ *  - `pnpm content:demo`: canlıda seçili dükkanları (varsayılan `DEFAULT_DEMO_SHOP_SLUGS`) "örnek olsun" diye
+ *    doldurur; yalnızca BOŞ dükkanlara yazar, panelden girilmiş içeriğe dokunmaz.
+ * Telefon ve adresler gerçek değildir (0555 000 …, "Örnek Sokak"); patron panelden gerçeğini girer.
  */
-export interface SeedHours {
+export interface DemoHours {
   opensAt: string
   closesAt: string
 }
 
-export interface SeedPriceItem {
+export interface DemoPriceItem {
   name: string
   price: number | null
   unit?: string
@@ -24,24 +21,25 @@ export interface SeedPriceItem {
   isFeatured?: boolean
 }
 
-export interface SeedPriceCategory {
+export interface DemoPriceCategory {
   name: string
   description?: string
-  items: SeedPriceItem[]
+  items: DemoPriceItem[]
 }
 
-interface DemoLocation {
+export interface DemoLocation {
   description?: string
   address?: string
   mapUrl?: string
   phone?: string
   whatsapp?: string
   /** Haftanın 7 günü aynı saat. */
-  hours?: SeedHours
+  hours?: DemoHours
+  /** Yer tutucu görsellerin rengi (HSL ton). */
   hue: number
 }
 
-interface DemoShop {
+export interface DemoShop {
   description: string
   address?: string
   phone?: string
@@ -49,15 +47,38 @@ interface DemoShop {
   instagramUrl?: string
   features: string[]
   /** Boşsa mekandan devralır. */
-  hours?: SeedHours
-  priceCategories: SeedPriceCategory[]
+  hours?: DemoHours
+  priceCategories: DemoPriceCategory[]
   hue: number
 }
 
-export type SeedLocation = SkeletonLocation & DemoLocation
-export type SeedShop = SkeletonShop & DemoShop
+interface DemoCampaignBase {
+  title: string
+  description: string
+  ctaLabel?: string
+  hue: number
+}
 
-const DEMO_LOCATIONS: Record<SkeletonLocationSlug, DemoLocation> = {
+export type DemoCampaign = DemoCampaignBase &
+  (
+    | { scope: 'GLOBAL' }
+    | { scope: 'SHOP'; targetSlug: SkeletonShopSlug }
+    | { scope: 'LOCATION'; targetSlug: SkeletonLocationSlug }
+  )
+
+/**
+ * `pnpm content:demo` varsayılan kümesi: her dükkan türünden biri, iki bölge ve Garden içinden bir dükkan;
+ * böylece saat devralma, fiyat listesi türleri ve apart odaları tek bakışta görülür.
+ */
+export const DEFAULT_DEMO_SHOP_SLUGS = [
+  'black-playstation-carsi',
+  'black-internet-kafe-carsi',
+  'black-tost-iyas',
+  'black-tavuk-garden',
+  'lavinya-apart',
+] as const satisfies readonly SkeletonShopSlug[]
+
+export const DEMO_LOCATIONS: Record<SkeletonLocationSlug, DemoLocation> = {
   'black-garden': {
     description:
       'Tek çatı altında tavuk, makarna, tost ve sushi. Geniş bahçeli oturma alanı, aile dostu ortam.',
@@ -72,7 +93,7 @@ const DEMO_LOCATIONS: Record<SkeletonLocationSlug, DemoLocation> = {
   iyas: { hue: 260 },
 }
 
-const DRINKS: SeedPriceCategory = {
+const DRINKS: DemoPriceCategory = {
   name: 'İçecekler',
   items: [
     { name: 'Çay', price: 15, unit: 'adet' },
@@ -82,7 +103,7 @@ const DRINKS: SeedPriceCategory = {
   ],
 }
 
-const playstationPrices = (): SeedPriceCategory[] => [
+const playstationPrices = (): DemoPriceCategory[] => [
   {
     name: 'Oyun Ücretleri',
     items: [
@@ -104,7 +125,7 @@ const playstationPrices = (): SeedPriceCategory[] => [
   DRINKS,
 ]
 
-const internetCafePrices = (): SeedPriceCategory[] => [
+const internetCafePrices = (): DemoPriceCategory[] => [
   {
     name: 'Kullanım Ücretleri',
     items: [
@@ -124,7 +145,7 @@ const internetCafePrices = (): SeedPriceCategory[] => [
   DRINKS,
 ]
 
-const tostPrices = (): SeedPriceCategory[] => [
+const tostPrices = (): DemoPriceCategory[] => [
   {
     name: 'Tostlar',
     items: [
@@ -146,7 +167,7 @@ const PS_FEATURES = ['PS5', '4K TV', '12 Konsol', 'Turnuva Geceleri']
 const NET_FEATURES = ['RTX Ekran Kartı', '144Hz Monitör', 'Fiber İnternet', 'Oyuncu Koltuğu']
 const TOST_FEATURES = ['Odun Fırını', 'Paket Servis', 'Kahvaltı']
 
-const DEMO_SHOPS: Record<SkeletonShopSlug, DemoShop> = {
+export const DEMO_SHOPS: Record<SkeletonShopSlug, DemoShop> = {
   'black-playstation-carsi': {
     description: 'Çarşı merkezinde PS5 ve PS4 konsollar, 4K ekranlar ve her cuma turnuva gecesi.',
     address: 'Çarşı Merkez, Örnek Sokak No: 5',
@@ -319,26 +340,7 @@ const DEMO_SHOPS: Record<SkeletonShopSlug, DemoShop> = {
   },
 }
 
-export const SEED_LOCATIONS: SeedLocation[] = SKELETON_LOCATIONS.map((loc) => ({
-  ...loc,
-  ...DEMO_LOCATIONS[loc.slug],
-}))
-
-export const SEED_SHOPS: SeedShop[] = SKELETON_SHOPS.map((shop) => ({
-  ...shop,
-  ...DEMO_SHOPS[shop.slug],
-}))
-
-export interface SeedCampaign {
-  title: string
-  description: string
-  scope: 'GLOBAL' | 'LOCATION' | 'SHOP'
-  targetSlug?: string
-  hue: number
-  ctaLabel?: string
-}
-
-export const SEED_CAMPAIGNS: SeedCampaign[] = [
+export const DEMO_CAMPAIGNS: DemoCampaign[] = [
   {
     title: 'Black Garden Açıldı',
     description:
@@ -362,17 +364,3 @@ export const SEED_CAMPAIGNS: SeedCampaign[] = [
     hue: 30,
   },
 ]
-
-export const SEED_STAFF = {
-  owner: {
-    email: 'patron@black.local',
-    fullName: 'Patron',
-    password: process.env.SEED_OWNER_PASSWORD ?? 'Patron123!',
-  },
-  manager: {
-    email: 'sorumlu@black.local',
-    fullName: 'Çarşı Sorumlusu',
-    password: process.env.SEED_MANAGER_PASSWORD ?? 'Sorumlu123!',
-    shopSlugs: ['black-playstation-carsi', 'black-internet-kafe-carsi'],
-  },
-}

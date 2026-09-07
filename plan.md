@@ -214,6 +214,10 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
    (`src/features/content/skeleton-data.ts`: site ayarı, 3 mekan/bölge, 11 dükkan; uydurma telefon/adres/fiyat YOK)
    `pnpm content:init` ile canlıda açılır (yalnızca eksikleri açar, panel düzenlemelerine dokunmaz, tek transaction,
    günlüğe düşer; birim + entegrasyon testli); yerel seed aynı iskeleti demo veriyle doldurur. Ayrıntılar panelden.
+   Örnek içerik (07.09.2026): `pnpm content:demo` seçili dükkanları (varsayılan 5) + Garden + 3 kampanyayı demo veriyle
+   doldurur; yalnızca boş kayda yazar, panel düzenlemesine dokunmaz. Demo veri `features/content/demo-data.ts`, seed ile
+   ortak yazma katmanı `demo-fill.ts`, görsel yolları panelle aynı (`shop/<id>/<uuid>.webp`). Canlıda örnek olarak
+   çalıştırıldı; patron panelden gerçeğini girer.
    Ertelenen (karar, satışta): domain, Sentry projesi, Pro planlar. M5 bu kapsamda tamamlandı.
 
 ## 12. Bilinen Kararlar / Notlar (uygulama sırasında)
