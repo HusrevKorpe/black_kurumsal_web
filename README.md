@@ -44,6 +44,7 @@ Seed hesapları: `patron@black.local / Patron123!` (Patron) · `sorumlu@black.lo
 - Panelden yapılan her değişiklik `revalidatePublicSite()` ile açık siteyi yeniler.
 - Görseller tarayıcıda sıkıştırılır ve imzalı URL ile doğrudan Storage'a yüklenir; sunucudan dosya geçmez.
 - Açık site bileşenlerine Zod, Supabase ya da Prisma sızmaz; `instrumentation-client.ts` her sayfaya girer, hafif kalır.
+  Sentry SDK'sı ve mobil menü çekmecesi ilk pakete girmez; sayfa yüklendikten sonra boşta indirilir (LCP için).
 
 ## Hata izleme ve bakım
 

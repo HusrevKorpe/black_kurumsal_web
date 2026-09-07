@@ -1,8 +1,8 @@
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { captureException } from '@/lib/sentry/client'
 import { tr } from '@/lib/i18n/tr'
 
 /** Sayfa düzeyinde hata sınırı: kök layout ayakta kalır, içerik yerine bu görünür. */
@@ -14,7 +14,7 @@ export default function RouteError({
   retry: () => void
 }) {
   useEffect(() => {
-    Sentry.captureException(error)
+    void captureException(error)
   }, [error])
 
   return (
