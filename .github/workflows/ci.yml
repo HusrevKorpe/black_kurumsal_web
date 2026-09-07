@@ -83,4 +83,6 @@ jobs:
         with:
           name: lighthouse
           path: .lighthouseci
+          # Nokta ile başlayan klasör; v4 gizli dosyaları varsayılan olarak atlar.
+          include-hidden-files: true
           retention-days: 7
