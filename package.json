@@ -18,6 +18,7 @@
     "test:all": "vitest run && playwright test",
     "lighthouse": "lhci autorun",
     "media:cleanup": "tsx --conditions=react-server scripts/cleanup-media.ts",
+    "staff:owner": "tsx scripts/create-owner.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",

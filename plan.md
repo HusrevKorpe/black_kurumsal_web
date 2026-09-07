@@ -1,6 +1,6 @@
 # Black Kurumsal — Proje Planı
 
-> Durum: M1–M4 tamamlandı (07.09.2026). Sıradaki iş: CI'ın GitHub'da doğrulanması (ilk push), canlıya çıkış (M5).
+> Durum: M1–M4 tamamlandı, CI GitHub'da yeşil (07.09.2026; Lighthouse medyan 0,92–0,93). Sıradaki iş: canlıya çıkış (M5), adımlar README §Canlıya çıkış.
 > Bu belge tek doğruluk kaynağıdır. Karar değişirse önce burası güncellenir.
 
 ## 1. Amaç
@@ -204,9 +204,11 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
 4. **M4 Sertleştirme** ✅ — testler (93 birim/bileşen, 44 entegrasyon, 56 e2e masaüstü+mobil, axe erişilebilirlik dahil),
    Sentry (sunucu + edge + tarayıcı, yalnızca hata izleme), yetim medya temizliği (haftalık cron + CLI),
    Lighthouse CI mobil turu (tüm kategoriler ≥ 0.90; a11y/bp/seo 1.00), CI iş akışı (build → e2e → lighthouse).
-   Kalan: CI'ın GitHub'da ilk push ile doğrulanması (uzak depo: github.com/HusrevKorpe/black_kurumsal_web).
+   CI GitHub'da yeşil (07.09.2026, uzak depo: github.com/HusrevKorpe/black_kurumsal_web).
 5. **M5 Canlı** — Supabase prod projesi (+ `media` bucket, public), Sentry projesi (DSN + org/project/auth token),
    Vercel (env: `NEXT_PUBLIC_SENTRY_DSN`, `CRON_SECRET`, Sentry build değişkenleri), domain, içerik girişi.
+   Kod tarafı hazır (07.09.2026): `pnpm staff:owner` ilk patron hesabı, `supabase config push` ile bucket/auth,
+   README §Canlıya çıkış runbook'u. Bekleyen: Supabase / Sentry / Vercel hesap girişleri (hesap sahibi).
 
 ## 12. Bilinen Kararlar / Notlar (uygulama sırasında)
 
@@ -234,6 +236,14 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
   siteye ~85 KB gz ekledi, kaldırıldı. Ana sayfa JS'i 228 KB gz (07.09.2026: 290 → Sentry tembel 246 → Sheet tembel 228;
   kalan: react-dom+Next ~140, base-ui Button çekirdeği ~21, sayfa bileşenleri). Kural: açık site
   bileşenlerine Zod/Supabase/Prisma sızmaz; `pnpm build` sonrası `.next/server/app/index.html` script listesi kontrol edilir.
+- **Lighthouse ısıtma (07.09.2026):** CI'da "/" ilk koşusu 0,63 (TBT 2,4 s) ölçüldü; sonraki koşular 0,93. Sebep soğuk
+  ilk istek (rota modülleri + Prisma bağlantısı) ile Lighthouse'un ilk turunun aynı CPU'da çakışması. Sunucu artık
+  `scripts/lighthouse-server.sh` ile açılıyor: her URL ölçümden önce bir kez ısıtılır. Medyan-3 tek sapmayı tolere
+  ediyordu; ısıtma ikinci sapma riskini kaldırır. Yerelde 3000 doluysa `PORT=3100 pnpm lighthouse`.
+- **İlk patron (07.09.2026):** `features/staff/bootstrap.ts` → `ensureOwner`: seed ve `pnpm staff:owner` ortak kullanır.
+  Auth kullanıcısı silinip yeniden açılmışsa (kimlik değişir) e-postayla duran StaffUser kaydı yeni kimliğe taşınır;
+  FK'ler `onUpdate: Cascade` (Prisma varsayılanı) olduğundan atama/yükleme/günlük kayıtları korunur. Şifre CLI'da
+  üretilir (kabuk geçmişine düşmesin), tek sefer yazdırılır.
 - **Lighthouse dersleri:** `next/image` `priority` yalnızca preload ekler; LCP görseline ayrıca `fetchPriority="high"`
   verilir (CoverImage). `experimental.inlineCss` açık: Tailwind CSS (~16 KB) HTML'e gömülür, ilk ziyarette render'ı
   engelleyen istek kalkar (Next belgesinin Tailwind + ilk ziyaretçi önerisi). Kampanya kartı başlığı sayfaya göre

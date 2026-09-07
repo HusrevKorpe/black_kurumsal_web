@@ -4,7 +4,7 @@ import { serverEnv } from '@/lib/env.server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { SEED_CAMPAIGNS, SEED_LOCATIONS, SEED_SHOPS, SEED_STAFF, type SeedHours } from './seed/data'
 import { uploadPlaceholder } from './seed/media'
-import { ensureAuthUser } from './seed/staff'
+import { ensureAuthUser } from '@/features/staff/bootstrap'
 
 const DAYS = [1, 2, 3, 4, 5, 6, 7] as const
 
@@ -203,14 +203,19 @@ async function seedStaff(
   shopIds: Map<string, string>,
 ) {
   const { owner, manager } = SEED_STAFF
-  const ownerId = await ensureAuthUser(supabase, owner.email, owner.password, owner.fullName)
+  const { id: ownerId } = await ensureAuthUser(
+    supabase,
+    owner.email,
+    owner.password,
+    owner.fullName,
+  )
   await db.staffUser.upsert({
     where: { id: ownerId },
     create: { id: ownerId, email: owner.email, fullName: owner.fullName, role: 'OWNER' },
     update: { email: owner.email, fullName: owner.fullName, role: 'OWNER', isActive: true },
   })
 
-  const managerId = await ensureAuthUser(
+  const { id: managerId } = await ensureAuthUser(
     supabase,
     manager.email,
     manager.password,
