@@ -1,0 +1,45 @@
+/// Yalnızca görsel duyuru (Faz 1). Kupon/indirim takibi Faz 2.
+model Campaign {
+  id          String        @id @default(uuid(7))
+  title       String
+  description String?
+  imageId     String
+  scope       CampaignScope
+  locationId  String?
+  shopId      String?
+  ctaLabel    String?
+  ctaUrl      String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  isActive    Boolean       @default(true)
+  sortOrder   Int           @default(0)
+  createdById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  image     Media      @relation(fields: [imageId], references: [id], onDelete: Restrict)
+  location  Location?  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  shop      Shop?      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdBy StaffUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([isActive, startsAt, endsAt])
+  @@index([shopId])
+  @@index([locationId])
+}
+
+/// Tek satır (id = 1). Ana sayfa metinleri ve kurumsal iletişim.
+model SiteSettings {
+  id           Int      @id @default(1)
+  brandName    String   @default("Black")
+  heroTitle    String   @default("Black")
+  heroSubtitle String?
+  aboutText    String?
+  contactPhone String?
+  contactEmail String?
+  instagramUrl String?
+  facebookUrl  String?
+  logoImageId  String?
+  updatedAt    DateTime @updatedAt
+
+  logoImage Media? @relation(fields: [logoImageId], references: [id], onDelete: SetNull)
+}

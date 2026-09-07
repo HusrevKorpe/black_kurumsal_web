@@ -1,0 +1,39 @@
+/// Supabase Storage'daki tek bir dosya. path bucket içinde benzersizdir.
+model Media {
+  id           String   @id @default(uuid(7))
+  bucket       String   @default("media")
+  path         String   @unique
+  mimeType     String
+  sizeBytes    Int
+  width        Int?
+  height       Int?
+  alt          String?
+  uploadedById String?
+  createdAt    DateTime @default(now())
+
+  uploadedBy     StaffUser?     @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  galleryImage   GalleryImage?
+  shopCovers     Shop[]         @relation("ShopCover")
+  shopLogos      Shop[]         @relation("ShopLogo")
+  locationCovers Location[]     @relation("LocationCover")
+  campaigns      Campaign[]
+  priceItems     PriceItem[]
+  siteLogos      SiteSettings[]
+}
+
+/// Galeri kaydı medyaya sahiptir (1:1). Galeri silinince dosya da silinir.
+model GalleryImage {
+  id         String  @id @default(uuid(7))
+  mediaId    String  @unique
+  shopId     String?
+  locationId String?
+  caption    String?
+  sortOrder  Int     @default(0)
+
+  media    Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  shop     Shop?     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, sortOrder])
+  @@index([locationId, sortOrder])
+}

@@ -1,0 +1,44 @@
+/// id = Supabase Auth kullanıcı kimliği (uuid). Kayıt yalnızca patron tarafından açılır.
+model StaffUser {
+  id        String    @id
+  email     String    @unique
+  fullName  String
+  role      StaffRole
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  assignments StaffShopAssignment[]
+  uploads     Media[]
+  campaigns   Campaign[]
+  auditLogs   AuditLog[]
+}
+
+model StaffShopAssignment {
+  staffId   String
+  shopId    String
+  createdAt DateTime @default(now())
+
+  staff StaffUser @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  shop  Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@id([staffId, shopId])
+  @@index([shopId])
+}
+
+/// Kim, ne zaman, neyi değiştirdi. Patron panelden okur.
+model AuditLog {
+  id         String   @id @default(uuid(7))
+  staffId    String?
+  action     String
+  entityType String
+  entityId   String?
+  summary    String
+  data       Json?
+  createdAt  DateTime @default(now())
+
+  staff StaffUser? @relation(fields: [staffId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+}

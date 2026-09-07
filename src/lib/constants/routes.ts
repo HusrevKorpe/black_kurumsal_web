@@ -1,0 +1,44 @@
+/** Dükkan slug'ı olamayacak kök yollar. Slug doğrulaması bunları reddeder. */
+export const RESERVED_SLUGS = new Set<string>([
+  'admin',
+  'monitoring',
+  'api',
+  'mekan',
+  'kampanyalar',
+  'hakkimizda',
+  'iletisim',
+  'giris',
+  'sitemap.xml',
+  'robots.txt',
+  'favicon.ico',
+  'manifest.webmanifest',
+  'opengraph-image',
+  'twitter-image',
+  'icon',
+  'apple-icon',
+  '_next',
+  'static',
+  'public',
+])
+
+/** Dönüş tipleri şablon dizesidir; Next typedRoutes bunları dinamik rotalarla eşler. */
+export const ROUTES = {
+  home: '/',
+  shop: (slug: string): `/${string}` => `/${slug}`,
+  location: (slug: string): `/mekan/${string}` => `/mekan/${slug}`,
+  campaigns: '/kampanyalar',
+  homeSection: (id: string): `/#${string}` => `/#${id}`,
+  admin: {
+    root: '/admin',
+    login: '/admin/giris',
+    signOut: '/admin/cikis',
+    shops: '/admin/dukkanlar',
+    shop: (id: string): `/admin/dukkanlar/${string}` => `/admin/dukkanlar/${id}`,
+    locations: '/admin/mekanlar',
+    location: (id: string): `/admin/mekanlar/${string}` => `/admin/mekanlar/${id}`,
+    campaigns: '/admin/kampanyalar',
+    users: '/admin/kullanicilar',
+    settings: '/admin/ayarlar',
+    audit: '/admin/gunluk',
+  },
+} as const

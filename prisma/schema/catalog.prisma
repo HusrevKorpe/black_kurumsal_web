@@ -1,0 +1,80 @@
+model Location {
+  id           String       @id @default(uuid(7))
+  slug         String       @unique
+  name         String
+  kind         LocationKind
+  description  String?
+  address      String?
+  mapUrl       String?
+  phone        String?
+  whatsapp     String?
+  instagramUrl String?
+  coverImageId String?
+  sortOrder    Int          @default(0)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  coverImage Media?         @relation("LocationCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+  shops      Shop[]
+  hours      OpeningHours[]
+  gallery    GalleryImage[]
+  campaigns  Campaign[]
+
+  @@index([isActive, sortOrder])
+}
+
+model Shop {
+  id             String   @id @default(uuid(7))
+  slug           String   @unique
+  name           String
+  type           ShopType
+  /// Boş olabilir: bölgesi olmayan bağımsız dükkan (ör. apart).
+  locationId     String?
+  description    String?
+  address        String?
+  mapUrl         String?
+  phone          String?
+  whatsapp       String?
+  instagramUrl   String?
+  /// Öne çıkan kısa özellikler: "PS5", "Ücretsiz WiFi", "Otopark"
+  features       String[] @default([])
+  coverImageId   String?
+  logoImageId    String?
+  seoTitle       String?
+  seoDescription String?
+  sortOrder      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  location        Location?             @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  coverImage      Media?                @relation("ShopCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+  logoImage       Media?                @relation("ShopLogo", fields: [logoImageId], references: [id], onDelete: SetNull)
+  hours           OpeningHours[]
+  gallery         GalleryImage[]
+  priceCategories PriceCategory[]
+  campaigns       Campaign[]
+  staff           StaffShopAssignment[]
+
+  @@index([locationId])
+  @@index([isActive, sortOrder])
+}
+
+/// Dükkana VEYA mekana bağlı çalışma saati. Tam olarak biri dolu olur (CHECK kısıtı migration'da).
+/// dayOfWeek ISO: 1 = Pazartesi ... 7 = Pazar. Saatler "HH:mm". closesAt < opensAt ise gece yarısını geçer.
+model OpeningHours {
+  id         String  @id @default(uuid(7))
+  shopId     String?
+  locationId String?
+  dayOfWeek  Int
+  opensAt    String? @db.VarChar(5)
+  closesAt   String? @db.VarChar(5)
+  isClosed   Boolean @default(false)
+
+  shop     Shop?     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, dayOfWeek])
+  @@unique([locationId, dayOfWeek])
+}

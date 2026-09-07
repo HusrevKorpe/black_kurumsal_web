@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+  DIRECT_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+  TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/black_test
+  NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  SUPABASE_STORAGE_BUCKET: media
+  CI: true
+
+jobs:
+  quality:
+    name: Tip · Lint · Birim
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        env:
+          # Prisma generate DB istemez; yine de env doğrulaması için sahte anahtar.
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci
+          SUPABASE_SECRET_KEY: ci
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm test
+        env:
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci
+          SUPABASE_SECRET_KEY: ci
+
+  integration-e2e:
+    name: Entegrasyon · Build · E2E
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase start -x studio,realtime,edge-runtime,logflare,vector
+      - name: Supabase anahtarlarını ortama yaz
+        run: |
+          supabase status -o env | sed -n 's/^PUBLISHABLE_KEY=/NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=/p;s/^SECRET_KEY=/SUPABASE_SECRET_KEY=/p' >> "$GITHUB_ENV"
+      - run: pnpm install --frozen-lockfile
+      - run: psql "$DATABASE_URL" -c 'CREATE DATABASE black_test'
+      - run: pnpm db:deploy
+      - run: pnpm db:seed
+      - run: pnpm test:integration
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+      - name: Lighthouse (mobil, eşik 90)
+        run: pnpm lighthouse
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse
+          path: .lighthouseci
+          retention-days: 7
