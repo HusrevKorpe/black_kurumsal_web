@@ -417,3 +417,18 @@ enabled = true
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# ── Canlı (supabase link + supabase config push). Kök ayarlar (bucket, kayıt kapalı) aynen geçer,
+# yalnızca aşağıdakiler canlıda farklıdır. Domain bağlanınca site_url ve redirect listesi güncellenir.
+[remotes.production]
+project_id = "isqneubsobtzkylkfadz"
+
+[remotes.production.auth]
+site_url = "https://black-kurumsal.vercel.app"
+additional_redirect_urls = ["https://black-kurumsal.vercel.app/**"]
+
+[remotes.production.auth.email]
+# Yerel kolaylıklar (onay kapalı, 1 sn sıklık) canlıya gitmesin; Supabase varsayılanları.
+enable_confirmations = true
+max_frequency = "1m0s"
+otp_length = 8

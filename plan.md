@@ -207,8 +207,9 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
    CI GitHub'da yeşil (07.09.2026, uzak depo: github.com/HusrevKorpe/black_kurumsal_web).
 5. **M5 Canlı** — Supabase prod projesi (+ `media` bucket, public), Sentry projesi (DSN + org/project/auth token),
    Vercel (env: `NEXT_PUBLIC_SENTRY_DSN`, `CRON_SECRET`, Sentry build değişkenleri), domain, içerik girişi.
-   Kod tarafı hazır (07.09.2026): `pnpm staff:owner` ilk patron hesabı, `supabase config push` ile bucket/auth,
-   README §Canlıya çıkış runbook'u. Bekleyen: Supabase / Sentry / Vercel hesap girişleri (hesap sahibi).
+   Yapıldı (07.09.2026): Supabase prod projesi + config push + `media` bucket + migration'lar (RLS dahil),
+   `pnpm staff:owner` hazır, README §Canlıya çıkış runbook'u. Bekleyen: patron e-postası, Sentry projesi,
+   Vercel (takım Hobby → Pro), domain, içerik.
 
 ## 12. Bilinen Kararlar / Notlar (uygulama sırasında)
 
@@ -236,6 +237,16 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
   siteye ~85 KB gz ekledi, kaldırıldı. Ana sayfa JS'i 228 KB gz (07.09.2026: 290 → Sentry tembel 246 → Sheet tembel 228;
   kalan: react-dom+Next ~140, base-ui Button çekirdeği ~21, sayfa bileşenleri). Kural: açık site
   bileşenlerine Zod/Supabase/Prisma sızmaz; `pnpm build` sonrası `.next/server/app/index.html` script listesi kontrol edilir.
+- **RLS (07.09.2026):** Supabase REST/GraphQL `public` şemasını publishable anahtarla dışa açar; Prisma tablolarında RLS
+  yoktu → anon her şeyi okuyup yazabilirdi. `20260907125547_enable_rls` tüm tablolarda RLS açar, politika yok
+  (API tamamen kapalı); uygulama `postgres` rolüyle bağlanır, rol `bypassrls`. Kural: her yeni tablo migration'da
+  RLS ile açılır, `tests/integration/rls.test.ts` zorlar. Canlıda doğrulandı: anon GET `[]`, INSERT 401.
+- **Supabase canlı (07.09.2026):** org "Black", proje `black-kurumsal` (`isqneubsobtzkylkfadz`, eu-central-1, Free;
+  canlıya çıkmadan Pro). `supabase config push` TTY dışında onay sormadan uygular; yerel e-posta kolaylıklarını
+  (onay kapalı, 1 sn sıklık) canlıya taşıdı → `[remotes.production.auth.email]` ile geri alındı. Bucket'ı config
+  push oluşturmuyor → `features/media/bucket.ts` `ensureMediaBucket` + `pnpm storage:init` (idempotent, testli).
+  `supabase projects api-keys` secret'ı maskeli döndürür (`·`), `--reveal` şart. Pooler host
+  `aws-0-eu-central-1.pooler.supabase.com`: 6543 transaction (`?pgbouncer=true`), 5432 session (migration).
 - **Lighthouse ilk koşu sapması (07.09.2026):** CI'da "/" ilk koşusu 0,63 (TBT 2,4 s), sonrakiler 0,93. Sunucu artık
   `scripts/lighthouse-server.sh` ile açılıyor ve her URL ölçümden önce ısıtılıyor; bu, sunucu tarafındaki soğuk
   başlangıcı kaldırdı ama ilk koşu yine 0,63 (TBT 1,2 s, benchmarkIndex o anda en düşük). Kalan sebep Chrome'un ilk
