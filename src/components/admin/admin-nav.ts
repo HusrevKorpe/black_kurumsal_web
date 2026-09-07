@@ -4,7 +4,15 @@ import { tr } from '@/lib/i18n/tr'
 
 /** İkonlar ada göre istemci tarafında çözülür; sunucudan istemciye fonksiyon geçmez. */
 export type AdminNavIcon =
-  'home' | 'store' | 'megaphone' | 'map-pin' | 'users' | 'settings' | 'clipboard-list' | 'trash'
+  | 'home'
+  | 'chart'
+  | 'store'
+  | 'megaphone'
+  | 'map-pin'
+  | 'users'
+  | 'settings'
+  | 'clipboard-list'
+  | 'trash'
 
 export interface AdminNavItem {
   href: `/${string}`
@@ -19,6 +27,9 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: ROUTES.admin.campaigns, label: tr.admin.nav.campaigns, icon: 'megaphone' },
   { href: ROUTES.admin.locations, label: tr.admin.nav.locations, icon: 'map-pin', ownerOnly: true },
   { href: ROUTES.admin.users, label: tr.admin.nav.users, icon: 'users', ownerOnly: true },
+  // Telefonda alt çubuğa yalnızca ilk 5 madde sığar; buraya eklenirse Kullanıcılar düşerdi.
+  // İstatistiğe telefondan özet sayfasındaki karttan girilir.
+  { href: ROUTES.admin.analytics, label: tr.admin.nav.analytics, icon: 'chart', ownerOnly: true },
   { href: ROUTES.admin.settings, label: tr.admin.nav.settings, icon: 'settings', ownerOnly: true },
   { href: ROUTES.admin.audit, label: tr.admin.nav.audit, icon: 'clipboard-list', ownerOnly: true },
   { href: ROUTES.admin.trash, label: tr.admin.nav.trash, icon: 'trash', ownerOnly: true },

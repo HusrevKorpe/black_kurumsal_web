@@ -26,6 +26,7 @@ export function ShopCard({ shop, hideLocation = false }: ShopCardProps) {
   return (
     <Link
       href={ROUTES.shop(shop.slug)}
+      data-track="shop"
       className="group flex flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="relative aspect-[16/10] overflow-hidden">

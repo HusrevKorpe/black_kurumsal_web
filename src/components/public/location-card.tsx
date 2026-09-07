@@ -14,6 +14,7 @@ export function LocationCard({ location }: LocationCardProps) {
   return (
     <Link
       href={ROUTES.location(location.slug)}
+      data-track="location"
       className="group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-xl border focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:aspect-[3/2]"
     >
       <CoverImage

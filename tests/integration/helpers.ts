@@ -11,6 +11,7 @@ export async function resetDatabase(): Promise<void> {
     )
   }
   const tables = [
+    'AnalyticsEvent',
     'AuditLog',
     'StaffShopAssignment',
     'Campaign',

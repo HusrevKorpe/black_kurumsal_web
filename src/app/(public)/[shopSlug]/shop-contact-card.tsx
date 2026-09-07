@@ -28,6 +28,7 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
               {contact.mapUrl ? (
                 <a
                   href={contact.mapUrl}
+                  data-track="directions"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-brand hover:underline"
@@ -41,7 +42,7 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
         {tel && contact.phone ? (
           <li className="flex items-center gap-3">
             <PhoneIcon className="size-4 shrink-0 text-muted-foreground" />
-            <a href={tel} className="hover:underline">
+            <a href={tel} data-track="call" className="hover:underline">
               {formatTrPhone(contact.phone)}
             </a>
           </li>
@@ -49,7 +50,13 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
         {wa && contact.whatsapp ? (
           <li className="flex items-center gap-3">
             <MessageCircleIcon className="size-4 shrink-0 text-muted-foreground" />
-            <a href={wa} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            <a
+              href={wa}
+              data-track="whatsapp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
               {tr.common.whatsapp} · {formatTrPhone(contact.whatsapp)}
             </a>
           </li>
@@ -59,6 +66,7 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
             <InstagramIcon className="size-4 shrink-0 text-muted-foreground" />
             <a
               href={contact.instagramUrl}
+              data-track="instagram"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:underline"

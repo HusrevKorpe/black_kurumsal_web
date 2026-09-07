@@ -64,6 +64,7 @@ export function CampaignCard({
           scope.href ? (
             <Link
               href={scope.href}
+              data-track={campaign.scope === 'SHOP' ? 'shop' : 'location'}
               className="text-xs font-medium tracking-wide text-brand uppercase hover:underline"
             >
               {scope.label}
@@ -91,6 +92,8 @@ export function CampaignCard({
           {campaign.ctaUrl ? (
             <a
               href={campaign.ctaUrl}
+              data-track="campaign"
+              data-track-campaign={campaign.id}
               target={isExternal ? '_blank' : undefined}
               rel={isExternal ? 'noopener noreferrer' : undefined}
               className={buttonVariants({ size: 'sm', variant: 'outline' })}

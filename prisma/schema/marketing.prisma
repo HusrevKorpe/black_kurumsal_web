@@ -22,6 +22,8 @@ model Campaign {
   shop      Shop?      @relation(fields: [shopId], references: [id], onDelete: Cascade)
   createdBy StaffUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
+  analyticsEvents AnalyticsEvent[]
+
   @@index([isActive, startsAt, endsAt])
   @@index([shopId])
   @@index([locationId])

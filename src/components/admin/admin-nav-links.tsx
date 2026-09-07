@@ -2,6 +2,7 @@
 
 import type { LucideIcon } from 'lucide-react'
 import {
+  ChartColumnIcon,
   ClipboardListIcon,
   HomeIcon,
   MapPinIcon,
@@ -18,6 +19,7 @@ import type { AdminNavIcon, AdminNavItem } from './admin-nav'
 
 const ICONS: Record<AdminNavIcon, LucideIcon> = {
   home: HomeIcon,
+  chart: ChartColumnIcon,
   store: StoreIcon,
   megaphone: MegaphoneIcon,
   'map-pin': MapPinIcon,

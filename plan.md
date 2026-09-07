@@ -138,6 +138,10 @@ kod değişmez.
 - **StaffShopAssignment**: staff ↔ shop.
 - **SiteSettings**: tek satır; marka adı, hero metinleri, iletişim, sosyal medya, logo.
 - **AuditLog**: kim, ne zaman, neyi değiştirdi.
+- **AnalyticsEvent**: ziyaret sayacı. type(PAGE_VIEW|CALL_CLICK|WHATSAPP_CLICK|DIRECTIONS_CLICK|
+  INSTAGRAM_CLICK|SHOP_CARD_CLICK|LOCATION_CARD_CLICK|CAMPAIGN_CLICK|GALLERY_OPEN), path, shop/location/campaign
+  (hepsi isteğe bağlı, `SetNull`), source (yönlendiren site), device(MOBILE|DESKTOP), visitorHash, createdAt.
+  Kişisel veri yok: IP ve tarayıcı imzası günlük tuzla hash'lenir, ham hâli saklanmaz.
 
 Kategori (Eğlence / Yeme-İçme / Konaklama) tabloda tutulmaz, `type`'tan türetilir.
 Apart odaları Faz 1'de fiyat listesiyle ("Oda Tipleri" kategorisi, resimli kalemler) çözülür;
@@ -160,7 +164,9 @@ Panel (`/admin`, giriş zorunlu, `proxy.ts` korur):
 - `/admin/cop` çöp kutusu: silinen dükkan/mekan, geri alma ve kalıcı silme (Patron)
 - `/admin/mekanlar`, `/admin/mekanlar/[id]` (Patron)
 - `/admin/kampanyalar` (Patron: hepsi; Sorumlu: kendi dükkanları)
+- `/admin/istatistik` ziyaret ve tıklama sayaçları (Patron)
 - `/admin/kullanicilar` (Patron), `/admin/ayarlar` (Patron), `/admin/gunluk` (Patron)
+- `/api/olay` sayaç ucu (tarayıcının `sendBeacon` isteği; her zaman 204 döner)
 
 ## 8. Klasör Yapısı
 
@@ -172,13 +178,14 @@ src/
     api/cron/             zamanlanmış görevler (vercel.json → crons), CRON_SECRET korumalı
     global-error.tsx      kök layout çökerse (kendi <html>'ini kurar, Sentry'ye bildirir)
   instrumentation.ts      Sentry sunucu/edge kurulumu + onRequestError
-  instrumentation-client.ts Sentry'yi başlatmaz; DSN varsa lib/sentry/lazy-init'i çağırır (her sayfaya girer, hafif)
+  instrumentation-client.ts Sentry'yi başlatmaz; DSN varsa lib/sentry/lazy-init'i çağırır. Ziyaret sayacını
+                          başlatır ve onRouterTransitionStart ile istemci gezinmelerini sayar (her sayfaya girer, hafif)
   components/
     ui/                   shadcn
     public/               site bileşenleri (mobile-nav.tsx düğme; mobile-nav-sheet.tsx çekmece, tembel yüklenir)
     admin/                panel bileşenleri
   features/<alan>/        alan bazlı: actions.ts, queries.ts, schema.ts, components/
-    shops/ locations/ hours/ media/ pricing/ campaigns/ staff/ settings/ audit/
+    shops/ locations/ hours/ media/ pricing/ campaigns/ staff/ settings/ audit/ analytics/
   lib/
     db.ts                 Prisma istemcisi (tekil)
     supabase/             server.ts, client.ts, admin.ts
@@ -187,6 +194,7 @@ src/
     sentry/               options.ts (3 ortam ortak ayar), client.ts (tembel yükleyici), sdk.ts (tree-shake köprüsü),
                           lazy-init.ts (erken hata tamponu + load sonrası idle'da başlatma)
     browser/idle.ts       whenIdleAfterLoad: LCP'yi geciktirmemesi gereken ikincil işler için
+    analytics/track.ts    tarayıcı sayacı (~1 KB): tek delegasyonlu tıklama dinleyicisi + sendBeacon
     utils/                slugify, time, format
   generated/prisma/       üretilen istemci (git'te yok)
 prisma/schema/*.prisma, prisma/migrations, prisma/seed.ts
@@ -247,7 +255,48 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
      Testler bu adımdan sonra: 150 birim/bileşen, 81 entegrasyon, 60 e2e (56 koşan + 4 atlanan).
      **Canlıya not:** site zaten yayında; deploy öncesi prod veritabanında `pnpm db:deploy` gerekir.
 
+7. **M7 Ziyaret sayacı** ✅ (07.09.2026) — patron sitenin nasıl kullanıldığını panelden görür
+   (`/admin/istatistik`, yalnızca patron): sayfa görüntüleme, tekil ziyaretçi, dükkan dükkan
+   WhatsApp / Ara / Yol tarifi / Instagram / galeri / listeden tıklama, en çok bakılan sayfalar,
+   ziyaretçinin geldiği kaynak (google, instagram, doğrudan), cihaz, kampanya tıklaması ve 7/30/90
+   günlük seri. Migration: `20260907182449_analytics_events` + `20260907182508_analytics_rls`.
+   - **Kendi sayacımız, üçüncü taraf yok:** olaylar `/api/olay` ucuna `navigator.sendBeacon` ile gider,
+     kendi veritabanımıza yazılır. Dışarıdan betik yüklenmez; açık sitenin JS paketi 0,4 KB gz büyüdü
+     (232,5 → 232,9), Lighthouse medyanları değişmedi (perf 0,92–0,94).
+   - **Tıklamalar `data-track` özniteliğiyle işaretlenir** (WhatsApp, Ara, Yol tarifi, Instagram, dükkan/mekan
+     kartı, kampanya CTA, galeri). Tek bir yakalama aşamalı dinleyici hepsini toplar: hiçbir bağlantı
+     istemci bileşenine dönüşmez. Yeni bir düğmeyi saymak için tek öznitelik yeter.
+   - **Kişisel veri tutulmaz (KVKK):** çerez yok, IP saklanmaz. `visitorHash = sha256(tuz + gün + IP + tarayıcı)`
+     ilk 16 hane; gün değişince aynı ziyaretçi başka hash alır → "bugün kaç kişi" sorusu cevaplanır, kişi
+     günler boyu takip edilemez. Tuz `ANALYTICS_SALT`, tanımsızsa `SUPABASE_SECRET_KEY`.
+   - **Sayı gerçek olsun diye:** robot imzaları (Googlebot, WhatsApp önizleme, headless) ve panelde oturumu
+     açık personel (Supabase çerezi) sayılmaz; ziyaretçi başına dakikada 120 olay sınırı vardır.
+   - **Saklama:** 400 gün (geçen yılın aynı ayı karşılaştırılabilsin), haftalık cron
+     (`/api/cron/istatistik-temizle`) eskiyeni siler. Ücretsiz katmanda güvenli.
+   - Menüde İstatistik Kullanıcılar'dan sonra durur: telefondaki alt çubuğa ilk 5 madde sığdığından
+     daha yukarı alınsa Kullanıcılar erişilemez kalırdı. Telefondan giriş, özet sayfasındaki
+     "Son 7 gün ziyaret" kartı.
+     Testler bu adımdan sonra: 190 birim/bileşen, 94 entegrasyon, 66 e2e (62 koşan + 4 atlanan).
+     **Canlıya not:** deploy öncesi prod veritabanında `pnpm db:deploy` gerekir.
+
 ## 12. Bilinen Kararlar / Notlar (uygulama sırasında)
+
+- **Sayaç mimarisi (07.09.2026):** ham olay tablosu tek doğruluk kaynağı; günlük özet tablosu (rollup) yazılmadı.
+  Bu ölçekte (günde birkaç yüz olay) `groupBy` sorguları anında dönüyor, iki yazma yolu bakım yükü olurdu.
+  Hacim büyürse (günde 10 binler) sıradaki adım: gün + tür + dükkan kırılımında `AnalyticsDaily` özet tablosu,
+  ham olaylar 90 günde silinir.
+- **Olayın hangi dükkana yazılacağını sunucu belirler:** tarayıcı yalnızca bulunduğu yolu (`/black-tost`) ve varsa
+  tıklanan bağlantının yolunu gönderir; slug → kimlik eşlemesi sunucuda 5 dakikalık bellek önbelleğiyle çözülür.
+  Böylece tarayıcıya kimlik sızmaz, her olayda ek sorgu olmaz. Dış bağlantıda (wa.me, tel:) hedef gönderilmez;
+  olay bulunulan sayfanın dükkanına yazılır.
+- **Sayaç ucu her zaman 204 döner:** gövde geçersiz, robot ya da personel olsa bile. Tarayıcı ne yazıldığını
+  öğrenmez, sayaç hatası sayfayı etkilemez; beklenmeyen hata Sentry'ye gider.
+- **Sayaçta gün sınırı Europe/Istanbul:** günlük seri SQL'de `"createdAt" AT TIME ZONE 'UTC' AT TIME ZONE
+'Europe/Istanbul'` ile bucket'lanır (Prisma `DateTime` saat dilimsiz UTC saklar); aralık başlangıcı da yerel
+  gece yarısıdır. Yoksa 00:00–03:00 arası olaylar bir önceki güne düşerdi.
+- **Yerelde kendi ziyaretiniz sayılmayabilir:** çerezler porta göre ayrılmaz; panelde açık Supabase oturumu varsa
+  localhost'taki her ziyaret "personel" sayılıp elenir. Canlıda istenen davranış budur (patronun kendi gezinmesi
+  WhatsApp sayacını şişirmez).
 
 - Özel gün tarihi `@db.Date` (saat dilimsiz). Kodda "YYYY-MM-DD" anahtarı olarak taşınır; `zonedNow`
   bugünün anahtarını Europe/Istanbul'a göre verir. UTC gece yarısı ile karşılaştırma yapılmaz —

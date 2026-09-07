@@ -10,6 +10,8 @@ const serverSchema = z.object({
   SUPABASE_STORAGE_BUCKET: z.string().min(1).default('media'),
   /** Vercel Cron isteklerinin taşıdığı gizli anahtar. Boşsa cron uçları hiçbir isteği kabul etmez. */
   CRON_SECRET: z.string().trim().optional(),
+  /** Ziyaretçi hash'inin tuzu. Tanımsızsa SUPABASE_SECRET_KEY kullanılır (o da yalnızca sunucuda). */
+  ANALYTICS_SALT: z.string().trim().min(8).optional(),
 })
 
 export const serverEnv = serverSchema.parse({
@@ -17,4 +19,5 @@ export const serverEnv = serverSchema.parse({
   SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
   SUPABASE_STORAGE_BUCKET: process.env.SUPABASE_STORAGE_BUCKET,
   CRON_SECRET: process.env.CRON_SECRET,
+  ANALYTICS_SALT: process.env.ANALYTICS_SALT,
 })

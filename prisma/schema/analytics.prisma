@@ -1,0 +1,30 @@
+/// Sitede ne olduğunun sayacı: hangi sayfaya bakıldı, hangi düğmeye basıldı.
+/// Kişisel veri tutmaz. IP ve tarayıcı imzası günlük tuzla tek yönlü hash'lenir (visitorHash);
+/// gün değişince aynı ziyaretçi başka hash alır, ham IP hiçbir yerde saklanmaz.
+model AnalyticsEvent {
+  id          String             @id @default(uuid(7))
+  type        AnalyticsEventType
+  /// Olayın gerçekleştiği sayfa yolu: "/", "/mekan/black-garden", "/black-tost".
+  path        String             @db.VarChar(200)
+  /// Olayın ilgilendirdiği kayıt. Sayfa görüntülemede sayfanın kendisi, kart tıklamasında hedef.
+  shopId      String?
+  locationId  String?
+  campaignId  String?
+  /// Ziyaretçiyi getiren site: "google", "instagram". Doğrudan girişte boş.
+  source      String?            @db.VarChar(80)
+  device      DeviceKind
+  /// sha256(tuz + gün + IP + tarayıcı) ilk 16 hane. Yalnızca "aynı gün aynı kişi mi" sorusuna yeter.
+  visitorHash String             @db.Char(16)
+  createdAt   DateTime           @default(now())
+
+  /// Kalıcı silmede olay durur, ilişkisi boşalır: geçmiş toplamlar kaybolmaz (yol sütunu okunur kalır).
+  shop     Shop?     @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([type, createdAt])
+  @@index([shopId, createdAt])
+  @@index([locationId, createdAt])
+  @@index([campaignId, createdAt])
+}

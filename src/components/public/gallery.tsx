@@ -48,6 +48,7 @@ export function Gallery({ images, title }: GalleryProps) {
           <li key={image.id} className={i === 0 ? 'col-span-2 row-span-2 sm:col-span-2' : ''}>
             <button
               type="button"
+              data-track="gallery"
               onClick={() => setIndex(i)}
               className="relative block aspect-[4/3] w-full overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               aria-label={`${title} – ${tr.shop.gallery} ${i + 1}`}

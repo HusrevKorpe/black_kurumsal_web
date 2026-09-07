@@ -55,12 +55,17 @@ Seed hesapları: `patron@black.local / Patron123!` (Patron) · `sorumlu@black.lo
 ## Hata izleme ve bakım
 
 - Şema değişikliği canlıya çıkarken: deploy'dan önce `DOTENV_CONFIG_PATH=.env.canli pnpm db:deploy`.
-  Bekleyen migration: `20260907174949_hours_exceptions_and_soft_delete` (özel günler + çöp kutusu).
+  Bekleyen migration: `20260907174949_hours_exceptions_and_soft_delete` (özel günler + çöp kutusu),
+  `20260907182449_analytics_events` + `20260907182508_analytics_rls` (ziyaret sayacı).
 - Çöp kutusu (`/admin/cop`, patron): silinen dükkan/mekan burada durur, geri alınabilir. Kalıcı
   silme yalnızca buradan yapılır ve depodaki fotoğrafları da götürür.
 - Sentry: `NEXT_PUBLIC_SENTRY_DSN` doluysa açık, boşsa tamamen kapalı. Yalnızca hata izleme (tracing/replay paketten çıkarılmış).
   Kaynak haritası yüklemek için Vercel/CI'da `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`.
 - Yetim medya: canlıda haftalık Vercel Cron (`/api/cron/medya-temizle`, `CRON_SECRET` gerekli), yerelde `pnpm media:cleanup`.
+- İstatistik (`/admin/istatistik`, patron): sayfa görüntüleme ve tıklama sayaçları kendi veritabanımızda; dışarıya
+  hiçbir betik yüklenmez. Olaylar 400 gün saklanır, haftalık Vercel Cron (`/api/cron/istatistik-temizle`,
+  `CRON_SECRET` gerekli) eskiyeni siler. Ziyaretçi imzası günlük tuzla hash'lenir; tuz `ANALYTICS_SALT`
+  (tanımsızsa `SUPABASE_SECRET_KEY`). Robotlar ve panelde oturumu açık personel sayılmaz.
 
 ## Canlıya çıkış (M5)
 
@@ -98,6 +103,7 @@ Sıra önemli; her adım bir öncekinin çıktısını kullanır. Hesap girişle
    | `NEXT_PUBLIC_SITE_URL`                                                                    | `https://<domain>` (domain yoksa Vercel adresi; sitemap/OG/JSON-LD buradan) |
    | `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`             | 2. adım                                                                     |
    | `CRON_SECRET`                                                                             | `openssl rand -hex 32`                                                      |
+   | `ANALYTICS_SALT` (isteğe bağlı)                                                           | `openssl rand -hex 16`; tanımsızsa `SUPABASE_SECRET_KEY` kullanılır         |
 
 4. **Şema + ilk patron.** `.env.canli` 1. adımda hazır (yoksa `vercel env pull .env.canli --environment=production`;
    bu adı Next okumaz, yerel build canlıya bağlanmaz). `DOTENV_CONFIG_PATH=.env.canli pnpm db:deploy` (07.09.2026'da
@@ -116,7 +122,8 @@ Sıra önemli; her adım bir öncekinin çıktısını kullanır. Hesap girişle
    `site_url`/`additional_redirect_urls` domaine çekilir (`supabase config push`), yeniden deploy.
 6. **Duman testi.** Giriş; panelden görsel yükleme (prod Storage); "şu an açık" (Europe/Istanbul); telefon/WhatsApp
    linkleri; `/sitemap.xml`, `/robots.txt`, OG görselleri; Sentry'ye test hatası düşüyor mu; `/api/cron/medya-temizle`
-   secret'sız 401, `Authorization: Bearer <CRON_SECRET>` ile 200. Durum (07.09.2026): sayfalar, 404, `/admin` → giriş
+   secret'sız 401, `Authorization: Bearer <CRON_SECRET>` ile 200 (aynısı `/api/cron/istatistik-temizle` için);
+   siteyi gerçek telefondan gezip `/admin/istatistik`'te sayaçların arttığını görmek. Durum (07.09.2026): sayfalar, 404, `/admin` → giriş
    yönlendirmesi, robots/sitemap ve cron doğrulandı; giriş, görsel yükleme, saat ve telefon/WhatsApp kontrolü panelden
    ilk veri girilince yapılır. Sentry ve domain karar gereği satışa ertelendi.
 

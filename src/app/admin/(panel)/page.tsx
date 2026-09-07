@@ -1,10 +1,12 @@
-import { ArrowRightIcon, ImageIcon, MegaphoneIcon, StoreIcon } from 'lucide-react'
+import { ArrowRightIcon, ChartColumnIcon, ImageIcon, MegaphoneIcon, StoreIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PageHeader } from '@/components/admin/page-header'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
+import { getEventTotals } from '@/features/analytics/queries'
+import { buildRange } from '@/features/analytics/range'
 import { listRecentAuditLogs } from '@/features/audit/queries'
 import { getDashboardData } from '@/features/dashboard/queries'
 import { isOwner } from '@/lib/auth/authorize'
@@ -25,13 +27,26 @@ export default async function AdminDashboardPage({ searchParams }: PageProps<'/a
   const showForbidden = params.yetki === 'yok'
   const staff = await requireStaff()
   const owner = isOwner(staff)
-  const [data, recent] = await Promise.all([
+  // Patron telefonda alt menüde İstatistik'i göremez (5 madde sınırı); giriş buradaki kart.
+  const week = buildRange(new Date(), 7)
+  const [data, recent, visits] = await Promise.all([
     getDashboardData(staff),
     owner ? listRecentAuditLogs(6) : Promise.resolve([]),
+    owner ? getEventTotals(week.from) : Promise.resolve(null),
   ])
   const d = tr.admin.dashboard
 
   const stats = [
+    ...(visits
+      ? [
+          {
+            label: d.visits,
+            value: d.visitsStat(visits.PAGE_VIEW, visits.WHATSAPP_CLICK),
+            icon: ChartColumnIcon,
+            href: ROUTES.admin.analytics,
+          },
+        ]
+      : []),
     {
       label: owner ? d.allShops : d.yourShops,
       value: d.shopsStat(data.shopsActive, data.shopsTotal),
@@ -61,7 +76,10 @@ export default async function AdminDashboardPage({ searchParams }: PageProps<'/a
         </Alert>
       ) : null}
 
-      <section className="grid gap-3 sm:grid-cols-3" aria-label="Özet">
+      <section
+        className={owner ? 'grid gap-3 sm:grid-cols-2 lg:grid-cols-4' : 'grid gap-3 sm:grid-cols-3'}
+        aria-label="Özet"
+      >
         {stats.map((stat) => (
           <Link
             key={stat.label}

@@ -39,6 +39,7 @@ export const ROUTES = {
     campaigns: '/admin/kampanyalar',
     users: '/admin/kullanicilar',
     settings: '/admin/ayarlar',
+    analytics: '/admin/istatistik',
     audit: '/admin/gunluk',
     trash: '/admin/cop',
   },

@@ -53,6 +53,7 @@ export function SiteFooter({ settings }: SiteFooterProps) {
               <li>
                 <a
                   href={phoneHref}
+                  data-track="call"
                   className="inline-flex items-center gap-2 hover:text-foreground"
                 >
                   <PhoneIcon className="size-4" /> {formatTrPhone(settings.contactPhone)}
@@ -63,6 +64,7 @@ export function SiteFooter({ settings }: SiteFooterProps) {
               <li>
                 <a
                   href={settings.instagramUrl}
+                  data-track="instagram"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 hover:text-foreground"

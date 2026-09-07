@@ -23,6 +23,7 @@ model Location {
   hoursExceptions HoursException[]
   gallery         GalleryImage[]
   campaigns       Campaign[]
+  analyticsEvents AnalyticsEvent[]
 
   @@index([isActive, sortOrder])
   @@index([deletedAt])
@@ -63,6 +64,7 @@ model Shop {
   priceCategories PriceCategory[]
   campaigns       Campaign[]
   staff           StaffShopAssignment[]
+  analyticsEvents AnalyticsEvent[]
 
   @@index([locationId])
   @@index([isActive, sortOrder])

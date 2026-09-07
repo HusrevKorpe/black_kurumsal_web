@@ -23,13 +23,14 @@ export function ContactButtons({ contact, whatsappMessage, className }: ContactB
   return (
     <div className={cn('flex flex-wrap gap-2', className)}>
       {tel ? (
-        <a href={tel} className={buttonVariants({ size: 'lg' })}>
+        <a href={tel} data-track="call" className={buttonVariants({ size: 'lg' })}>
           <PhoneIcon data-icon="inline-start" /> {tr.common.call}
         </a>
       ) : null}
       {wa ? (
         <a
           href={wa}
+          data-track="whatsapp"
           target="_blank"
           rel="noopener noreferrer"
           className={cn(buttonVariants({ size: 'lg' }), WHATSAPP_CLASS)}
@@ -40,6 +41,7 @@ export function ContactButtons({ contact, whatsappMessage, className }: ContactB
       {contact.mapUrl ? (
         <a
           href={contact.mapUrl}
+          data-track="directions"
           target="_blank"
           rel="noopener noreferrer"
           className={buttonVariants({ size: 'lg', variant: 'outline' })}
@@ -50,6 +52,7 @@ export function ContactButtons({ contact, whatsappMessage, className }: ContactB
       {contact.instagramUrl ? (
         <a
           href={contact.instagramUrl}
+          data-track="instagram"
           target="_blank"
           rel="noopener noreferrer"
           className={buttonVariants({ size: 'lg', variant: 'outline' })}
@@ -71,13 +74,14 @@ export function ContactActionBar({ contact, whatsappMessage }: ContactButtonsPro
     <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
       <div className="mx-auto flex max-w-6xl gap-2">
         {tel ? (
-          <a href={tel} className={cn(buttonVariants({ size: 'lg' }), 'flex-1')}>
+          <a href={tel} data-track="call" className={cn(buttonVariants({ size: 'lg' }), 'flex-1')}>
             <PhoneIcon data-icon="inline-start" /> {tr.common.call}
           </a>
         ) : null}
         {wa ? (
           <a
             href={wa}
+            data-track="whatsapp"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(buttonVariants({ size: 'lg' }), WHATSAPP_CLASS, 'flex-1')}

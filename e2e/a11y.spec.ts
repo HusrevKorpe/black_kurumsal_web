@@ -80,6 +80,7 @@ test.describe('Erişilebilirlik (axe)', () => {
       '/admin/ayarlar',
       '/admin/cop',
       '/admin/gunluk',
+      '/admin/istatistik',
     ]) {
       await page.goto(path)
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible()

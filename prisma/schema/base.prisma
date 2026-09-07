@@ -32,3 +32,21 @@ enum CampaignScope {
   LOCATION
   SHOP
 }
+
+enum AnalyticsEventType {
+  PAGE_VIEW
+  CALL_CLICK
+  WHATSAPP_CLICK
+  DIRECTIONS_CLICK
+  INSTAGRAM_CLICK
+  SHOP_CARD_CLICK
+  LOCATION_CARD_CLICK
+  CAMPAIGN_CLICK
+  GALLERY_OPEN
+}
+
+/// Tarayıcı imzasından çıkarılır; ikiden fazla ayrım güvenilir değil.
+enum DeviceKind {
+  MOBILE
+  DESKTOP
+}
