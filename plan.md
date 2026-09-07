@@ -243,6 +243,14 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
   artık `next typegen && tsc --noEmit` (tam build yapmadan rota tiplerini üretir). `next-env.d.ts` de bu yüzden commit'lenmez.
   İkinci koşu: `supabase status -o env` değerleri çift tırnaklı basar, `$GITHUB_ENV` tırnak soymaz → anahtar `"sb_…"`
   olarak gitti, Storage "Invalid Compact JWS" verdi; iş akışına `tr -d '"'` eklendi.
+  Üçüncü koşu: `.lighthouseci` nokta ile başladığından upload-artifact@v4 atlıyordu → `include-hidden-files: true`.
+- **CI'da Lighthouse performansı (07.09.2026, AÇIK KARAR):** entegrasyon/build/e2e CI'da yeşil; performans medyanı
+  0,87–0,89 (eşik 0,90). Tek düşük metrik LCP (~3,7 s, puan 0,55); FCP/SI/TBT/CLS tam puan. LCP öğesi hero görseli
+  (4 KB AVIF, preload'lu, ~50 ms'de iniyor); süreyi yiyen faz **Render Delay** (2–3,4 s) = görsel indikten sonra boyanana
+  kadar ana iş parçacığında koşan JS (hydration + Sentry, ~315 KB gz). Runner benchmarkIndex ~2200, Mac ~3100: runner
+  orta sınıf mobil cihaza daha yakın; Mac'te görsel bazen JS'in önüne geçtiği için 0,97, bazen arkasına düştüğü için 0,90.
+  Seçenekler: (a) LCP öncesi JS'i azaltmak (Sentry init'i idle'a ertelemek, hydration yükü) → gerçek mobil kazanç, hedef
+  0,90 korunur; (b) CI eşiğini 0,85'e çekip 0,90'ı yerel hedef bırakmak (stopgap). Karar kullanıcıda.
 - **axe turunun bulguları (07.09.2026, hepsi düzeltildi):** gizli dosya girdisi (`ImageUploadButton`) etiketsizdi →
   `aria-label` + `tabIndex=-1`; Sheet/Dialog kapatma düğmesinin ekran okuyucu metni İngilizce "Close" idi →
   `tr.common.close`; kampanya kartı h3'ü `/kampanyalar`'da h1'in altına düşüyordu → `headingLevel`. Ölçüm notu:
