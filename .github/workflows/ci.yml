@@ -59,7 +59,7 @@ jobs:
       - run: supabase start -x studio,realtime,edge-runtime,logflare,vector
       - name: Supabase anahtarlarını ortama yaz
         run: |
-          supabase status -o env | sed -n 's/^PUBLISHABLE_KEY=/NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=/p;s/^SECRET_KEY=/SUPABASE_SECRET_KEY=/p' >> "$GITHUB_ENV"
+          supabase status -o env | tr -d '"' | sed -n 's/^PUBLISHABLE_KEY=/NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=/p;s/^SECRET_KEY=/SUPABASE_SECRET_KEY=/p' >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
       - run: psql "$DATABASE_URL" -c 'CREATE DATABASE black_test'
       - run: pnpm db:deploy
