@@ -78,8 +78,10 @@ Sıra önemli; her adım bir öncekinin çıktısını kullanır. Hesap girişle
 
 2. **Sentry.** sentry.io → yeni proje (Next.js) → DSN. Settings → Auth Tokens → organization token (kaynak haritası
    yüklemesi için). `SENTRY_ORG` = org slug, `SENTRY_PROJECT` = proje slug.
-3. **Vercel.** `vercel link` (yeni proje; ticari site → Pro takım) → `vercel git connect` (push = deploy) → değişkenler
-   (`printf '%s' '<değer>' | vercel env add <AD> production`):
+3. **Vercel** (07.09.2026'da yapıldı: proje `black-kurumsal`, takım 979268, GitHub bağlı → `main`'e push = canlı
+   deploy, adres https://black-kurumsal.vercel.app). Şimdilik Hobby; satış/yayın olunca Pro. Değişkenler yalnızca
+   production ortamında (`printf '%s' '<değer>' | vercel env add <AD> production`; preview deploy canlı DB'ye
+   bağlanmasın diye preview'a verilmedi):
 
    | Değişken                                                                                  | Değer                                                                       |
    | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |

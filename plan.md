@@ -208,8 +208,9 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
 5. **M5 Canlı** — Supabase prod projesi (+ `media` bucket, public), Sentry projesi (DSN + org/project/auth token),
    Vercel (env: `NEXT_PUBLIC_SENTRY_DSN`, `CRON_SECRET`, Sentry build değişkenleri), domain, içerik girişi.
    Yapıldı (07.09.2026): Supabase prod projesi + config push + `media` bucket + migration'lar (RLS dahil),
-   `pnpm staff:owner` hazır, README §Canlıya çıkış runbook'u. Bekleyen: patron e-postası, Sentry projesi,
-   Vercel (takım Hobby → Pro), domain, içerik.
+   Vercel projesi + env + GitHub bağlantısı (https://black-kurumsal.vercel.app), `pnpm staff:owner` hazır,
+   README §Canlıya çıkış runbook'u. Karar: satış netleşene kadar ücretsiz katmanlar (Supabase Free, Vercel Hobby,
+   Sentry Free); yayına girince Supabase Pro + Vercel Pro. Bekleyen: patron e-postası, Sentry projesi, domain, içerik.
 
 ## 12. Bilinen Kararlar / Notlar (uygulama sırasında)
 
