@@ -19,6 +19,7 @@
     "lighthouse": "lhci autorun",
     "media:cleanup": "tsx --conditions=react-server scripts/cleanup-media.ts",
     "staff:owner": "tsx scripts/create-owner.ts",
+    "content:init": "tsx scripts/init-content.ts",
     "storage:init": "tsx scripts/init-storage.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "db:generate": "prisma generate",

@@ -1,6 +1,6 @@
 # Black Kurumsal — Proje Planı
 
-> Durum: M1–M4 tamamlandı, CI GitHub'da yeşil (07.09.2026; Lighthouse medyan 0,92–0,93). Sıradaki iş: canlıya çıkış (M5), adımlar README §Canlıya çıkış.
+> Durum: M1–M5 tamamlandı (07.09.2026): CI yeşil (Lighthouse medyan 0,92–0,93), site https://black-kurumsal.vercel.app adresinde canlı, içerik iskeleti `pnpm content:init` ile. Sıradaki iş: patronun panelden ayrıntı girmesi; satışta domain + Sentry + Pro planlar (README §Canlıya çıkış).
 > Bu belge tek doğruluk kaynağıdır. Karar değişirse önce burası güncellenir.
 
 ## 1. Amaç
@@ -210,7 +210,11 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
    Yapıldı (07.09.2026): Supabase prod projesi + config push + `media` bucket + migration'lar (RLS dahil),
    Vercel projesi + env + GitHub bağlantısı (https://black-kurumsal.vercel.app), `pnpm staff:owner` hazır,
    README §Canlıya çıkış runbook'u. Karar: satış netleşene kadar ücretsiz katmanlar (Supabase Free, Vercel Hobby,
-   Sentry Free); yayına girince Supabase Pro + Vercel Pro. Bekleyen: patron e-postası, Sentry projesi, domain, içerik.
+   Sentry Free); yayına girince Supabase Pro + Vercel Pro. Patron hesabı açıldı. İçerik: gerçek yapı
+   (`src/features/content/skeleton-data.ts`: site ayarı, 3 mekan/bölge, 11 dükkan; uydurma telefon/adres/fiyat YOK)
+   `pnpm content:init` ile canlıda açılır (yalnızca eksikleri açar, panel düzenlemelerine dokunmaz, tek transaction,
+   günlüğe düşer; birim + entegrasyon testli); yerel seed aynı iskeleti demo veriyle doldurur. Ayrıntılar panelden.
+   Ertelenen (karar, satışta): domain, Sentry projesi, Pro planlar. M5 bu kapsamda tamamlandı.
 
 ## 12. Bilinen Kararlar / Notlar (uygulama sırasında)
 

@@ -4,6 +4,7 @@ import { serverEnv } from '@/lib/env.server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { SEED_CAMPAIGNS, SEED_LOCATIONS, SEED_SHOPS, SEED_STAFF, type SeedHours } from './seed/data'
 import { uploadPlaceholder } from './seed/media'
+import { SKELETON_SETTINGS } from '@/features/content/skeleton-data'
 import { ensureAuthUser } from '@/features/staff/bootstrap'
 
 const DAYS = [1, 2, 3, 4, 5, 6, 7] as const
@@ -22,10 +23,7 @@ async function seedSettings() {
     where: { id: 1 },
     create: {
       id: 1,
-      brandName: 'Black',
-      heroTitle: 'Black ile şehrin keyfi tek çatı altında',
-      heroSubtitle:
-        'PlayStation, internet kafe, yeme-içme ve konaklama. Tüm dükkanlarımız, kampanyalarımız ve iletişim bilgilerimiz burada.',
+      ...SKELETON_SETTINGS,
       contactPhone: '0555 000 00 00',
       instagramUrl: 'https://instagram.com/black',
     },

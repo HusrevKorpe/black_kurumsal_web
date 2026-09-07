@@ -1,5 +1,16 @@
-import type { LocationKind, ShopType } from '@/generated/prisma/enums'
+import {
+  SKELETON_LOCATIONS,
+  SKELETON_SHOPS,
+  type SkeletonLocation,
+  type SkeletonLocationSlug,
+  type SkeletonShop,
+  type SkeletonShopSlug,
+} from '@/features/content/skeleton-data'
 
+/**
+ * Yerel geliştirme seed'i: gerçek iskeletin (ad/slug/tür/bağ) üstüne DEMO dolgu. Adres, telefon, saat,
+ * fiyat ve görsel rengi örnektir; canlıya asla gitmez (canlıda yalnızca iskelet: `pnpm content:init`).
+ */
 export interface SeedHours {
   opensAt: string
   closesAt: string
@@ -19,10 +30,7 @@ export interface SeedPriceCategory {
   items: SeedPriceItem[]
 }
 
-export interface SeedLocation {
-  slug: string
-  name: string
-  kind: LocationKind
+interface DemoLocation {
   description?: string
   address?: string
   mapUrl?: string
@@ -30,15 +38,10 @@ export interface SeedLocation {
   whatsapp?: string
   /** Haftanın 7 günü aynı saat. */
   hours?: SeedHours
-  sortOrder: number
   hue: number
 }
 
-export interface SeedShop {
-  slug: string
-  name: string
-  type: ShopType
-  locationSlug: string | null
+interface DemoShop {
   description: string
   address?: string
   phone?: string
@@ -48,15 +51,14 @@ export interface SeedShop {
   /** Boşsa mekandan devralır. */
   hours?: SeedHours
   priceCategories: SeedPriceCategory[]
-  sortOrder: number
   hue: number
 }
 
-export const SEED_LOCATIONS: SeedLocation[] = [
-  {
-    slug: 'black-garden',
-    name: 'Black Garden',
-    kind: 'VENUE',
+export type SeedLocation = SkeletonLocation & DemoLocation
+export type SeedShop = SkeletonShop & DemoShop
+
+const DEMO_LOCATIONS: Record<SkeletonLocationSlug, DemoLocation> = {
+  'black-garden': {
     description:
       'Tek çatı altında tavuk, makarna, tost ve sushi. Geniş bahçeli oturma alanı, aile dostu ortam.',
     address: 'Garden Caddesi No: 1 (örnek adres, panelden güncellenecek)',
@@ -64,12 +66,11 @@ export const SEED_LOCATIONS: SeedLocation[] = [
     phone: '0555 000 00 01',
     whatsapp: '0555 000 00 01',
     hours: { opensAt: '11:00', closesAt: '23:30' },
-    sortOrder: 1,
     hue: 140,
   },
-  { slug: 'carsi', name: 'Çarşı', kind: 'DISTRICT', sortOrder: 2, hue: 30 },
-  { slug: 'iyas', name: 'Iyaş', kind: 'DISTRICT', sortOrder: 3, hue: 260 },
-]
+  carsi: { hue: 30 },
+  iyas: { hue: 260 },
+}
 
 const DRINKS: SeedPriceCategory = {
   name: 'İçecekler',
@@ -145,12 +146,8 @@ const PS_FEATURES = ['PS5', '4K TV', '12 Konsol', 'Turnuva Geceleri']
 const NET_FEATURES = ['RTX Ekran Kartı', '144Hz Monitör', 'Fiber İnternet', 'Oyuncu Koltuğu']
 const TOST_FEATURES = ['Odun Fırını', 'Paket Servis', 'Kahvaltı']
 
-export const SEED_SHOPS: SeedShop[] = [
-  {
-    slug: 'black-playstation-carsi',
-    name: 'Black PlayStation Çarşı',
-    type: 'PLAYSTATION',
-    locationSlug: 'carsi',
+const DEMO_SHOPS: Record<SkeletonShopSlug, DemoShop> = {
+  'black-playstation-carsi': {
     description: 'Çarşı merkezinde PS5 ve PS4 konsollar, 4K ekranlar ve her cuma turnuva gecesi.',
     address: 'Çarşı Merkez, Örnek Sokak No: 5',
     phone: '0555 000 00 11',
@@ -158,14 +155,9 @@ export const SEED_SHOPS: SeedShop[] = [
     features: PS_FEATURES,
     hours: { opensAt: '10:00', closesAt: '02:00' },
     priceCategories: playstationPrices(),
-    sortOrder: 1,
     hue: 210,
   },
-  {
-    slug: 'black-internet-kafe-carsi',
-    name: 'Black İnternet Kafe Çarşı',
-    type: 'INTERNET_CAFE',
-    locationSlug: 'carsi',
+  'black-internet-kafe-carsi': {
     description:
       'Yüksek performanslı oyun bilgisayarları, fiber internet ve rahat oyuncu koltukları.',
     address: 'Çarşı Merkez, Örnek Sokak No: 7',
@@ -173,14 +165,9 @@ export const SEED_SHOPS: SeedShop[] = [
     features: NET_FEATURES,
     hours: { opensAt: '09:00', closesAt: '01:00' },
     priceCategories: internetCafePrices(),
-    sortOrder: 2,
     hue: 190,
   },
-  {
-    slug: 'black-tost-carsi',
-    name: 'Black Tost Çarşı',
-    type: 'FOOD',
-    locationSlug: 'carsi',
+  'black-tost-carsi': {
     description: 'Odun fırınında hazırlanan tostlar, sabah kahvaltısı ve hızlı paket servis.',
     address: 'Çarşı Merkez, Örnek Sokak No: 9',
     phone: '0555 000 00 13',
@@ -188,14 +175,9 @@ export const SEED_SHOPS: SeedShop[] = [
     features: TOST_FEATURES,
     hours: { opensAt: '08:00', closesAt: '23:00' },
     priceCategories: tostPrices(),
-    sortOrder: 3,
     hue: 35,
   },
-  {
-    slug: 'black-playstation-iyas',
-    name: 'Black PlayStation Iyaş',
-    type: 'PLAYSTATION',
-    locationSlug: 'iyas',
+  'black-playstation-iyas': {
     description: 'Iyaş bölgesinde geniş salon, PS5 konsollar ve grup oyun alanları.',
     address: 'Iyaş, Örnek Bulvarı No: 12',
     phone: '0555 000 00 21',
@@ -203,28 +185,18 @@ export const SEED_SHOPS: SeedShop[] = [
     features: ['PS5', '4K TV', '16 Konsol', 'Grup Salonu'],
     hours: { opensAt: '10:00', closesAt: '00:00' },
     priceCategories: playstationPrices(),
-    sortOrder: 4,
     hue: 220,
   },
-  {
-    slug: 'black-internet-kafe-iyas',
-    name: 'Black İnternet Kafe Iyaş',
-    type: 'INTERNET_CAFE',
-    locationSlug: 'iyas',
+  'black-internet-kafe-iyas': {
     description: 'Iyaş bölgesinde 30 bilgisayarlık salon, e-spor turnuvaları ve ofis hizmetleri.',
     address: 'Iyaş, Örnek Bulvarı No: 12',
     phone: '0555 000 00 22',
     features: NET_FEATURES,
     hours: { opensAt: '09:00', closesAt: '00:00' },
     priceCategories: internetCafePrices(),
-    sortOrder: 5,
     hue: 200,
   },
-  {
-    slug: 'black-tost-iyas',
-    name: 'Black Tost Iyaş',
-    type: 'FOOD',
-    locationSlug: 'iyas',
+  'black-tost-iyas': {
     description: 'Iyaş bölgesinde tost, kahvaltı ve sıcak içecekler. Paket servis mevcut.',
     address: 'Iyaş, Örnek Bulvarı No: 14',
     phone: '0555 000 00 23',
@@ -232,14 +204,9 @@ export const SEED_SHOPS: SeedShop[] = [
     features: TOST_FEATURES,
     hours: { opensAt: '08:00', closesAt: '22:00' },
     priceCategories: tostPrices(),
-    sortOrder: 6,
     hue: 40,
   },
-  {
-    slug: 'black-tavuk-garden',
-    name: 'Black Tavuk',
-    type: 'FOOD',
-    locationSlug: 'black-garden',
+  'black-tavuk-garden': {
     description:
       'Izgara ve döner tavuk çeşitleri, kanat sepetleri ve menüler. Black Garden içinde.',
     features: ['Izgara', 'Menüler', 'Aile Boyu'],
@@ -260,14 +227,9 @@ export const SEED_SHOPS: SeedShop[] = [
       },
       { name: 'Ekstralar', items: [{ name: 'Patates Kızartması', price: 60, unit: 'porsiyon' }] },
     ],
-    sortOrder: 7,
     hue: 20,
   },
-  {
-    slug: 'black-makarna-garden',
-    name: 'Black Makarna',
-    type: 'FOOD',
-    locationSlug: 'black-garden',
+  'black-makarna-garden': {
     description: 'Taze soslarla hazırlanan İtalyan makarnalar. Black Garden içinde.',
     features: ['Taze Sos', 'Vejetaryen Seçenek'],
     priceCategories: [
@@ -281,25 +243,15 @@ export const SEED_SHOPS: SeedShop[] = [
         ],
       },
     ],
-    sortOrder: 8,
     hue: 60,
   },
-  {
-    slug: 'black-tost-garden',
-    name: 'Black Tost',
-    type: 'FOOD',
-    locationSlug: 'black-garden',
+  'black-tost-garden': {
     description: 'Black Garden içinde tost ve kahvaltı köşesi.',
     features: TOST_FEATURES,
     priceCategories: tostPrices(),
-    sortOrder: 9,
     hue: 45,
   },
-  {
-    slug: 'black-sushi-garden',
-    name: 'Black Sushi',
-    type: 'FOOD',
-    locationSlug: 'black-garden',
+  'black-sushi-garden': {
     description:
       'Günlük taze balıkla hazırlanan sushi setleri ve roll çeşitleri. Black Garden içinde.',
     features: ['Günlük Taze Balık', 'Set Menüler'],
@@ -320,14 +272,9 @@ export const SEED_SHOPS: SeedShop[] = [
         ],
       },
     ],
-    sortOrder: 10,
     hue: 340,
   },
-  {
-    slug: 'lavinya-apart',
-    name: 'Lavinya Apart',
-    type: 'APART',
-    locationSlug: null,
+  'lavinya-apart': {
     description:
       'Şehir merkezine yakın, temiz ve güvenli günlük/haftalık konaklama. Tüm odalarda klima ve ücretsiz WiFi.',
     address: 'Lavinya Sokak No: 3 (örnek adres)',
@@ -368,10 +315,19 @@ export const SEED_SHOPS: SeedShop[] = [
         ],
       },
     ],
-    sortOrder: 11,
     hue: 290,
   },
-]
+}
+
+export const SEED_LOCATIONS: SeedLocation[] = SKELETON_LOCATIONS.map((loc) => ({
+  ...loc,
+  ...DEMO_LOCATIONS[loc.slug],
+}))
+
+export const SEED_SHOPS: SeedShop[] = SKELETON_SHOPS.map((shop) => ({
+  ...shop,
+  ...DEMO_SHOPS[shop.slug],
+}))
 
 export interface SeedCampaign {
   title: string

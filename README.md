@@ -35,6 +35,7 @@ Seed hesapları: `patron@black.local / Patron123!` (Patron) · `sorumlu@black.lo
 | `pnpm media:cleanup`    | Yetim medya raporu (kuru çalışma); `--apply` siler, `--grace=SAAT` bekleme süresi                                         |
 | `pnpm staff:owner`      | İlk patron hesabı (canlı kurulum): `--email= --name=`; şifreyi üretip bir kez yazar, hesap varsa şifreyi sıfırlar         |
 | `pnpm storage:init`     | Medya bucket'ını oluşturur/ayarlarını doğrular (public, 10 MiB, görsel MIME); canlıda `DOTENV_CONFIG_PATH=.env.canli` ile |
+| `pnpm content:init`     | İçerik iskeleti (canlı ilk kurulum): site ayarı, 3 mekan/bölge, 11 dükkan; yalnızca eksikleri açar, var olana dokunmaz    |
 | `pnpm db:migrate`       | Şema değişikliğinden sonra migration üret ve uygula                                                                       |
 | `pnpm db:studio`        | Prisma Studio                                                                                                             |
 | `pnpm build`            | Üretim derlemesi (`prisma generate` dahil)                                                                                |
@@ -97,12 +98,18 @@ Sıra önemli; her adım bir öncekinin çıktısını kullanır. Hesap girişle
    bu adı Next okumaz, yerel build canlıya bağlanmaz). `DOTENV_CONFIG_PATH=.env.canli pnpm db:deploy` (07.09.2026'da
    uygulandı, RLS dahil) ve
    `DOTENV_CONFIG_PATH=.env.canli pnpm staff:owner --email=<patron e-posta> --name="<Ad Soyad>"` (şifre bir kez yazdırılır,
-   ilk girişte panelden değiştirilir). Seed canlıda çalıştırılmaz; dükkanlar ve sorumlular panelden girilir.
+   ilk girişte panelden değiştirilir). Ardından içerik iskeleti: `DOTENV_CONFIG_PATH=.env.canli pnpm content:init`
+   (site ayarı, 3 mekan/bölge, 11 dükkan; `src/features/content/skeleton-data.ts` tek doğruluk kaynağı; yalnızca eksik
+   kayıtları açar, panelden yapılan düzenlemelere dokunmaz, tekrar çalıştırmak güvenlidir; işlem günlüğüne düşer). Seed
+   canlıda çalıştırılmaz: telefon, adres, saat, fiyat, açıklama, görsel ve sorumlular panelden girilir. Komut açık siteyi
+   yenilemez (sayfalar 1 saat önbellekli); sonrasında deploy ya da panelden ilk düzenleme siteyi tazeler.
 5. **Domain.** `vercel domains add <domain>` + DNS kaydı (Vercel'in verdiği A/CNAME); sonra `NEXT_PUBLIC_SITE_URL` ve Supabase
    `site_url`/`additional_redirect_urls` domaine çekilir (`supabase config push`), yeniden deploy.
 6. **Duman testi.** Giriş; panelden görsel yükleme (prod Storage); "şu an açık" (Europe/Istanbul); telefon/WhatsApp
    linkleri; `/sitemap.xml`, `/robots.txt`, OG görselleri; Sentry'ye test hatası düşüyor mu; `/api/cron/medya-temizle`
-   secret'sız 401, `Authorization: Bearer <CRON_SECRET>` ile 200.
+   secret'sız 401, `Authorization: Bearer <CRON_SECRET>` ile 200. Durum (07.09.2026): sayfalar, 404, `/admin` → giriş
+   yönlendirmesi, robots/sitemap ve cron doğrulandı; giriş, görsel yükleme, saat ve telefon/WhatsApp kontrolü panelden
+   ilk veri girilince yapılır. Sentry ve domain karar gereği satışa ertelendi.
 
 ## Klasörler
 
