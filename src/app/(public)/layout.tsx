@@ -8,7 +8,10 @@ export default async function PublicLayout({ children }: LayoutProps<'/'>) {
   const settings = await getSiteSettings()
   return (
     <>
-      <SiteHeader brandName={settings.brandName} />
+      <SiteHeader
+        brandName={settings.brandName}
+        contact={{ phone: settings.contactPhone, instagramUrl: settings.instagramUrl }}
+      />
       <main className="flex-1">{children}</main>
       <SiteFooter settings={settings} />
     </>

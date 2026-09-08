@@ -12,9 +12,16 @@ export interface NavItem {
   label: string
 }
 
+/** Site ayarlarından gelen genel iletişim; menünün altında Ara / Instagram olarak çıkar. */
+export interface NavContact {
+  phone: string | null
+  instagramUrl: string | null
+}
+
 interface MobileNavProps {
   items: NavItem[]
   brandName: string
+  contact: NavContact
 }
 
 const SHEET_ID = 'mobil-menu'
@@ -25,7 +32,7 @@ const SHEET_ID = 'mobil-menu'
 const loadSheet = () => import('./mobile-nav-sheet')
 const MobileNavSheet = dynamic(() => loadSheet().then((m) => m.MobileNavSheet), { ssr: false })
 
-export function MobileNav({ items, brandName }: MobileNavProps) {
+export function MobileNav({ items, brandName, contact }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   // İlk açılıştan sonra takılı kalır: kapanış animasyonu oynar, ikinci açılış anında olur.
   const [mounted, setMounted] = useState(false)
@@ -63,6 +70,7 @@ export function MobileNav({ items, brandName }: MobileNavProps) {
           onOpenChange={setOpen}
           items={items}
           brandName={brandName}
+          contact={contact}
           finalFocus={triggerRef}
         />
       ) : null}

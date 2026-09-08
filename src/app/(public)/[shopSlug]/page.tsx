@@ -27,6 +27,9 @@ import { ShopContactCard } from './shop-contact-card'
 export const revalidate = 3600
 export const dynamicParams = true
 
+/** 44 px'lik dokunma hedefi; eksi dikey boşluk metin satırının dışına taşan kısmı yutar. */
+const BREADCRUMB_LINK_CLASS = '-my-3 inline-flex min-h-11 items-center hover:text-foreground'
+
 export async function generateStaticParams() {
   const slugs = await getActiveShopSlugs()
   return slugs.map((shopSlug) => ({ shopSlug }))
@@ -89,7 +92,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
   })
 
   return (
-    <article className="pb-24 md:pb-0">
+    <article className="pb-28 md:pb-0">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
@@ -109,13 +112,13 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
             aria-label="Konum"
             className="mb-3 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground"
           >
-            <Link href={ROUTES.home} className="hover:text-foreground">
+            <Link href={ROUTES.home} className={BREADCRUMB_LINK_CLASS}>
               {tr.nav.home}
             </Link>
             {shop.location ? (
               <>
                 <span aria-hidden>/</span>
-                <Link href={ROUTES.location(shop.location.slug)} className="hover:text-foreground">
+                <Link href={ROUTES.location(shop.location.slug)} className={BREADCRUMB_LINK_CLASS}>
                   {shop.location.name}
                 </Link>
               </>
@@ -129,11 +132,30 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
           </div>
           <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{shop.name}</h1>
           <OpenStatusBadge week={week} exceptions={exceptions} detailed className="mt-2 text-sm" />
-          <ContactButtons contact={contact} whatsappMessage={whatsappMessage} className="mt-5" />
+          <ContactButtons
+            contact={contact}
+            whatsappMessage={whatsappMessage}
+            className="mt-5"
+            hasActionBar
+          />
         </header>
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_340px]">
-          <div className="space-y-12">
+        {/*
+          Telefonda "açık mı, nerede" fiyat listesinden önce gelir: saat ve iletişim kartları
+          DOM'da da önde. Geniş ekranda hücre yerleşimi açıkça verilir; sağ sütun yine yan panel.
+        */}
+        <div className="mt-8 grid gap-8 sm:mt-10 sm:gap-10 lg:grid-cols-[1fr_340px]">
+          <aside className="space-y-6 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:self-start">
+            <section aria-labelledby="saatler" className="rounded-xl border bg-card p-4">
+              <h2 id="saatler" className="mb-3 font-semibold">
+                {tr.common.hours}
+              </h2>
+              <HoursTable week={week} exceptions={exceptions} note={hoursNote} />
+            </section>
+            <ShopContactCard contact={contact} />
+          </aside>
+
+          <div className="space-y-12 lg:col-start-1 lg:row-start-1">
             {shop.description ? (
               <section aria-labelledby="hakkinda">
                 <h2 id="hakkinda" className="mb-3 text-xl font-semibold">
@@ -179,16 +201,6 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
               </section>
             ) : null}
           </div>
-
-          <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-            <section aria-labelledby="saatler" className="rounded-xl border bg-card p-4">
-              <h2 id="saatler" className="mb-3 font-semibold">
-                {tr.common.hours}
-              </h2>
-              <HoursTable week={week} exceptions={exceptions} note={hoursNote} />
-            </section>
-            <ShopContactCard contact={contact} />
-          </aside>
         </div>
       </div>
 

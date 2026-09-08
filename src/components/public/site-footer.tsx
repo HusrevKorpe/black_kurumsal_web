@@ -10,6 +10,13 @@ interface SiteFooterProps {
   settings: SiteSettings
 }
 
+/**
+ * Telefonda 44 px'lik dokunma hedefi; geniş ekranda eski sıkı satır aralığı. Listenin eksi dikey
+ * boşluğu, satır yüksekliğinin fazlasını yutar ki başlıkla ilk bağlantının arası değişmesin.
+ */
+const LIST_CLASS = '-my-3 text-sm text-muted-foreground sm:my-0 sm:space-y-2'
+const LINK_CLASS = 'inline-flex min-h-11 items-center gap-2 hover:text-foreground sm:min-h-0'
+
 export function SiteFooter({ settings }: SiteFooterProps) {
   const phoneHref = settings.contactPhone ? telHref(settings.contactPhone) : null
 
@@ -27,19 +34,19 @@ export function SiteFooter({ settings }: SiteFooterProps) {
 
         <nav aria-label={tr.footer.quickLinks}>
           <p className="mb-3 text-sm font-semibold">{tr.footer.quickLinks}</p>
-          <ul className="space-y-2 text-sm text-muted-foreground">
+          <ul className={LIST_CLASS}>
             <li>
-              <Link href={ROUTES.homeSection('dukkanlar')} className="hover:text-foreground">
+              <Link href={ROUTES.homeSection('dukkanlar')} className={LINK_CLASS}>
                 {tr.nav.shops}
               </Link>
             </li>
             <li>
-              <Link href={ROUTES.homeSection('mekanlar')} className="hover:text-foreground">
+              <Link href={ROUTES.homeSection('mekanlar')} className={LINK_CLASS}>
                 {tr.nav.locations}
               </Link>
             </li>
             <li>
-              <Link href={ROUTES.campaigns} className="hover:text-foreground">
+              <Link href={ROUTES.campaigns} className={LINK_CLASS}>
                 {tr.nav.campaigns}
               </Link>
             </li>
@@ -48,14 +55,10 @@ export function SiteFooter({ settings }: SiteFooterProps) {
 
         <div>
           <p className="mb-3 text-sm font-semibold">{tr.footer.contact}</p>
-          <ul className="space-y-2 text-sm text-muted-foreground">
+          <ul className={LIST_CLASS}>
             {phoneHref && settings.contactPhone ? (
               <li>
-                <a
-                  href={phoneHref}
-                  data-track="call"
-                  className="inline-flex items-center gap-2 hover:text-foreground"
-                >
+                <a href={phoneHref} data-track="call" className={LINK_CLASS}>
                   <PhoneIcon className="size-4" /> {formatTrPhone(settings.contactPhone)}
                 </a>
               </li>
@@ -67,7 +70,7 @@ export function SiteFooter({ settings }: SiteFooterProps) {
                   data-track="instagram"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 hover:text-foreground"
+                  className={LINK_CLASS}
                 >
                   <InstagramIcon className="size-4" /> {tr.common.instagram}
                 </a>

@@ -19,6 +19,9 @@ import { mediaPublicUrl } from '@/lib/media/url'
 export const revalidate = 3600
 export const dynamicParams = true
 
+/** 44 px'lik dokunma hedefi; eksi dikey boşluk metin satırının dışına taşan kısmı yutar. */
+const BREADCRUMB_LINK_CLASS = '-my-3 inline-flex min-h-11 items-center hover:text-foreground'
+
 export async function generateStaticParams() {
   const slugs = await getActiveLocationSlugs()
   return slugs.map((slug) => ({ slug }))
@@ -73,8 +76,8 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
 
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <header className={isVenue ? 'relative -mt-16 sm:-mt-24' : 'pt-10'}>
-          <nav aria-label="Konum" className="mb-3 text-sm text-muted-foreground">
-            <Link href={ROUTES.home} className="hover:text-foreground">
+          <nav aria-label="Konum" className="mb-3 flex text-sm text-muted-foreground">
+            <Link href={ROUTES.home} className={BREADCRUMB_LINK_CLASS}>
               {tr.nav.home}
             </Link>
           </nav>
@@ -106,7 +109,7 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
             {location.shops.length === 0 ? (
               <p className="text-sm text-muted-foreground">{tr.location.noShops}</p>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                 {location.shops.map((shop) => (
                   <ShopCard key={shop.id} shop={shop} hideLocation />
                 ))}

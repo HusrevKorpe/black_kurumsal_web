@@ -48,6 +48,7 @@ export const admin = {
       mapUrl: 'Harita bağlantısı',
       phone: 'Telefon',
       whatsapp: 'WhatsApp numarası',
+      whatsappHint: 'Boş bırakılırsa mesajlar mekanın numarasına gider.',
       instagramUrl: 'Instagram bağlantısı',
       features: 'Öne çıkan özellikler',
       featuresHint: 'Kısa etiketler: PS5, Ücretsiz WiFi, Otopark… Enter ile ekleyin.',

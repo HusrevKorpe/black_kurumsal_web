@@ -235,7 +235,13 @@ export function ShopForm({ mode, shop, locations, isOwner }: ShopFormProps) {
             placeholder="05xx xxx xx xx"
           />
         </Field>
-        <Field label={f.whatsapp} htmlFor="whatsapp" error={err('whatsapp')} optional>
+        <Field
+          label={f.whatsapp}
+          htmlFor="whatsapp"
+          error={err('whatsapp')}
+          hint={shop?.location?.kind === 'VENUE' ? f.whatsappHint : undefined}
+          optional
+        >
           <Input
             id="whatsapp"
             type="tel"

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { lazy, Suspense, type ComponentType } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { MobileNav, type NavItem } from './mobile-nav'
+import { MobileNav, type NavContact, type NavItem } from './mobile-nav'
 
 const idle = vi.hoisted(() => ({
   schedule: vi.fn<(cb: () => void) => () => void>(),
@@ -53,6 +53,7 @@ const items: NavItem[] = [
   { href: '/#dukkanlar', label: 'Dükkanlar' },
   { href: '/kampanyalar', label: 'Kampanyalar' },
 ]
+const contact: NavContact = { phone: null, instagramUrl: null }
 
 afterEach(() => {
   vi.clearAllMocks()
@@ -60,7 +61,7 @@ afterEach(() => {
 
 describe('MobileNav', () => {
   it('düğme sunucuda hazır gelir; çekmece açılana kadar render edilmez', () => {
-    render(<MobileNav items={items} brandName="Black" />)
+    render(<MobileNav items={items} brandName="Black" contact={contact} />)
     const trigger = screen.getByRole('button', { name: 'Menü' })
     expect(trigger).toHaveAttribute('aria-haspopup', 'dialog')
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
@@ -69,14 +70,14 @@ describe('MobileNav', () => {
   })
 
   it('çekmece kodu sayfa boşa çıkınca önceden istenir; sökülünce plan iptal edilir', () => {
-    const { unmount } = render(<MobileNav items={items} brandName="Black" />)
+    const { unmount } = render(<MobileNav items={items} brandName="Black" contact={contact} />)
     expect(idle.schedule).toHaveBeenCalledTimes(1)
     unmount()
     expect(idle.cancel).toHaveBeenCalledTimes(1)
   })
 
   it('düğmeye basınca çekmece yüklenir ve açık gelir; kapanınca takılı kalır', async () => {
-    render(<MobileNav items={items} brandName="Black" />)
+    render(<MobileNav items={items} brandName="Black" contact={contact} />)
     const trigger = screen.getByRole('button', { name: 'Menü' })
     fireEvent.click(trigger)
 

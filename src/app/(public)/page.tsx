@@ -78,7 +78,7 @@ export default async function HomePage() {
                   <h3 className="text-xl font-semibold">{group.label}</h3>
                   <p className="text-sm text-muted-foreground">{group.description}</p>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                   {group.shops.map((shop) => (
                     <ShopCard key={shop.id} shop={shop} />
                   ))}
