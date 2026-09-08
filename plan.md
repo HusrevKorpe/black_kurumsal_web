@@ -195,6 +195,7 @@ src/
                           lazy-init.ts (erken hata tamponu + load sonrası idle'da başlatma)
     browser/idle.ts       whenIdleAfterLoad: LCP'yi geciktirmemesi gereken ikincil işler için
     analytics/track.ts    tarayıcı sayacı (~1 KB): tek delegasyonlu tıklama dinleyicisi + sendBeacon
+    analytics/repeat.ts   tekrar penceresi: süre + olay imzası (tarayıcı ve sunucu aynı kuralı kullanır)
     utils/                slugify, time, format
   generated/prisma/       üretilen istemci (git'te yok)
 prisma/schema/*.prisma, prisma/migrations, prisma/seed.ts
@@ -271,6 +272,7 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
      günler boyu takip edilemez. Tuz `ANALYTICS_SALT`, tanımsızsa `SUPABASE_SECRET_KEY`.
    - **Sayı gerçek olsun diye:** robot imzaları (Googlebot, WhatsApp önizleme, headless) ve panelde oturumu
      açık personel (Supabase çerezi) sayılmaz; ziyaretçi başına dakikada 120 olay sınırı vardır.
+     Aynı ziyaretçinin aynı olayı 30 saniyede bir kez sayılır (08.09.2026, aşağıdaki not).
    - **Saklama:** 400 gün (geçen yılın aynı ayı karşılaştırılabilsin), haftalık cron
      (`/api/cron/istatistik-temizle`) eskiyeni siler. Ücretsiz katmanda güvenli.
    - Menüde İstatistik Kullanıcılar'dan sonra durur: telefondaki alt çubuğa ilk 5 madde sığdığından
@@ -285,6 +287,20 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
   Bu ölçekte (günde birkaç yüz olay) `groupBy` sorguları anında dönüyor, iki yazma yolu bakım yükü olurdu.
   Hacim büyürse (günde 10 binler) sıradaki adım: gün + tür + dükkan kırılımında `AnalyticsDaily` özet tablosu,
   ham olaylar 90 günde silinir.
+- **Tekrar penceresi 30 saniye (08.09.2026):** yavaş bağlantıda ziyaretçi WhatsApp düğmesine arka arkaya basar
+  ya da sayfayı üst üste yeniler; bu tıklamalar tek niyettir, sayaç bundan şişmesin. Aynı ziyaretçinin aynı
+  olayı (tür + sayfa + hedef + kampanya) 30 saniyelik pencerede bir kez yazılır. Pencere ilk olaydan işler,
+  tekrarlar süreyi uzatmaz: kural patrona tek cümleyle anlatılabiliyor ve panelde de yazıyor.
+  - **İki katman:** tarayıcı (`lib/analytics/track.ts`) tekrarı hiç göndermez — yavaş bağlantıda gereksiz istek
+    de birikmez; sunucu (`features/analytics/dedupe.ts`) sayfa yenilendiğinde, ikinci sekmede ve elle atılan
+    istekte eler. Ortak kural `lib/analytics/repeat.ts` içinde tek yerde durur.
+  - **Bellekte tutulur**, `rate-limit.ts` gibi: sunucu örneği başına çalışır, yani kesin değil. Arka arkaya
+    gelen tıklamalar pratikte aynı örneğe düştüğü için amacına ulaşır; veritabanına ek yazma/okuma getirmez,
+    ücretsiz katmanda bedava. Kesinlik gerekirse sıradaki adım (visitorHash + imza + dakika) tekil indeksidir.
+  - **Bilinen etkisi:** galeri fotoğraflarının hepsi aynı imzayı taşır (`data-track="gallery"`), yani bir
+    ziyaretçinin peş peşe açtığı fotoğraflar tek "galeri" olayı sayılır. Patronun sorusu "kaç kişi
+    fotoğraflara baktı" olduğu için bu istenen davranıştır; fotoğraf başına sayım istenirse imzaya öğe
+    kimliği eklenmelidir.
 - **Olayın hangi dükkana yazılacağını sunucu belirler:** tarayıcı yalnızca bulunduğu yolu (`/black-tost`) ve varsa
   tıklanan bağlantının yolunu gönderir; slug → kimlik eşlemesi sunucuda 5 dakikalık bellek önbelleğiyle çözülür.
   Böylece tarayıcıya kimlik sızmaz, her olayda ek sorgu olmaz. Dış bağlantıda (wa.me, tel:) hedef gönderilmez;

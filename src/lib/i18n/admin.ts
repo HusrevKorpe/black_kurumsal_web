@@ -311,6 +311,8 @@ export const admin = {
       call: 'Ara',
     },
     visitorsNote: 'Gün bazında sayılır: aynı kişi iki ayrı gün gelirse iki kişi görünür.',
+    repeatNote: (seconds: number) =>
+      `Aynı ziyaretçinin aynı düğmeye ${seconds} saniye içindeki tekrar tıklamaları tek sayılır; yavaş bağlantıda arka arkaya basmak ya da sayfayı yenilemek sayıyı şişirmez.`,
     daily: { title: 'Günlere göre', views: 'Görüntülenme', interactions: 'Tıklama' },
     shops: {
       title: 'Dükkan dükkan',

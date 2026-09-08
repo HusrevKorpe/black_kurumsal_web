@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { resetDedupe } from '@/features/analytics/dedupe'
 import { pruneAnalyticsEvents } from '@/features/analytics/prune'
 import { getAnalyticsOverview } from '@/features/analytics/queries'
 import { resetRateLimit } from '@/features/analytics/rate-limit'
 import { buildRange } from '@/features/analytics/range'
 import { recordEvent, resetSlugCache } from '@/features/analytics/service'
+import { REPEAT_WINDOW_MS } from '@/lib/analytics/repeat'
 import { db } from '@/lib/db'
 import { createLocation, createMedia, createOwner, createShop, resetDatabase } from './helpers'
 
@@ -22,6 +24,7 @@ beforeEach(async () => {
   await resetDatabase()
   resetSlugCache()
   resetRateLimit()
+  resetDedupe()
 })
 
 describe('olay kaydı', () => {
@@ -116,6 +119,40 @@ describe('olay kaydı', () => {
     expect(events).toHaveLength(2)
     expect(events[0]!.campaignId).toBe(campaign.id)
     expect(events[1]!.campaignId).toBeNull()
+  })
+
+  it('sabırsız ziyaretçinin tekrar tıklamasını bir kez sayar', async () => {
+    const now = new Date('2026-09-07T12:00:00.000Z')
+    const later = new Date(now.getTime() + REPEAT_WINDOW_MS)
+
+    const first = await recordEvent({ type: 'whatsapp', path: '/' }, headers(), {
+      ...OPTIONS,
+      now,
+    })
+    const again = await recordEvent({ type: 'whatsapp', path: '/' }, headers(), {
+      ...OPTIONS,
+      now: new Date(now.getTime() + 5_000),
+    })
+    // Pencere dolduktan sonraki tıklama yeniden sayılır; başka düğme hiç beklemez.
+    const afterWindow = await recordEvent({ type: 'whatsapp', path: '/' }, headers(), {
+      ...OPTIONS,
+      now: later,
+    })
+    const otherButton = await recordEvent({ type: 'call', path: '/' }, headers(), {
+      ...OPTIONS,
+      now,
+    })
+    // Başka ziyaretçinin aynı anda aynı düğmeye basması da sayılır.
+    const otherVisitor = await recordEvent(
+      { type: 'whatsapp', path: '/' },
+      headers({ 'x-forwarded-for': '9.9.9.9' }),
+      { ...OPTIONS, now },
+    )
+
+    expect([first.recorded, again.recorded, afterWindow.recorded]).toEqual([true, false, true])
+    expect(again.reason).toBe('repeat')
+    expect([otherButton.recorded, otherVisitor.recorded]).toEqual([true, true])
+    expect(await db.analyticsEvent.count()).toBe(4)
   })
 
   it('robotu, personeli ve bilinmeyen olayı saymaz', async () => {

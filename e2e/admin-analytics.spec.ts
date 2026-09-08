@@ -14,6 +14,22 @@ test.describe('İstatistik', () => {
     await beacon
   })
 
+  test('arka arkaya basılan aynı düğme bir kez sayılır', async ({ page }) => {
+    await page.route('https://wa.me/**', (route) => route.abort())
+    const beacons: string[] = []
+    page.on('request', (request) => {
+      if (request.url().includes('/api/olay')) beacons.push(request.postData() ?? '')
+    })
+    await page.goto('/black-playstation-carsi')
+
+    const button = page.getByRole('link', { name: 'WhatsApp' }).first()
+    for (let i = 0; i < 3; i += 1) await button.click()
+    // İlk olay yolda; sonrakiler gönderilmediği için beklenecek istek de yok, kısa soluk yeter.
+    await page.waitForTimeout(500)
+
+    expect(beacons.filter((body) => body.includes('whatsapp'))).toHaveLength(1)
+  })
+
   test('patron istatistik sayfasını görür, aralığı ve sıralamayı değiştirir', async ({ page }) => {
     await login(page, OWNER)
     await page.goto('/admin/istatistik')

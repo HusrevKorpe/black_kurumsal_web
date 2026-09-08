@@ -1,4 +1,5 @@
 import { whenIdleAfterLoad } from '@/lib/browser/idle'
+import { eventSignature, REPEAT_WINDOW_MS } from './repeat'
 
 const ENDPOINT = '/api/olay'
 /** Panel ve teknik yollar sayılmaz; sunucu da ayrıca eler. */
@@ -12,12 +13,36 @@ interface TrackPayload {
   referrer?: string
 }
 
+/** Gönderilen olayın imzası → gönderim anı. Tekrarlar bu listeye bakılarak elenir. */
+const lastSent = new Map<string, number>()
+
+/**
+ * Aynı olay pencere içinde tekrar mı ediliyor? Sabırsız ziyaretçinin arka arkaya bastığı
+ * düğme için istek hiç açılmaz — yavaş bağlantıda gereksiz istek de birikmez. Sayfa
+ * yenilenince bu bellek sıfırlanır; asıl güvence sunucudaki eştir (features/analytics/dedupe.ts).
+ */
+function isRepeat(payload: TrackPayload): boolean {
+  const now = Date.now()
+  const key = eventSignature(payload)
+  const previous = lastSent.get(key)
+  if (previous !== undefined && now - previous < REPEAT_WINDOW_MS) return true
+  // Uzun oturumda liste büyümesin: süresi dolmuş kayıtlar atılır.
+  if (lastSent.size > 50) {
+    for (const [old, at] of lastSent) {
+      if (now - at >= REPEAT_WINDOW_MS) lastSent.delete(old)
+    }
+  }
+  lastSent.set(key, now)
+  return false
+}
+
 /**
  * Olayı arka planda bırakır. `sendBeacon` sayfa kapanırken/başka sayfaya geçerken bile iletir
  * ve ana iş parçacığını bekletmez; yoksa `keepalive` ile fetch'e düşülür. Hata yutulur:
  * sayaç hiçbir koşulda sayfayı bozmaz.
  */
 function send(payload: TrackPayload): void {
+  if (isRepeat(payload)) return
   try {
     const body = JSON.stringify(payload)
     if (typeof navigator.sendBeacon === 'function') {

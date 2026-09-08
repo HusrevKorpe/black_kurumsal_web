@@ -1,7 +1,9 @@
 import 'server-only'
 import { zonedNow } from '@/features/hours/time'
+import { eventSignature } from '@/lib/analytics/repeat'
 import { db } from '@/lib/db'
 import { serverEnv } from '@/lib/env.server'
+import { isRepeatEvent } from './dedupe'
 import { checkRateLimit } from './rate-limit'
 import { trackEventSchema, TRACK_NAMES } from './schema'
 import {
@@ -20,7 +22,7 @@ const SLUG_CACHE_MS = 5 * 60 * 1000
 export interface RecordResult {
   recorded: boolean
   /** Yazılmadıysa nedeni; uçtan 204 döner, tarayıcı hiçbir şey öğrenmez. */
-  reason?: 'bot' | 'staff' | 'rate' | 'invalid'
+  reason?: 'bot' | 'staff' | 'rate' | 'repeat' | 'invalid'
 }
 
 interface SlugMaps {
@@ -77,8 +79,9 @@ export interface RecordOptions {
 }
 
 /**
- * Tarayıcıdan gelen tek bir olayı yazar. Robotlar, panel personeli ve taşkın istekler elenir;
- * geri kalan her şey tek INSERT'e iner. Hiçbir hata tarayıcıya yansımaz (uç her zaman 204 döner).
+ * Tarayıcıdan gelen tek bir olayı yazar. Robotlar, panel personeli, taşkın istekler ve aynı
+ * ziyaretçinin kısa süredeki tekrarları elenir; geri kalan her şey tek INSERT'e iner.
+ * Hiçbir hata tarayıcıya yansımaz (uç her zaman 204 döner).
  */
 export async function recordEvent(
   body: unknown,
@@ -99,6 +102,10 @@ export async function recordEvent(
   const dateKey = zonedNow(now, TIME_ZONE).dateKey
   const visitorHash = hashVisitor(salt, dateKey, clientIpFromHeaders(headers), userAgent)
   if (!checkRateLimit(visitorHash, now.getTime())) return { recorded: false, reason: 'rate' }
+  // Aynı düğmeye arka arkaya basmak tek tıklama sayılır. Tarayıcı da eler; burası sayfa
+  // yenilendiğinde, ikinci sekmede ve sayacı elle çağıran istekte devreye giren güvence.
+  const repeatKey = `${visitorHash}|${eventSignature({ type, path, target, campaignId })}`
+  if (isRepeatEvent(repeatKey, now.getTime())) return { recorded: false, reason: 'repeat' }
 
   const { shopId, locationId } = await resolveTarget(target ?? path, now.getTime())
   const campaign =

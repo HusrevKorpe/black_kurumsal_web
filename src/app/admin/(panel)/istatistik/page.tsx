@@ -9,6 +9,7 @@ import { getAnalyticsOverview, type NamedCount } from '@/features/analytics/quer
 import { buildRange, parseRange } from '@/features/analytics/range'
 import { parseShopSort, sortShopRows } from '@/features/analytics/view'
 import type { AnalyticsEventType } from '@/generated/prisma/enums'
+import { REPEAT_WINDOW_SECONDS } from '@/lib/analytics/repeat'
 import { requireOwner } from '@/lib/auth/session'
 import { tr } from '@/lib/i18n/tr'
 
@@ -114,7 +115,10 @@ export default async function AnalyticsPage({ searchParams }: PageProps<'/admin/
         </>
       )}
 
-      <p className="text-xs leading-relaxed text-muted-foreground">{a.privacy}</p>
+      <div className="space-y-1 text-xs leading-relaxed text-muted-foreground">
+        <p>{a.privacy}</p>
+        <p>{a.repeatNote(REPEAT_WINDOW_SECONDS)}</p>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { REPEAT_WINDOW_MS } from './repeat'
 import { initAnalytics, trackNavigation } from './track'
 
 const beacon = vi.fn((_url: string, _body?: BodyInit | null) => true)
@@ -18,7 +19,14 @@ function payloads(): Record<string, string>[] {
   )
 }
 
+/** Sayaç son gönderimleri modül belleğinde tutar (tekrar penceresi). Her test saatin
+ * ilerlemiş hâliyle başlar ki bir testteki tıklama sonrakini "tekrar" saymasın. */
+let clock = Date.UTC(2026, 8, 8, 12)
+
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  clock += 60 * 60_000
+  vi.setSystemTime(clock)
   // jsdom Blob'u okunur değil; gönderilen gövdeyi doğrudan iliştiriyoruz.
   vi.stubGlobal(
     'Blob',
@@ -38,6 +46,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.unstubAllGlobals()
 })
 
@@ -94,5 +103,54 @@ describe('gezinme sayacı', () => {
   it('panel yolunu göndermez', () => {
     trackNavigation('/admin')
     expect(beacon).not.toHaveBeenCalled()
+  })
+})
+
+describe('tekrar penceresi', () => {
+  it('aynı düğmeye arka arkaya basmak tek sayılır', () => {
+    document.body.innerHTML = '<a href="https://wa.me/905321234567" data-track="whatsapp">Yaz</a>'
+    const link = document.querySelector('a')!
+
+    click(link)
+    click(link)
+    click(link)
+
+    expect(beacon).toHaveBeenCalledTimes(1)
+  })
+
+  it('pencere dolunca yeniden sayılır', () => {
+    document.body.innerHTML = '<a href="https://wa.me/905321234567" data-track="whatsapp">Yaz</a>'
+    const link = document.querySelector('a')!
+
+    click(link)
+    vi.setSystemTime(clock + REPEAT_WINDOW_MS)
+    click(link)
+
+    expect(beacon).toHaveBeenCalledTimes(2)
+  })
+
+  it('aynı sayfadaki başka düğme ve başka dükkanın kartı ayrı sayılır', () => {
+    document.body.innerHTML =
+      '<a href="tel:+905321234567" data-track="call">Ara</a>' +
+      '<a href="https://wa.me/905321234567" data-track="whatsapp">Yaz</a>' +
+      '<a href="/kalender-ps" data-track="shop">Bir</a>' +
+      '<a href="/black-tost-2" data-track="shop">İki</a>'
+
+    for (const link of document.querySelectorAll('a')) click(link)
+
+    expect(payloads().map((payload) => payload.type ?? '')).toEqual([
+      'call',
+      'whatsapp',
+      'shop',
+      'shop',
+    ])
+    expect(payloads().at(-1)).toMatchObject({ target: '/black-tost-2' })
+  })
+
+  it('aynı sayfa üst üste görüntülenmiş sayılmaz', () => {
+    trackNavigation('/mekan/black-garden')
+    trackNavigation('/mekan/black-garden?utm=x')
+
+    expect(beacon).toHaveBeenCalledTimes(1)
   })
 })
