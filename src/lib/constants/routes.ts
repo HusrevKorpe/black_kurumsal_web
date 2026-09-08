@@ -41,6 +41,5 @@ export const ROUTES = {
     settings: '/admin/ayarlar',
     analytics: '/admin/istatistik',
     audit: '/admin/gunluk',
-    trash: '/admin/cop',
   },
 } as const

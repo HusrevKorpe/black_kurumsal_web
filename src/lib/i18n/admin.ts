@@ -21,33 +21,12 @@ export const admin = {
     settings: 'Ayarlar',
     analytics: 'İstatistik',
     audit: 'İşlem Günlüğü',
-    trash: 'Çöp Kutusu',
     viewSite: 'Siteyi Gör',
     signOut: 'Çıkış',
   },
   roles: {
     OWNER: 'Patron',
     MANAGER: 'Dükkan Sorumlusu',
-  },
-  trash: {
-    title: 'Çöp Kutusu',
-    description:
-      'Silinen dükkan ve mekanlar burada durur. Geri alınabilir; kalıcı silme yalnızca buradan yapılır ve fotoğrafları da götürür.',
-    shops: 'Dükkanlar',
-    locations: 'Mekanlar',
-    empty: 'Çöp kutusu boş.',
-    badge: 'Çöpte',
-    deletedAt: (date: string) => `${date} tarihinde silindi`,
-    contents: (gallery: number, extra: number) => `${gallery} görsel · ${extra} kayıt`,
-    restore: 'Geri al',
-    restored: 'Geri alındı.',
-    purge: 'Kalıcı sil',
-    purged: 'Kalıcı olarak silindi.',
-    purgeTitle: 'Kalıcı olarak sil',
-    purgeText: (name: string) =>
-      `"${name}" ve tüm fotoğrafları depodan kalıcı olarak silinecek. Bu işlem geri alınamaz.`,
-    locationHasShops:
-      'Bu mekana bağlı dükkanlar var (çöp kutusundakiler dahil). Önce onları kalıcı silin ya da başka mekana taşıyın.',
   },
   shops: {
     title: 'Dükkanlar',
@@ -79,12 +58,11 @@ export const admin = {
     },
     saved: 'Dükkan kaydedildi.',
     created: 'Dükkan oluşturuldu.',
-    deleted: 'Dükkan çöp kutusuna alındı.',
+    deleted: 'Dükkan silindi.',
     deleteTitle: 'Dükkanı sil',
     deleteText: (name: string) =>
-      `"${name}" çöp kutusuna alınacak: siteden ve panelden kalkar, hiçbir şey silinmez. Çöp kutusundan geri alabilirsiniz.`,
-    slugInTrash:
-      'Bu web adresi çöp kutusundaki bir dükkanda duruyor. O dükkanı geri alın ya da kalıcı silin.',
+      `"${name}" siteden ve panelden kalkacak. Bu işlemi panelden geri alamazsınız.`,
+    slugHeld: 'Bu web adresi silinmiş bir dükkanda duruyor. Bu dükkana başka bir adres verin.',
     viewOnSite: 'Sitede gör',
     counts: (gallery: number, prices: number) => `${gallery} görsel · ${prices} fiyat kategorisi`,
   },
@@ -196,12 +174,11 @@ export const admin = {
     shopCount: (n: number) => `${n} dükkan`,
     saved: 'Mekan kaydedildi.',
     created: 'Mekan oluşturuldu.',
-    deleted: 'Mekan çöp kutusuna alındı.',
+    deleted: 'Mekan silindi.',
     deleteTitle: 'Mekanı sil',
     deleteText: (name: string) =>
-      `"${name}" çöp kutusuna alınacak: siteden ve panelden kalkar, hiçbir şey silinmez. Çöp kutusundan geri alabilirsiniz.`,
-    slugInTrash:
-      'Bu web adresi çöp kutusundaki bir mekanda duruyor. O mekanı geri alın ya da kalıcı silin.',
+      `"${name}" siteden ve panelden kalkacak. Bu işlemi panelden geri alamazsınız.`,
+    slugHeld: 'Bu web adresi silinmiş bir mekanda duruyor. Bu mekana başka bir adres verin.',
     hasShops: 'Bu mekanda dükkanlar var. Önce dükkanları başka mekana taşıyın.',
     viewOnSite: 'Sitede gör',
   },
@@ -327,6 +304,7 @@ export const admin = {
       card: 'Listeden tıklama',
       gallery: 'Galeri',
       interest: 'Toplam ilgi',
+      deleted: 'Silindi',
       empty: 'Bu aralıkta dükkanlara ait ölçüm yok.',
     },
     locations: { title: 'Mekanlar', name: 'Mekan', count: 'Olay' },

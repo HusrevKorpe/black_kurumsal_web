@@ -131,8 +131,8 @@ describe('setShopCover', () => {
   })
 })
 
-describe('deleteShop (çöp kutusuna alır)', () => {
-  it('dükkanı çöp kutusuna alır; içerik ve dosyalar yerinde kalır', async () => {
+describe('deleteShop', () => {
+  it('dükkanı siler; kayıt işaretlenir, içerik ve dosyalar yerinde kalır', async () => {
     const shop = await makeShop()
     const owner = await createOwner()
     const media = await createMedia(`shop/${shop.id}/g1.webp`)
@@ -157,12 +157,12 @@ describe('deleteShop (çöp kutusuna alır)', () => {
     await expect(deleteShop(manager, shop.id)).rejects.toBeInstanceOf(AuthorizationError)
   })
 
-  it('çöp kutusundaki slug yeni dükkanda kullanılamaz, yol gösteren hata döner', async () => {
+  it("silinmiş dükkanın slug'ı yeni dükkanda kullanılamaz, nedenini söyleyen hata döner", async () => {
     const owner = await createOwner()
     const shop = await makeShop({ slug: 'tavuk' })
     await deleteShop(owner, shop.id)
     const result = await createShop(owner, validShopInput('tavuk'))
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error).toContain('çöp kutusundaki')
+    if (!result.ok) expect(result.error).toContain('silinmiş bir dükkanda')
   })
 })

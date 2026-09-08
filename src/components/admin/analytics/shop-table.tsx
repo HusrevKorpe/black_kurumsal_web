@@ -90,9 +90,9 @@ export function ShopTable({ rows, sort, days }: ShopTableProps) {
                     <Link href={ROUTES.admin.shop(row.id)} className="hover:underline">
                       {row.name}
                     </Link>
-                    {row.isTrashed ? (
+                    {row.isDeleted ? (
                       <Badge variant="outline" className="ml-2">
-                        {tr.admin.trash.badge}
+                        {a.shops.deleted}
                       </Badge>
                     ) : !row.isActive ? (
                       <Badge variant="outline" className="ml-2">

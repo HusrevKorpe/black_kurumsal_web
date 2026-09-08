@@ -13,10 +13,10 @@ import {
 } from './schema'
 
 /**
- * Çöp kutusundaki dükkan slug'ını korur (geri alınınca adresi değişmesin). Bu yüzden çakışma
- * P2002'nin genel "zaten kullanılıyor" mesajı yerine nereye bakılacağını söyleyen mesajla döner.
+ * Silinen dükkan kaydı veritabanında kaldığı için slug'ı da tutulu kalır. Çakışma P2002'nin
+ * genel "zaten kullanılıyor" mesajı yerine nedenini söyleyen mesajla döner.
  */
-async function slugHeldInTrash(slug: string): Promise<boolean> {
+async function slugHeldByDeleted(slug: string): Promise<boolean> {
   const held = await db.shop.count({ where: { slug, deletedAt: { not: null } } })
   return held > 0
 }
@@ -25,7 +25,7 @@ export async function createShop(staff: StaffContext, input: unknown): Promise<A
   assertOwner(staff)
   const parsed = shopFormSchema.safeParse(input)
   if (!parsed.success) return fromZodError(parsed.error)
-  if (await slugHeldInTrash(parsed.data.slug)) return fail(tr.admin.shops.slugInTrash)
+  if (await slugHeldByDeleted(parsed.data.slug)) return fail(tr.admin.shops.slugHeld)
 
   const shop = await db.$transaction(async (tx) => {
     const created = await tx.shop.create({ data: parsed.data })
@@ -56,7 +56,7 @@ export async function updateShop(
   }
   const parsed = shopFormSchema.safeParse(input)
   if (!parsed.success) return fromZodError(parsed.error)
-  if (await slugHeldInTrash(parsed.data.slug)) return fail(tr.admin.shops.slugInTrash)
+  if (await slugHeldByDeleted(parsed.data.slug)) return fail(tr.admin.shops.slugHeld)
   return persistShopUpdate(staff, shopId, parsed.data)
 }
 
@@ -109,8 +109,8 @@ export async function setShopCover(
 }
 
 /**
- * Dükkanı çöp kutusuna alır: siteden ve panelden düşer, hiçbir şey silinmez. Geri alınabilir;
- * kalıcı silme çöp kutusundan yapılır (`features/trash`). Yalnızca patron.
+ * Dükkanı siler: siteden ve panelden düşer. Kayıt ve dosyaları veritabanında `deletedAt`
+ * işaretiyle durur, ama panelde geri getirecek bir ekran yoktur. Yalnızca patron.
  */
 export async function deleteShop(staff: StaffContext, shopId: string): Promise<ActionResult<null>> {
   assertOwner(staff)
@@ -125,7 +125,7 @@ export async function deleteShop(staff: StaffContext, shopId: string): Promise<A
       action: 'shop.delete',
       entityType: 'Shop',
       entityId: shopId,
-      summary: `${shop.name} dükkanı çöp kutusuna alındı`,
+      summary: `${shop.name} dükkanı silindi`,
     })
   })
   return ok(null)

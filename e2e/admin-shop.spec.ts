@@ -117,29 +117,29 @@ test.describe('Dükkan yönetimi', () => {
     await expect(page.getByText('Özel gün kaldırıldı.')).toBeVisible()
   })
 
-  test('dükkan çöp kutusuna alınır, siteden düşer, geri alınır', async ({ page }) => {
+  test('dükkan silinir: panelden ve siteden düşer', async ({ page }) => {
     await login(page, OWNER)
-    await page.goto('/admin/dukkanlar')
-    await page.getByRole('link', { name: /Black Sushi/ }).click()
-    const slug = await page.getByLabel('Web adresi (slug)').inputValue()
 
+    // Silme panelden geri alınamıyor; tohum verisine dokunmamak için tek kullanımlık dükkan açılır.
+    const slug = `e2e-silinecek-${Date.now()}`
+    await page.goto('/admin/dukkanlar/yeni')
+    await page.getByLabel('Dükkan adı').fill('E2E Silinecek')
+    await page.getByLabel('Web adresi (slug)').fill(slug)
+    await page.getByRole('button', { name: 'Kaydet' }).click()
+    await expect(page.getByText('Dükkan oluşturuldu.')).toBeVisible()
+
+    await page.goto(`/${slug}`)
+    await expect(page.getByRole('heading', { level: 1, name: 'E2E Silinecek' })).toBeVisible()
+
+    await page.goto('/admin/dukkanlar')
+    await page.getByRole('link', { name: /E2E Silinecek/ }).click()
     await page.getByRole('button', { name: 'Sil' }).click()
     await page.getByRole('dialog').getByRole('button', { name: 'Sil' }).click()
-    await expect(page.getByText('Dükkan çöp kutusuna alındı.')).toBeVisible()
+    await expect(page.getByText('Dükkan silindi.')).toBeVisible()
     await expect(page).toHaveURL(/\/admin\/dukkanlar$/)
-    await expect(page.getByRole('link', { name: /Black Sushi/ })).toHaveCount(0)
+    await expect(page.getByRole('link', { name: /E2E Silinecek/ })).toHaveCount(0)
 
-    // Sitede 404, panelde çöp kutusunda.
     await page.goto(`/${slug}`)
     await expect(page.getByText('Sayfa bulunamadı')).toBeVisible()
-
-    await page.goto('/admin/cop')
-    await expect(page.getByText('Black Sushi')).toBeVisible()
-    await page.getByRole('button', { name: 'Geri al' }).first().click()
-    await expect(page.getByText('Geri alındı.')).toBeVisible()
-
-    // Adresi korunarak döner.
-    await page.goto(`/${slug}`)
-    await expect(page.getByRole('heading', { level: 1, name: 'Black Sushi' })).toBeVisible()
   })
 })

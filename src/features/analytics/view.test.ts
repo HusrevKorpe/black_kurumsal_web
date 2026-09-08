@@ -8,7 +8,7 @@ function row(name: string, views: number, whatsapp: number, call: number): ShopS
     name,
     slug: name,
     isActive: true,
-    isTrashed: false,
+    isDeleted: false,
     totals: {
       PAGE_VIEW: views,
       CALL_CLICK: call,

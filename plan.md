@@ -83,12 +83,13 @@ kod değişmez.
 
 - Prisma sunucu tarafında çalışır, RLS kullanılmaz. **Her server action ve her admin
   sayfası yetkiyi sunucuda kontrol eder** (`requireStaff`, `requireShopAccess`).
-- **Silme geri alınabilir.** Dükkan ve mekan silmek `deletedAt` işaretler (çöp kutusu): kayıt
-  siteden ve panelden düşer, galeri/fiyat/kampanya ve depodaki dosyalar yerinde kalır. Geri alma
-  ve kalıcı silme yalnızca patronun `/admin/cop` sayfasından (`features/trash`). Slug çöp
-  kutusunda da rezerve kalır: geri alınan dükkan eski adresine döner, basılı QR ölmez.
+- **Silme işaretlemedir.** Dükkan ve mekan silmek `deletedAt` doldurur: kayıt siteden ve panelden
+  düşer, galeri/fiyat/kampanya ve depodaki dosyalar yerinde kalır. Panelde geri getirme ya da
+  kalıcı silme ekranı **yoktur** (çöp kutusu 08.09.2026'da kaldırıldı, patron gerekli görmedi);
+  ikisi de veritabanından elle yapılır. Slug silinen kayıtta tutulu kalır: aynı adresle yeni
+  dükkan açılamaz, kullanıcıya nedenini söyleyen hata döner.
 - `deletedAt` süzgeci sorgu katmanında tek yerden gelir: `publicShopWhere`, `publicLocationWhere`,
-  `notTrashedShopWhere`. Yeni sorgu yazarken bunlardan biri kullanılır.
+  `notDeletedShopWhere`. Yeni sorgu yazarken bunlardan biri kullanılır.
 - Supabase istemcisi tarayıcıda yalnızca oturum (giriş/çıkış) ve imzalı URL'e yükleme için kullanılır.
 - Servis anahtarı (`SUPABASE_SECRET_KEY`) yalnızca sunucuda: kullanıcı oluşturma, imzalı URL, dosya silme.
 
@@ -161,7 +162,6 @@ Panel (`/admin`, giriş zorunlu, `proxy.ts` korur):
 
 - `/admin/giris`, `/admin` özet
 - `/admin/dukkanlar`, `/admin/dukkanlar/[id]` (sekmeler: Bilgiler · Saatler · Galeri · Fiyat Listesi)
-- `/admin/cop` çöp kutusu: silinen dükkan/mekan, geri alma ve kalıcı silme (Patron)
 - `/admin/mekanlar`, `/admin/mekanlar/[id]` (Patron)
 - `/admin/kampanyalar` (Patron: hepsi; Sorumlu: kendi dükkanları)
 - `/admin/istatistik` ziyaret ve tıklama sayaçları (Patron)
@@ -250,9 +250,8 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
    - `HoursException`: bayram kapanışı / yarım gün. Tarihi geçince kendiliğinden düşer; haftalık
      tabloyu elle bozup geri düzeltme derdi biter. Panelde Saatler sekmesinin altında, sitede
      saat tablosunun altında "Özel günler", JSON-LD'de `specialOpeningHoursSpecification`.
-   - Dükkan/mekan silme artık çöp kutusu (`deletedAt`): dosyalar ve içerik yerinde kalır, slug
-     rezerve kalır, patron `/admin/cop`'tan geri alır ya da kalıcı siler (kalıcı silme eski
-     davranış: kayıt + medya + depo dosyaları).
+   - Dükkan/mekan silme artık işaretleme (`deletedAt`): dosyalar ve içerik yerinde kalır, slug
+     rezerve kalır. (Bu adımda gelen `/admin/cop` çöp kutusu ekranı 08.09.2026'da kaldırıldı.)
      Testler bu adımdan sonra: 150 birim/bileşen, 81 entegrasyon, 60 e2e (56 koşan + 4 atlanan).
      **Canlıya not:** site zaten yayında; deploy öncesi prod veritabanında `pnpm db:deploy` gerekir.
 
@@ -320,10 +319,10 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
 - Özel gün eklemek/çıkarmak haftalık form gönderiminden bağımsızdır (anında kaydeder). Tek büyük
   form yerine iki ayrı bölüm: telefonda uzun form doldurmak yerine tek tarih eklemek yeterli.
 - `deletedAt` süzgeci unutulursa silinmiş kayıt sızar. Bu yüzden süzgeç sabit olarak dışa verilir
-  (`publicShopWhere`, `publicLocationWhere`, `notTrashedShopWhere`) ve entegrasyon testi
-  (`trash.service.test.ts`) site/panel/kampanya/atama yollarının hepsini birden kontrol eder.
-- Sorumlunun ataması `session.ts` içinde `shop: { deletedAt: null }` ile süzülür: çöp kutusundaki
-  dükkan sorumlunun `shopIds` listesinden düşer, doğrudan adresten de düzenleyemez.
+  (`publicShopWhere`, `publicLocationWhere`, `notDeletedShopWhere`) ve entegrasyon testi
+  (`soft-delete.test.ts`) site/panel/kampanya/atama yollarının hepsini birden kontrol eder.
+- Sorumlunun ataması `session.ts` içinde `shop: { deletedAt: null }` ile süzülür: silinen dükkan
+  sorumlunun `shopIds` listesinden düşer, doğrudan adresten de düzenleyemez.
 
 - Supabase yerel `config.toml`: `[auth] enable_signup=false` (kayıt kapalı), `[auth.email] enable_signup=true`
   (e-posta sağlayıcısı açık; kapatılırsa "Email logins are disabled" hatası). Studio, realtime, edge, analytics kapalı.

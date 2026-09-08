@@ -66,7 +66,7 @@ describe('mekanlar', () => {
     expect(await db.location.count()).toBe(1)
   })
 
-  it('boş mekan çöp kutusuna alınır; galerisi ve dosyaları yerinde kalır', async () => {
+  it('boş mekan silinir; galerisi ve dosyaları yerinde kalır', async () => {
     const owner = await createOwner()
     const location = await makeLocation()
     const media = await createMedia(`location/${location.id}/1.webp`)

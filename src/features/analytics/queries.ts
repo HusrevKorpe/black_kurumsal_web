@@ -33,7 +33,7 @@ export interface ShopStatRow {
   name: string
   slug: string
   isActive: boolean
-  isTrashed: boolean
+  isDeleted: boolean
   totals: EventTotals
   /** Sıralama ve "ilgi" ölçüsü: sayfa görüntüleme dışındaki her şey. */
   interactions: number
@@ -111,7 +111,7 @@ async function shopRows(from: Date): Promise<ShopStatRow[]> {
       name: shop.name,
       slug: shop.slug,
       isActive: shop.isActive,
-      isTrashed: shop.deletedAt !== null,
+      isDeleted: shop.deletedAt !== null,
       totals,
       interactions: sumInteractions(totals),
     }

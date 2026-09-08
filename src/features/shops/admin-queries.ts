@@ -4,8 +4,8 @@ import type { Prisma } from '@/generated/prisma/client'
 import { accessibleShopFilter, assertShopAccess, type StaffContext } from '@/lib/auth/authorize'
 import { db } from '@/lib/db'
 
-/** Çöp kutusunda olmayan dükkan. Panelde düzenlenebilen kayıtlar; silinenler /admin/cop'ta. */
-export const notTrashedShopWhere = { deletedAt: null } satisfies Prisma.ShopWhereInput
+/** Silinmemiş dükkan: panelde yalnızca bunlar listelenir ve düzenlenir. */
+export const notDeletedShopWhere = { deletedAt: null } satisfies Prisma.ShopWhereInput
 
 export const adminShopListInclude = {
   coverImage: { select: { bucket: true, path: true, alt: true } },
@@ -18,7 +18,7 @@ export type AdminShopListItem = Prisma.ShopGetPayload<{ include: typeof adminSho
 /** Patron: tüm dükkanlar. Sorumlu: atandığı dükkanlar. Pasifler de listelenir, silinenler değil. */
 export async function listShopsForStaff(staff: StaffContext): Promise<AdminShopListItem[]> {
   return db.shop.findMany({
-    where: { ...accessibleShopFilter(staff), ...notTrashedShopWhere },
+    where: { ...accessibleShopFilter(staff), ...notDeletedShopWhere },
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     include: adminShopListInclude,
   })
@@ -61,7 +61,7 @@ export async function getShopForAdmin(
     return null
   }
   return db.shop.findFirst({
-    where: { id: shopId, ...notTrashedShopWhere },
+    where: { id: shopId, ...notDeletedShopWhere },
     include: adminShopInclude(now),
   })
 }

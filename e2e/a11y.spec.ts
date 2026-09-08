@@ -78,7 +78,6 @@ test.describe('Erişilebilirlik (axe)', () => {
       '/admin/kullanicilar',
       '/admin/kullanicilar/yeni',
       '/admin/ayarlar',
-      '/admin/cop',
       '/admin/gunluk',
       '/admin/istatistik',
     ]) {

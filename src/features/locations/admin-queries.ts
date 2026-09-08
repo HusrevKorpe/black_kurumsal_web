@@ -3,8 +3,8 @@ import { exceptionDateFilter, MAX_EXCEPTIONS } from '@/features/hours'
 import type { Prisma } from '@/generated/prisma/client'
 import { db } from '@/lib/db'
 
-/** Çöp kutusunda olmayan mekan. Panelde düzenlenebilen kayıtlar; silinenler /admin/cop'ta. */
-export const notTrashedLocationWhere = { deletedAt: null } satisfies Prisma.LocationWhereInput
+/** Silinmemiş mekan: panelde yalnızca bunlar listelenir ve düzenlenir. */
+export const notDeletedLocationWhere = { deletedAt: null } satisfies Prisma.LocationWhereInput
 
 export const adminLocationListInclude = {
   coverImage: { select: { bucket: true, path: true, alt: true } },
@@ -17,7 +17,7 @@ export type AdminLocationListItem = Prisma.LocationGetPayload<{
 
 export async function listLocationsForAdmin(): Promise<AdminLocationListItem[]> {
   return db.location.findMany({
-    where: notTrashedLocationWhere,
+    where: notDeletedLocationWhere,
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     include: adminLocationListInclude,
   })
@@ -46,7 +46,7 @@ export async function getLocationForAdmin(
   now: Date = new Date(),
 ): Promise<AdminLocation | null> {
   return db.location.findFirst({
-    where: { id, ...notTrashedLocationWhere },
+    where: { id, ...notDeletedLocationWhere },
     include: adminLocationInclude(now),
   })
 }

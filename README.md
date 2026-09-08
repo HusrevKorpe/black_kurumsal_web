@@ -61,10 +61,12 @@ Seed hesapları: `patron@black.local / Patron12345!` (Patron) · `sorumlu@black.
 ## Hata izleme ve bakım
 
 - Şema değişikliği canlıya çıkarken: deploy'dan önce `DOTENV_CONFIG_PATH=.env.canli pnpm db:deploy`.
-  Bekleyen migration: `20260907174949_hours_exceptions_and_soft_delete` (özel günler + çöp kutusu),
+  Bekleyen migration: `20260907174949_hours_exceptions_and_soft_delete` (özel günler + işaretli silme),
   `20260907182449_analytics_events` + `20260907182508_analytics_rls` (ziyaret sayacı).
-- Çöp kutusu (`/admin/cop`, patron): silinen dükkan/mekan burada durur, geri alınabilir. Kalıcı
-  silme yalnızca buradan yapılır ve depodaki fotoğrafları da götürür.
+- Silme işaretlemedir: dükkan/mekan silinince `deletedAt` dolar, kayıt ve depodaki fotoğrafları
+  veritabanında kalır ama siteden ve panelden düşer. **Panelde geri getirecek ekran yoktur**;
+  geri almak ya da kalıcı temizlemek veritabanından elle yapılır. Silinen kaydın slug'ı tutulu
+  kalır: aynı adresle yeni dükkan açılamaz.
 - Sentry: `NEXT_PUBLIC_SENTRY_DSN` doluysa açık, boşsa tamamen kapalı. Yalnızca hata izleme (tracing/replay paketten çıkarılmış).
   Kaynak haritası yüklemek için Vercel/CI'da `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`.
 - Yetim medya: canlıda haftalık Vercel Cron (`/api/cron/medya-temizle`, `CRON_SECRET` gerekli), yerelde `pnpm media:cleanup`.
@@ -143,8 +145,7 @@ Aylık maliyet: Vercel Pro $20 (koltuk başına) + Supabase Pro $25 + domain ~$1
 ### 1. Planlar
 
 - **Supabase Pro ($25/ay) — asıl gerekçe yedek.** Free katmanda otomatik yedek **yoktur**: yanlış bir
-  `db:deploy` ya da elle silme geri alınamaz (çöp kutusu yalnızca panelden silmeyi kurtarır, veritabanı
-  kaybını değil). Pro günlük yedek + 7 gün geri dönüş verir. Yanında 8 GB veritabanı (500 MB yerine;
+  `db:deploy` ya da elle silme geri alınamaz. Pro günlük yedek + 7 gün geri dönüş verir. Yanında 8 GB veritabanı (500 MB yerine;
   400 günlük olay saklaması ancak burada rahat eder), 100 GB depolama, hareketsizlikte askıya alma yok.
 - **Vercel Pro ($20/ay).** Hobby ticari kullanıma kapalı. Kota aşımında Hobby projeyi kısar, Pro faturalandırır.
 - **Spend Management ilk gün kurulur** (Vercel → Settings → Billing): aylık üst sınır + uyarı e-postası.

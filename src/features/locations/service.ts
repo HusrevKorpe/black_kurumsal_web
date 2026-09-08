@@ -7,8 +7,8 @@ import { db } from '@/lib/db'
 import { tr } from '@/lib/i18n/tr'
 import { locationFormSchema } from './schema'
 
-/** Çöp kutusundaki mekan slug'ını korur; çakışma nereye bakılacağını söyleyen mesajla döner. */
-async function slugHeldInTrash(slug: string): Promise<boolean> {
+/** Silinen mekanın kaydı kaldığı için slug'ı da tutulu kalır; çakışma nedenini söyler. */
+async function slugHeldByDeleted(slug: string): Promise<boolean> {
   const held = await db.location.count({ where: { slug, deletedAt: { not: null } } })
   return held > 0
 }
@@ -20,7 +20,7 @@ export async function createLocation(
   assertOwner(staff)
   const parsed = locationFormSchema.safeParse(input)
   if (!parsed.success) return fromZodError(parsed.error)
-  if (await slugHeldInTrash(parsed.data.slug)) return fail(tr.admin.locations.slugInTrash)
+  if (await slugHeldByDeleted(parsed.data.slug)) return fail(tr.admin.locations.slugHeld)
   const location = await db.$transaction(async (tx) => {
     const created = await tx.location.create({ data: parsed.data })
     await logAudit(tx, {
@@ -43,7 +43,7 @@ export async function updateLocation(
   assertOwner(staff)
   const parsed = locationFormSchema.safeParse(input)
   if (!parsed.success) return fromZodError(parsed.error)
-  if (await slugHeldInTrash(parsed.data.slug)) return fail(tr.admin.locations.slugInTrash)
+  if (await slugHeldByDeleted(parsed.data.slug)) return fail(tr.admin.locations.slugHeld)
   const location = await db.$transaction(async (tx) => {
     const updated = await tx.location.update({ where: { id: locationId }, data: parsed.data })
     await logAudit(tx, {
@@ -86,9 +86,9 @@ export async function setLocationCover(
 }
 
 /**
- * Mekanı çöp kutusuna alır: siteden ve panelden düşer, hiçbir şey silinmez. Geri alınabilir;
- * kalıcı silme çöp kutusundan yapılır (`features/trash`).
- * İçinde canlı dükkan varsa alınmaz: dükkanlar sessizce bağımsız kalmasın, patron bilinçli taşısın.
+ * Mekanı siler: siteden ve panelden düşer. Kayıt `deletedAt` işaretiyle veritabanında durur,
+ * ama panelde geri getirecek bir ekran yoktur.
+ * İçinde canlı dükkan varsa silinmez: dükkanlar sessizce bağımsız kalmasın, patron bilinçli taşısın.
  */
 export async function deleteLocation(
   staff: StaffContext,
@@ -109,7 +109,7 @@ export async function deleteLocation(
       action: 'location.delete',
       entityType: 'Location',
       entityId: locationId,
-      summary: `${location.name} mekanı çöp kutusuna alındı`,
+      summary: `${location.name} mekanı silindi`,
     })
   })
   return ok(null)

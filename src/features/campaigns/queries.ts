@@ -12,7 +12,7 @@ export const campaignCardInclude = {
 export type CampaignCardData = Prisma.CampaignGetPayload<{ include: typeof campaignCardInclude }>
 
 /**
- * Yayındaki kampanyalar; ana sayfa ve kampanyalar sayfası. Çöp kutusundaki dükkan/mekanın
+ * Yayındaki kampanyalar; ana sayfa ve kampanyalar sayfası. Silinen dükkan/mekanın
  * kampanyası listelenmez: kartı 404'e giden bir bağlantı gösterirdi.
  */
 export async function getActiveCampaigns(
@@ -23,7 +23,7 @@ export async function getActiveCampaigns(
     where: {
       AND: [
         activeCampaignWhere(now),
-        // Hedefi olmayan (GLOBAL) kampanya elenmesin: yalnızca hedefi çöp kutusundaysa düşer.
+        // Hedefi olmayan (GLOBAL) kampanya elenmesin: yalnızca hedefi silinmişse düşer.
         { OR: [{ shopId: null }, { shop: { deletedAt: null } }] },
         { OR: [{ locationId: null }, { location: { deletedAt: null } }] },
       ],

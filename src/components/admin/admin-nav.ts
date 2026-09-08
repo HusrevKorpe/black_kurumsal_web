@@ -4,15 +4,7 @@ import { tr } from '@/lib/i18n/tr'
 
 /** İkonlar ada göre istemci tarafında çözülür; sunucudan istemciye fonksiyon geçmez. */
 export type AdminNavIcon =
-  | 'home'
-  | 'chart'
-  | 'store'
-  | 'megaphone'
-  | 'map-pin'
-  | 'users'
-  | 'settings'
-  | 'clipboard-list'
-  | 'trash'
+  'home' | 'chart' | 'store' | 'megaphone' | 'map-pin' | 'users' | 'settings' | 'clipboard-list'
 
 export interface AdminNavItem {
   href: `/${string}`
@@ -32,7 +24,6 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: ROUTES.admin.analytics, label: tr.admin.nav.analytics, icon: 'chart', ownerOnly: true },
   { href: ROUTES.admin.settings, label: tr.admin.nav.settings, icon: 'settings', ownerOnly: true },
   { href: ROUTES.admin.audit, label: tr.admin.nav.audit, icon: 'clipboard-list', ownerOnly: true },
-  { href: ROUTES.admin.trash, label: tr.admin.nav.trash, icon: 'trash', ownerOnly: true },
 ]
 
 export function navItemsForRole(role: StaffRole): AdminNavItem[] {
