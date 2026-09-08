@@ -252,7 +252,8 @@ export const admin = {
       roleOwnerHint: 'Patron: her şeyi görür ve yönetir.',
       roleManagerHint: 'Dükkan Sorumlusu: yalnızca atanan dükkanları düzenler.',
       password: 'Şifre',
-      passwordHint: 'En az 8 karakter, harf ve rakam. Kullanıcıya siz iletirsiniz.',
+      passwordHint:
+        'En az 12 karakter; küçük harf, büyük harf ve rakam. Kullanıcıya siz iletirsiniz.',
       shops: 'Yetkili olduğu dükkanlar',
       shopsHint: 'Sorumlu yalnızca işaretli dükkanları düzenleyebilir.',
       isActive: 'Hesap aktif',

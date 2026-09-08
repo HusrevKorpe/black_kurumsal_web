@@ -2,11 +2,11 @@ import { expect, type Page } from '@playwright/test'
 
 export const OWNER = {
   email: 'patron@black.local',
-  password: process.env.SEED_OWNER_PASSWORD ?? 'Patron123!',
+  password: process.env.SEED_OWNER_PASSWORD ?? 'Patron12345!',
 }
 export const MANAGER = {
   email: 'sorumlu@black.local',
-  password: process.env.SEED_MANAGER_PASSWORD ?? 'Sorumlu123!',
+  password: process.env.SEED_MANAGER_PASSWORD ?? 'Sorumlu12345!',
 }
 
 export async function login(page: Page, user: { email: string; password: string }) {

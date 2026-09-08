@@ -30,12 +30,12 @@ const SEED_STAFF = {
   owner: {
     email: 'patron@black.local',
     fullName: 'Patron',
-    password: process.env.SEED_OWNER_PASSWORD ?? 'Patron123!',
+    password: process.env.SEED_OWNER_PASSWORD ?? 'Patron12345!',
   },
   manager: {
     email: 'sorumlu@black.local',
     fullName: 'Çarşı Sorumlusu',
-    password: process.env.SEED_MANAGER_PASSWORD ?? 'Sorumlu123!',
+    password: process.env.SEED_MANAGER_PASSWORD ?? 'Sorumlu12345!',
     shopSlugs: ['black-playstation-carsi', 'black-internet-kafe-carsi'],
   },
 }

@@ -39,17 +39,21 @@ describe('ilk patron kurulumu (ensureOwner)', () => {
     const result = await ensureOwner(db, admin, {
       email,
       fullName: 'İlk Patron',
-      password: 'Ilk12345',
+      password: 'Ilk123456789',
     })
     expect(result.created).toBe(true)
     const row = await db.staffUser.findUniqueOrThrow({ where: { id: result.id } })
     expect(row).toMatchObject({ email, fullName: 'İlk Patron', role: 'OWNER', isActive: true })
-    expect(await canSignIn(email, 'Ilk12345')).toBe(true)
+    expect(await canSignIn(email, 'Ilk123456789')).toBe(true)
   })
 
   it('tekrar: aynı kimlik, şifre sıfırlanır, pasif/MANAGER kayıt OWNER ve aktif olur', async () => {
     const email = `tekrar${Date.now()}${TEST_EMAIL_DOMAIN}`
-    const first = await ensureOwner(db, admin, { email, fullName: 'Patron', password: 'Eski12345' })
+    const first = await ensureOwner(db, admin, {
+      email,
+      fullName: 'Patron',
+      password: 'Eski12345678',
+    })
     await db.staffUser.update({
       where: { id: first.id },
       data: { role: 'MANAGER', isActive: false },
@@ -58,18 +62,22 @@ describe('ilk patron kurulumu (ensureOwner)', () => {
     const second = await ensureOwner(db, admin, {
       email,
       fullName: 'Patron Yeni',
-      password: 'Yeni12345',
+      password: 'Yeni12345678',
     })
     expect(second).toEqual({ id: first.id, created: false })
     const row = await db.staffUser.findUniqueOrThrow({ where: { id: first.id } })
     expect(row).toMatchObject({ fullName: 'Patron Yeni', role: 'OWNER', isActive: true })
-    expect(await canSignIn(email, 'Eski12345')).toBe(false)
-    expect(await canSignIn(email, 'Yeni12345')).toBe(true)
+    expect(await canSignIn(email, 'Eski12345678')).toBe(false)
+    expect(await canSignIn(email, 'Yeni12345678')).toBe(true)
   })
 
   it('auth kullanıcısı silinip yeniden açılınca kayıt ve atamaları yeni kimliğe taşınır', async () => {
     const email = `tasi${Date.now()}${TEST_EMAIL_DOMAIN}`
-    const first = await ensureOwner(db, admin, { email, fullName: 'Patron', password: 'Eski12345' })
+    const first = await ensureOwner(db, admin, {
+      email,
+      fullName: 'Patron',
+      password: 'Eski12345678',
+    })
     const shop = await createShop()
     await db.staffShopAssignment.create({ data: { staffId: first.id, shopId: shop.id } })
     await admin.auth.admin.deleteUser(first.id)
@@ -77,7 +85,7 @@ describe('ilk patron kurulumu (ensureOwner)', () => {
     const second = await ensureOwner(db, admin, {
       email,
       fullName: 'Patron',
-      password: 'Yeni12345',
+      password: 'Yeni12345678',
     })
     expect(second.id).not.toBe(first.id)
     expect(second.created).toBe(false)
@@ -88,12 +96,12 @@ describe('ilk patron kurulumu (ensureOwner)', () => {
     })
     expect(moved.id).toBe(second.id)
     expect(moved.assignments.map((a) => a.shopId)).toEqual([shop.id])
-    expect(await canSignIn(email, 'Yeni12345')).toBe(true)
+    expect(await canSignIn(email, 'Yeni12345678')).toBe(true)
   })
 
   it('geçersiz e-posta ve zayıf şifre reddedilir; auth kullanıcısı açılmaz', async () => {
     await expect(
-      ensureOwner(db, admin, { email: 'gecersiz', fullName: 'X Y', password: 'Ilk12345' }),
+      ensureOwner(db, admin, { email: 'gecersiz', fullName: 'X Y', password: 'Ilk123456789' }),
     ).rejects.toThrow()
     const email = `zayif${Date.now()}${TEST_EMAIL_DOMAIN}`
     await expect(

@@ -30,7 +30,7 @@ describe('personel', () => {
       email,
       fullName: 'Yeni Sorumlu',
       role: 'MANAGER',
-      password: 'Sifre1234',
+      password: 'Sifre1234567',
       shopIds: [shop.id],
     })
     expect(result.ok).toBe(true)
@@ -61,7 +61,7 @@ describe('personel', () => {
           email,
           fullName: 'X Y',
           role: 'MANAGER',
-          password: 'Sifre1234',
+          password: 'Sifre1234567',
           shopIds: [],
         })
       ).ok,
@@ -70,7 +70,7 @@ describe('personel', () => {
       email,
       fullName: 'X Y',
       role: 'MANAGER',
-      password: 'Sifre1234',
+      password: 'Sifre1234567',
       shopIds: [],
     })
     expect(dup.ok).toBe(false)
@@ -84,7 +84,7 @@ describe('personel', () => {
         email: `m${TEST_EMAIL_DOMAIN}`,
         fullName: 'A B',
         role: 'MANAGER',
-        password: 'Sifre1234',
+        password: 'Sifre1234567',
         shopIds: [],
       }),
     ).rejects.toBeInstanceOf(AuthorizationError)
@@ -127,16 +127,16 @@ describe('personel', () => {
       email,
       fullName: 'Şifre Test',
       role: 'MANAGER',
-      password: 'Eski12345',
+      password: 'Eski12345678',
       shopIds: [],
     })
     if (!created.ok) throw new Error('kullanıcı')
-    const reset = await resetStaffPassword(owner, { id: created.data.id, password: 'Yeni12345' })
+    const reset = await resetStaffPassword(owner, { id: created.data.id, password: 'Yeni12345678' })
     expect(reset.ok).toBe(true)
-    const login = await supabase.auth.signInWithPassword({ email, password: 'Yeni12345' })
+    const login = await supabase.auth.signInWithPassword({ email, password: 'Yeni12345678' })
     expect(login.error).toBeNull()
     const log = await db.auditLog.findFirst({ where: { action: 'staff.password_reset' } })
-    expect(log?.summary).not.toContain('Yeni12345')
-    expect(JSON.stringify(log?.data ?? null)).not.toContain('Yeni12345')
+    expect(log?.summary).not.toContain('Yeni12345678')
+    expect(JSON.stringify(log?.data ?? null)).not.toContain('Yeni12345678')
   })
 })

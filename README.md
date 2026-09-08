@@ -21,7 +21,7 @@ pnpm db:seed                 # 3 mekan, 11 dükkan, kampanyalar, örnek görsell
 pnpm dev                     # http://localhost:3000
 ```
 
-Seed hesapları: `patron@black.local / Patron123!` (Patron) · `sorumlu@black.local / Sorumlu123!` (Çarşı sorumlusu)
+Seed hesapları: `patron@black.local / Patron12345!` (Patron) · `sorumlu@black.local / Sorumlu12345!` (Çarşı sorumlusu)
 
 ## Komutlar
 
@@ -48,6 +48,12 @@ Seed hesapları: `patron@black.local / Patron123!` (Patron) · `sorumlu@black.lo
   Prisma `postgres` rolüyle RLS'i atlar). `tests/integration/rls.test.ts` bunu zorlar.
 - Her server action `runAction` ile sarılır ve yetkiyi sunucuda `assertShopAccess` / `assertOwner` ile doğrular.
 - Panelden yapılan her değişiklik `revalidatePublicSite()` ile açık siteyi yeniler.
+- Panel şifresi kuralı (12 karakter, küçük+büyük harf, rakam) üç yerde tanımlıdır ve birlikte
+  değişir: `src/features/staff/schema.ts` (asıl kapı), `src/lib/auth/generate-password.ts` ve
+  `supabase/config.toml`. Kullanıcı `auth.admin.*` ile açıldığından GoTrue'nun kuralı devreye
+  girmez; config'deki değerler kullanıcıya açık akışlar için yedek sınırdır.
+- Siteye yeni bir dış kaynak (harita, yazı tipi, betik, API) eklenirse `next.config.ts` içindeki CSP'nin
+  ilgili yönergesi de güncellenir; yoksa tarayıcı sessizce engeller.
 - Görseller tarayıcıda sıkıştırılır ve imzalı URL ile doğrudan Storage'a yüklenir; sunucudan dosya geçmez.
 - Açık site bileşenlerine Zod, Supabase ya da Prisma sızmaz; `instrumentation-client.ts` her sayfaya girer, hafif kalır.
   Sentry SDK'sı ve mobil menü çekmecesi ilk pakete girmez; sayfa yüklendikten sonra boşta indirilir (LCP için).
@@ -65,7 +71,8 @@ Seed hesapları: `patron@black.local / Patron123!` (Patron) · `sorumlu@black.lo
 - İstatistik (`/admin/istatistik`, patron): sayfa görüntüleme ve tıklama sayaçları kendi veritabanımızda; dışarıya
   hiçbir betik yüklenmez. Olaylar 400 gün saklanır, haftalık Vercel Cron (`/api/cron/istatistik-temizle`,
   `CRON_SECRET` gerekli) eskiyeni siler. Ziyaretçi imzası günlük tuzla hash'lenir; tuz `ANALYTICS_SALT`
-  (tanımsızsa `SUPABASE_SECRET_KEY`). Robotlar ve panelde oturumu açık personel sayılmaz.
+  (tanımsızsa `SUPABASE_SECRET_KEY`). Robotlar ve panelde oturumu açık personel sayılmaz; aynı ziyaretçinin
+  aynı olayı 30 saniyelik pencerede bir kez sayılır (arka arkaya tıklama sayacı şişirmez).
 
 ## Canlıya çıkış (M5)
 
@@ -126,6 +133,91 @@ Sıra önemli; her adım bir öncekinin çıktısını kullanır. Hesap girişle
    siteyi gerçek telefondan gezip `/admin/istatistik`'te sayaçların arttığını görmek. Durum (07.09.2026): sayfalar, 404, `/admin` → giriş
    yönlendirmesi, robots/sitemap ve cron doğrulandı; giriş, görsel yükleme, saat ve telefon/WhatsApp kontrolü panelden
    ilk veri girilince yapılır. Sentry ve domain karar gereği satışa ertelendi.
+
+## Pro'ya geçiş (satış / gerçek trafik)
+
+Ücretsiz katmanlar tanıtım ve içerik girişi için yeterli. Site gerçekten satılınca ya da günlük ziyaretçi
+~1.000'i geçince aşağıdaki sıra izlenir; domain DNS'i beklerken diğer adımlar ilerleyebilir.
+Aylık maliyet: Vercel Pro $20 (koltuk başına) + Supabase Pro $25 + domain ~$12/yıl. Sentry Free yeter.
+
+### 1. Planlar
+
+- **Supabase Pro ($25/ay) — asıl gerekçe yedek.** Free katmanda otomatik yedek **yoktur**: yanlış bir
+  `db:deploy` ya da elle silme geri alınamaz (çöp kutusu yalnızca panelden silmeyi kurtarır, veritabanı
+  kaybını değil). Pro günlük yedek + 7 gün geri dönüş verir. Yanında 8 GB veritabanı (500 MB yerine;
+  400 günlük olay saklaması ancak burada rahat eder), 100 GB depolama, hareketsizlikte askıya alma yok.
+- **Vercel Pro ($20/ay).** Hobby ticari kullanıma kapalı. Kota aşımında Hobby projeyi kısar, Pro faturalandırır.
+- **Spend Management ilk gün kurulur** (Vercel → Settings → Billing): aylık üst sınır + uyarı e-postası.
+  Bu olmadan `/api/olay`'a gelen bir taşkın, kesinti yerine fatura üretir.
+- Planlar bağlantı adreslerini değiştirmez: `.env.canli` ve Vercel değişkenleri aynı kalır.
+
+### 2. Domain
+
+Adımlar §Canlıya çıkış 5'te. Ek olarak:
+
+- `www` → apex 308 yönlendirmesi (Vercel → Domains, `www` kaydı "Redirect to" ile).
+- `NEXT_PUBLIC_SITE_URL` **ve** Supabase `site_url`/`additional_redirect_urls` birlikte güncellenir.
+  İkincisi atlanırsa panele giriş sonrası yönlendirme kırılır; birincisi atlanırsa sitemap, robots, OG
+  ve JSON-LD eski adresi gösterir, Google yanlış adresi indeksler.
+
+### 3. Staging
+
+Amaç: patronun denemeleri ve migration'lar canlıya değil kopyaya dokunsun. Vercel'in preview ortamı staging olur.
+
+1. Ayrı Supabase projesi (Free katman yeter, staging'de yedek gerekmez):
+   `supabase projects create black-kurumsal-staging`.
+2. `supabase/config.toml` sonundaki `[remotes.staging]` bloğu yorumdan çıkarılır (ref + adres girilir),
+   sonra `supabase config push --project-ref <staging-ref>`.
+3. `.env.staging` hazırlanır (`.env*` gitignore'lu; Next okumaz) ve şema/depo/örnek veri kurulur:
+
+   ```bash
+   DOTENV_CONFIG_PATH=.env.staging pnpm db:deploy
+   DOTENV_CONFIG_PATH=.env.staging pnpm storage:init
+   DOTENV_CONFIG_PATH=.env.staging pnpm db:seed   # staging'de seed serbest: gerçek veri değil
+   ```
+
+4. Aynı değişkenler Vercel'in **preview** ortamına, staging projesinin değerleriyle:
+   `printf '%s' '<değer>' | vercel env add <AD> preview`. Zorunlular: `DATABASE_URL`,
+   `DIRECT_DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+   `SUPABASE_SECRET_KEY`, `NEXT_PUBLIC_SITE_URL` (dal takma adı, ör.
+   `https://black-kurumsal-git-<dal>-<takım>.vercel.app`).
+5. Vercel → Settings → Deployment Protection: preview dağıtımları şifreye kapatılır.
+6. Akış: PR aç → preview (staging veritabanı) → onay → `main` → canlı. Migration önce staging'de çalışır.
+
+`src/app/robots.ts` `VERCEL_ENV`'e bakar: preview dağıtımı `Disallow: /` döner ve site haritası vermez,
+böylece staging Google'a düşüp canlıyla çift içerik olmaz (`src/app/robots.test.ts` bunu zorlar).
+
+### 4. Güvenlik sertleştirmesi
+
+Kod tarafı yapıldı (08.09.2026):
+
+- **Güvenlik başlıkları** (`next.config.ts` → `headers()`): CSP, `X-Frame-Options: DENY`,
+  `Referrer-Policy`, `Permissions-Policy`, `X-Content-Type-Options`, HSTS. CSP bilerek nonce'suz
+  kuruldu: nonce her isteği dinamik render'a zorlar ve açık sayfaların ISR/CDN önbelleğini bitirirdi
+  (Next belgesi bunu açıkça yazıyor: `node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md`).
+- **Şifre kuralı 12 karakter + küçük harf + büyük harf + rakam.** Zorlayan yer uygulamanın kendi
+  şemasıdır (`src/features/staff/schema.ts`); panel kullanıcıyı `auth.admin.*` ile açtığı için
+  GoTrue'nun kuralı o yolda çalışmaz. `supabase/config.toml`'daki karşılığı yine de aynı tutuldu ve
+  canlıya `supabase config push` ile gider. Mevcut şifreleri etkilemez: patron şifresi bir kez
+  yenilenmelidir (panel → Kullanıcılar → Şifre sıfırla).
+
+Pro açılınca panelden yapılacak:
+
+- **Firewall → Custom Rule:** `/api/olay` yoluna IP başına dakikada ~60 istek sınırı. Koddaki sayaç
+  (`src/features/analytics/rate-limit.ts`) bellekte ve sunucu örneği başına çalışır, kesin sınır değildir;
+  asıl sınır burada kurulur ve istek fonksiyona hiç ulaşmaz.
+- Saldırı anında **Attack Challenge Mode**.
+
+### 5. Trafik eşikleri
+
+Açık sayfalar 1 saat ISR önbellekli: ziyaretçi sayısı veritabanını değil CDN'i yorar. Yük `/api/olay`'a
+biner; her sayfa görüntüleme 1 fonksiyon çağrısı + 1 satır (5 index dahil ~450 bayt).
+
+| Günlük ziyaretçi | Ne olur                                                                                                                           |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| ~1.000'e kadar   | Ücretsiz katmanlar yeter                                                                                                          |
+| ~1.000 üstü      | Vercel kotası (fonksiyon + edge istek) zorlanır; Supabase 500 MB'ı 400 günlük saklamayla dolar                                    |
+| 10.000           | Site ayakta kalır (CDN), ama ayda ~900 bin olay: Pro şart, `RETENTION_DAYS` kısaltılır ya da olaylar günlük özet tabloya toplanır |
 
 ## Klasörler
 
