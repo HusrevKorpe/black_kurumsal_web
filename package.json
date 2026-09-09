@@ -18,6 +18,7 @@
     "test:all": "vitest run && playwright test",
     "lighthouse": "lhci autorun",
     "media:cleanup": "tsx --conditions=react-server scripts/cleanup-media.ts",
+    "media:import": "tsx scripts/import-media.ts",
     "staff:owner": "tsx scripts/create-owner.ts",
     "content:init": "tsx scripts/init-content.ts",
     "content:demo": "tsx scripts/demo-content.ts",
