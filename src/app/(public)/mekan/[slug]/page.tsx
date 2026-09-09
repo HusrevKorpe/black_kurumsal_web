@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { CampaignCard } from '@/components/public/campaign-card'
 import { ContactButtons } from '@/components/public/contact-buttons'
-import { CoverImage } from '@/components/public/cover-image'
+import { CoverBanner } from '@/components/public/cover-banner'
 import { Gallery } from '@/components/public/gallery'
 import { HoursTable } from '@/components/public/hours-table'
 import { OpenStatusBadge } from '@/components/public/open-status-badge'
@@ -64,15 +64,7 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
 
   return (
     <article>
-      {isVenue ? (
-        <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-[21/9]">
-          <CoverImage media={location.coverImage} alt={location.name} sizes="100vw" priority />
-          <div
-            className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent"
-            aria-hidden
-          />
-        </div>
-      ) : null}
+      {isVenue ? <CoverBanner media={location.coverImage} alt={location.name} /> : null}
 
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <header className={isVenue ? 'relative -mt-16 sm:-mt-24' : 'pt-10'}>
