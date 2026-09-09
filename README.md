@@ -37,6 +37,7 @@ Seed hesapları: `patron@black.local / Patron12345!` (Patron) · `sorumlu@black.
 | `pnpm storage:init`     | Medya bucket'ını oluşturur/ayarlarını doğrular (public, 10 MiB, görsel MIME); canlıda `DOTENV_CONFIG_PATH=.env.canli` ile |
 | `pnpm content:init`     | İçerik iskeleti (canlı ilk kurulum): site ayarı, 3 mekan/bölge, 11 dükkan; yalnızca eksikleri açar, var olana dokunmaz    |
 | `pnpm content:demo`     | Örnek içerik (gösterim): varsayılan 5 dükkanı + Garden + kampanyaları demo veriyle doldurur; yalnızca boş kayda yazar     |
+| `pnpm content:real`     | Gerçek içerik: patronun gönderdiği fiyat listesi ve saatleri yazar (`real-data.ts`); kuru çalışır, `--apply` ile yazar    |
 | `pnpm db:migrate`       | Şema değişikliğinden sonra migration üret ve uygula                                                                       |
 | `pnpm db:studio`        | Prisma Studio                                                                                                             |
 | `pnpm build`            | Üretim derlemesi (`prisma generate` dahil)                                                                                |

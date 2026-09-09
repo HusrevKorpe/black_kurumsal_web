@@ -22,6 +22,7 @@
     "staff:owner": "tsx scripts/create-owner.ts",
     "content:init": "tsx scripts/init-content.ts",
     "content:demo": "tsx scripts/demo-content.ts",
+    "content:real": "tsx scripts/real-content.ts",
     "storage:init": "tsx scripts/init-storage.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "db:generate": "prisma generate",
