@@ -3,7 +3,7 @@ import { ensureContentSkeleton, type SkeletonPart } from '@/features/content/ske
 import { db } from '@/lib/db'
 
 /**
- * İçerik iskeleti (canlı ilk kurulum): site ayarı, 3 mekan/bölge ve 11 dükkan. Yalnızca eksik olanları
+ * İçerik iskeleti (canlı ilk kurulum): site ayarı, 2 mekan/bölge ve 5 dükkan. Yalnızca eksik olanları
  * açar; var olan kayıtlara ve panelden yapılan düzenlemelere dokunmaz (tekrar çalıştırmak güvenlidir).
  *   pnpm content:init                                   → yerel
  *   DOTENV_CONFIG_PATH=.env.canli pnpm content:init     → canlı

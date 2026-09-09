@@ -30,7 +30,7 @@ test.describe('Panel kimlik doğrulama', () => {
     await login(page, MANAGER)
     await page.goto('/admin/dukkanlar')
     await expect(page.getByRole('link', { name: /Black PlayStation Çarşı/ })).toBeVisible()
-    await expect(page.getByRole('link', { name: /Black İnternet Kafe Çarşı/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Black Tost Çarşı/ })).toBeVisible()
     await expect(page.getByRole('link', { name: /Lavinya Apart/ })).toHaveCount(0)
     await expect(page.getByRole('link', { name: 'Yeni Dükkan' })).toHaveCount(0)
 

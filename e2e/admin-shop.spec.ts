@@ -5,16 +5,16 @@ test.describe('Dükkan yönetimi', () => {
   test('açıklama değişir ve açık siteye yansır', async ({ page }) => {
     await login(page, OWNER)
     await page.goto('/admin/dukkanlar')
-    await page.getByRole('link', { name: /Black Tost Iyaş/ }).click()
-    await expect(page.getByRole('heading', { level: 1, name: 'Black Tost Iyaş' })).toBeVisible()
+    await page.getByRole('link', { name: /Black Tavuk/ }).click()
+    await expect(page.getByRole('heading', { level: 1, name: 'Black Tavuk' })).toBeVisible()
 
     const marker = `E2E ${Date.now()}`
     const description = page.locator('#description')
-    await description.fill(`Iyaş bölgesinde tost, kahvaltı ve sıcak içecekler. ${marker}`)
+    await description.fill(`Izgara ve döner tavuk çeşitleri, kanat sepetleri ve menüler. ${marker}`)
     await page.getByRole('button', { name: 'Kaydet' }).click()
     await expect(page.getByText('Dükkan kaydedildi.')).toBeVisible()
 
-    await page.goto('/black-tost-iyas')
+    await page.goto('/black-tavuk-garden')
     await expect(page.getByText(marker)).toBeVisible()
   })
 
@@ -94,7 +94,7 @@ test.describe('Dükkan yönetimi', () => {
 
     await login(page, OWNER)
     await page.goto('/admin/dukkanlar')
-    await page.getByRole('link', { name: /Black Tost Iyaş/ }).click()
+    await page.getByRole('link', { name: /Black PlayStation Çarşı/ }).click()
     await page.getByRole('link', { name: 'Saatler' }).click()
 
     await page.locator('#exception-date').fill(date)
@@ -102,7 +102,7 @@ test.describe('Dükkan yönetimi', () => {
     await page.getByRole('button', { name: 'Özel gün ekle' }).click()
     await expect(page.getByText('Özel gün kaydedildi.')).toBeVisible()
 
-    await page.goto('/black-tost-iyas')
+    await page.goto('/black-playstation-carsi')
     const specialDays = page.getByText('Özel günler')
     await expect(specialDays).toBeVisible()
     await expect(page.getByText(shown)).toBeVisible()
@@ -110,7 +110,7 @@ test.describe('Dükkan yönetimi', () => {
 
     // Temizlik: seed durumuna dön.
     await page.goto('/admin/dukkanlar')
-    await page.getByRole('link', { name: /Black Tost Iyaş/ }).click()
+    await page.getByRole('link', { name: /Black PlayStation Çarşı/ }).click()
     await page.getByRole('link', { name: 'Saatler' }).click()
     await page.getByRole('button', { name: new RegExp(`${shown}.*Kaldır`) }).click()
     await page.getByRole('dialog').getByRole('button', { name: 'Sil' }).click()

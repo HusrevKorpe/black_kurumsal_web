@@ -22,7 +22,7 @@ import { serverEnv } from '@/lib/env.server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 
 /**
- * Yerel geliştirme seed'i: iskeleti (3 mekan/bölge, 11 dükkan) demo içerikle SIFIRDAN doldurur, iki giriş
+ * Yerel geliştirme seed'i: iskeleti (2 mekan/bölge, 5 dükkan) demo içerikle SIFIRDAN doldurur, iki giriş
  * hesabı ve örnek kampanyaları açar. Tekrar çalıştırılınca eski ayrıntı, görsel ve kampanyaları silip yeniden
  * yazar. Canlıda çalıştırılmaz: iskelet `pnpm content:init`, örnek içerik `pnpm content:demo`.
  */
@@ -36,7 +36,7 @@ const SEED_STAFF = {
     email: 'sorumlu@black.local',
     fullName: 'Çarşı Sorumlusu',
     password: process.env.SEED_MANAGER_PASSWORD ?? 'Sorumlu12345!',
-    shopSlugs: ['black-playstation-carsi', 'black-internet-kafe-carsi'],
+    shopSlugs: ['black-playstation-carsi', 'black-tost-carsi'],
   },
 }
 

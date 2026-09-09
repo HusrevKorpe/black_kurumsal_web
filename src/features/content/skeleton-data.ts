@@ -16,7 +16,6 @@ export interface SkeletonLocation {
 export const SKELETON_LOCATIONS = [
   { slug: 'black-garden', name: 'Black Garden', kind: 'VENUE', sortOrder: 1 },
   { slug: 'carsi', name: 'Çarşı', kind: 'DISTRICT', sortOrder: 2 },
-  { slug: 'iyas', name: 'Iyaş', kind: 'DISTRICT', sortOrder: 3 },
 ] as const satisfies readonly SkeletonLocation[]
 
 export type SkeletonLocationSlug = (typeof SKELETON_LOCATIONS)[number]['slug']
@@ -39,74 +38,32 @@ export const SKELETON_SHOPS = [
     sortOrder: 1,
   },
   {
-    slug: 'black-internet-kafe-carsi',
-    name: 'Black İnternet Kafe Çarşı',
-    type: 'INTERNET_CAFE',
-    locationSlug: 'carsi',
-    sortOrder: 2,
-  },
-  {
     slug: 'black-tost-carsi',
     name: 'Black Tost Çarşı',
     type: 'FOOD',
     locationSlug: 'carsi',
-    sortOrder: 3,
-  },
-  {
-    slug: 'black-playstation-iyas',
-    name: 'Black PlayStation Iyaş',
-    type: 'PLAYSTATION',
-    locationSlug: 'iyas',
-    sortOrder: 4,
-  },
-  {
-    slug: 'black-internet-kafe-iyas',
-    name: 'Black İnternet Kafe Iyaş',
-    type: 'INTERNET_CAFE',
-    locationSlug: 'iyas',
-    sortOrder: 5,
-  },
-  {
-    slug: 'black-tost-iyas',
-    name: 'Black Tost Iyaş',
-    type: 'FOOD',
-    locationSlug: 'iyas',
-    sortOrder: 6,
+    sortOrder: 2,
   },
   {
     slug: 'black-tavuk-garden',
     name: 'Black Tavuk',
     type: 'FOOD',
     locationSlug: 'black-garden',
-    sortOrder: 7,
+    sortOrder: 3,
   },
   {
     slug: 'black-makarna-garden',
     name: 'Black Makarna',
     type: 'FOOD',
     locationSlug: 'black-garden',
-    sortOrder: 8,
-  },
-  {
-    slug: 'black-tost-garden',
-    name: 'Black Tost',
-    type: 'FOOD',
-    locationSlug: 'black-garden',
-    sortOrder: 9,
-  },
-  {
-    slug: 'black-sushi-garden',
-    name: 'Black Sushi',
-    type: 'FOOD',
-    locationSlug: 'black-garden',
-    sortOrder: 10,
+    sortOrder: 4,
   },
   {
     slug: 'lavinya-apart',
     name: 'Lavinya Apart',
     type: 'APART',
     locationSlug: null,
-    sortOrder: 11,
+    sortOrder: 5,
   },
 ] as const satisfies readonly SkeletonShop[]
 
@@ -117,5 +74,5 @@ export const SKELETON_SETTINGS = {
   brandName: 'Black',
   heroTitle: 'Black dükkanları tek adreste',
   heroSubtitle:
-    'PlayStation kafe, internet kafe, yeme-içme ve apart. Çalışma saatleri, fiyat listeleri ve iletişim bilgileri burada.',
+    'PlayStation kafe, yeme-içme ve apart. Çalışma saatleri, fiyat listeleri ve iletişim bilgileri burada.',
 } as const

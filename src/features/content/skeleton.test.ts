@@ -7,12 +7,11 @@ import { SKELETON_LOCATIONS, SKELETON_SETTINGS, SKELETON_SHOPS } from './skeleto
 const unique = <T>(values: readonly T[]) => new Set(values).size === values.length
 
 describe('içerik iskeleti verisi', () => {
-  it('11 dükkan ve 3 mekan/bölge: Garden mekan, Çarşı ve Iyaş bölge', () => {
-    expect(SKELETON_SHOPS).toHaveLength(11)
+  it('5 dükkan ve 2 mekan/bölge: Garden mekan, Çarşı bölge', () => {
+    expect(SKELETON_SHOPS).toHaveLength(5)
     expect(SKELETON_LOCATIONS.map((l) => [l.slug, l.kind])).toEqual([
       ['black-garden', 'VENUE'],
       ['carsi', 'DISTRICT'],
-      ['iyas', 'DISTRICT'],
     ])
   })
 
@@ -31,12 +30,7 @@ describe('içerik iskeleti verisi', () => {
       if (shop.locationSlug !== null) expect(locationSlugs.has(shop.locationSlug)).toBe(true)
     }
     const gardenShops = SKELETON_SHOPS.filter((s) => s.locationSlug === 'black-garden')
-    expect(gardenShops.map((s) => s.name)).toEqual([
-      'Black Tavuk',
-      'Black Makarna',
-      'Black Tost',
-      'Black Sushi',
-    ])
+    expect(gardenShops.map((s) => s.name)).toEqual(['Black Tavuk', 'Black Makarna'])
   })
 
   it('panel formlarının doğrulamasından geçer (ad, slug, tür, sıra; ayar metin uzunlukları)', () => {

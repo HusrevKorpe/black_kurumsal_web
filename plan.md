@@ -5,7 +5,7 @@
 
 ## 1. Amaç
 
-Black markası altındaki 11 dükkanı tek kurumsal sitede toplamak. Müşteri siteye girer,
+Black markası altındaki dükkanları (09.09.2026'dan beri 5 dükkan) tek kurumsal sitede toplamak. Müşteri siteye girer,
 dükkanı bulur, fotoğraflara ve fiyatlara bakar, telefonla ya da WhatsApp'tan ulaşır.
 Dükkan çalışanları içeriği telefondan yönetir. Patron her şeyi tek panelden görür.
 
@@ -29,7 +29,7 @@ push öncesi typecheck + test. CI'da build + e2e.
 ### Faz 1 (bu plan)
 
 - Ana sayfa: kampanya vitrini, mekan/bölge kartları, kategori kartları, tüm dükkanlar.
-- Mekan sayfaları: Black Garden, Çarşı, Iyaş. Garden'ın adresi, saatleri, galerisi ve içindeki dükkanlar.
+- Mekan sayfaları: Black Garden, Çarşı. Garden'ın adresi, saatleri, galerisi ve içindeki dükkanlar.
 - Dükkan sayfaları: galeri, açıklama, öne çıkan özellikler, fiyat listesi, çalışma saatleri,
   "şu an açık/kapalı", adres + harita, telefon ve WhatsApp butonları, dükkana özel kampanyalar.
 - Kampanyalar sayfası.
@@ -53,16 +53,21 @@ push öncesi typecheck + test. CI'da build + e2e.
 
 ## 4. Dükkanlar ve Mekanlar
 
-| Mekan / Bölge | Tür                            | Dükkanlar                                           |
-| ------------- | ------------------------------ | --------------------------------------------------- |
-| Black Garden  | Mekan (tek giriş, ortak adres) | Black Tavuk, Black Makarna, Black Tost, Black Sushi |
-| Çarşı         | Bölge                          | Black PlayStation, Black İnternet Kafe, Black Tost  |
-| Iyaş          | Bölge                          | Black PlayStation, Black İnternet Kafe, Black Tost  |
-| —             | —                              | Lavinya Apart (Black markası taşımaz)               |
+| Mekan / Bölge | Tür                            | Dükkanlar                             |
+| ------------- | ------------------------------ | ------------------------------------- |
+| Black Garden  | Mekan (tek giriş, ortak adres) | Black Tavuk, Black Makarna            |
+| Çarşı         | Bölge                          | Black PlayStation, Black Tost         |
+| —             | —                              | Lavinya Apart (Black markası taşımaz) |
 
 "Mekan" fiziksel tek yerdir, kendi sayfası, adresi ve saati vardır. "Bölge" sadece
-gruplama etiketidir. Çarşı veya Iyaş dükkanları aynı binadaysa panelden "Mekan"a çevrilir,
+gruplama etiketidir. Çarşı dükkanları aynı binadaysa panelden "Mekan"a çevrilir,
 kod değişmez.
+
+**09.09.2026 kararı (patron):** dükkan sayısı 11'den 5'e indirildi. Kalanlar yukarıdaki tablodadır;
+gerçek fotoğrafı olan üç dükkan (Black PlayStation Çarşı, Black Tost Çarşı, Lavinya Apart) korundu.
+Silinenler: Black İnternet Kafe Çarşı, Iyaş'ın üç dükkanı (PlayStation, İnternet Kafe, Tost),
+Black Tost Garden, Black Sushi ve dükkanı kalmayan Iyaş bölgesi. Silme `deletedAt` ile yapıldı:
+sitede ve panelde görünmezler, kayıt ve görselleri veritabanında duruyor, gerekirse SQL ile geri alınır.
 
 ## 5. Mimari
 
@@ -408,7 +413,7 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
 
 ## 11. Varsayımlar (cevap gelince güncellenir)
 
-- Çarşı ve Iyaş şimdilik **bölge**; aynı binadaysa panelden mekana çevrilir.
+- Çarşı şimdilik **bölge**; aynı binadaysa panelden mekana çevrilir.
 - Garden içindeki dükkanların telefonu boş bırakılırsa Garden'ın numarası gösterilir.
 - Logo yok varsayıldı; koyu tema, marka rengi tek değişkenden (`--brand`) değiştirilir.
 - Domain sonra.

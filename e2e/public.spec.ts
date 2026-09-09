@@ -47,7 +47,7 @@ test.describe('Açık site', () => {
     await page.goto('/mekan/black-garden')
     await expect(page.getByRole('heading', { level: 1, name: 'Black Garden' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Buradaki dükkanlar' })).toBeVisible()
-    await expect(page.getByRole('link', { name: /Black Sushi/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Black Makarna/ })).toBeVisible()
   })
 
   test('kampanyalar sayfası ve 404', async ({ page }) => {

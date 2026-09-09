@@ -45,7 +45,7 @@ const shopWithDetails = (slug: string) =>
 beforeEach(resetDatabase)
 
 describe('örnek içerik (applyDemoContent)', () => {
-  it('iskelet üstünde varsayılan 5 dükkanı, Garden mekanını ve 3 kampanyayı doldurur; diğer 6 dükkana dokunmaz', async () => {
+  it('iskelet üstünde varsayılan 4 dükkanı, Garden mekanını ve 3 kampanyayı doldurur; diğer dükkana dokunmaz', async () => {
     await ensureContentSkeleton(db)
     const owner = await createOwner()
     const { upload, uploaded } = fakeUploader()
@@ -107,7 +107,7 @@ describe('örnek içerik (applyDemoContent)', () => {
       kind: 'location',
       ownerId: garden.id,
     })
-    for (const slug of ['carsi', 'iyas']) {
+    for (const slug of ['carsi']) {
       const district = await db.location.findUniqueOrThrow({ where: { slug } })
       expect(district).toMatchObject({ address: null, phone: null, coverImageId: null })
     }
@@ -207,10 +207,10 @@ describe('örnek içerik (applyDemoContent)', () => {
   it('yalnızca bölge dükkanı seçilince Garden’a ve mekan/dükkan kampanyalarına dokunulmaz', async () => {
     await ensureContentSkeleton(db)
     const { upload } = fakeUploader()
-    const result = await applyDemoContent(db, { upload, shopSlugs: ['black-tost-iyas'] })
+    const result = await applyDemoContent(db, { upload, shopSlugs: ['black-tost-carsi'] })
     expect(result).toEqual({
       locations: { filled: [], skipped: [] },
-      shops: { filled: ['black-tost-iyas'], skipped: [] },
+      shops: { filled: ['black-tost-carsi'], skipped: [] },
       campaigns: { created: ['Black Garden Açıldı'], skipped: false },
     })
     const garden = await db.location.findUniqueOrThrow({ where: { slug: 'black-garden' } })

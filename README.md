@@ -17,7 +17,7 @@ pnpm supabase:start          # yerel Postgres + Auth + Storage (ilk seferde imaj
 cp .env.example .env         # supabase start çıktısındaki anahtarları yaz
 pnpm db:migrate              # migration uygula, istemciyi üret
 psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -c 'CREATE DATABASE black_test'
-pnpm db:seed                 # 3 mekan, 11 dükkan, kampanyalar, örnek görseller, giriş hesapları
+pnpm db:seed                 # 2 mekan, 5 dükkan, kampanyalar, örnek görseller, giriş hesapları
 pnpm dev                     # http://localhost:3000
 ```
 
@@ -35,8 +35,8 @@ Seed hesapları: `patron@black.local / Patron12345!` (Patron) · `sorumlu@black.
 | `pnpm media:cleanup`    | Yetim medya raporu (kuru çalışma); `--apply` siler, `--grace=SAAT` bekleme süresi                                         |
 | `pnpm staff:owner`      | İlk patron hesabı (canlı kurulum): `--email= --name=`; şifreyi üretip bir kez yazar, hesap varsa şifreyi sıfırlar         |
 | `pnpm storage:init`     | Medya bucket'ını oluşturur/ayarlarını doğrular (public, 10 MiB, görsel MIME); canlıda `DOTENV_CONFIG_PATH=.env.canli` ile |
-| `pnpm content:init`     | İçerik iskeleti (canlı ilk kurulum): site ayarı, 3 mekan/bölge, 11 dükkan; yalnızca eksikleri açar, var olana dokunmaz    |
-| `pnpm content:demo`     | Örnek içerik (gösterim): varsayılan 5 dükkanı + Garden + kampanyaları demo veriyle doldurur; yalnızca boş kayda yazar     |
+| `pnpm content:init`     | İçerik iskeleti (canlı ilk kurulum): site ayarı, 2 mekan/bölge, 5 dükkan; yalnızca eksikleri açar, var olana dokunmaz     |
+| `pnpm content:demo`     | Örnek içerik (gösterim): varsayılan 4 dükkanı + Garden + kampanyaları demo veriyle doldurur; yalnızca boş kayda yazar     |
 | `pnpm content:real`     | Gerçek içerik: patronun gönderdiği fiyat listesi ve saatleri yazar (`real-data.ts`); kuru çalışır, `--apply` ile yazar    |
 | `pnpm db:migrate`       | Şema değişikliğinden sonra migration üret ve uygula                                                                       |
 | `pnpm db:studio`        | Prisma Studio                                                                                                             |
@@ -120,12 +120,12 @@ Sıra önemli; her adım bir öncekinin çıktısını kullanır. Hesap girişle
    uygulandı, RLS dahil) ve
    `DOTENV_CONFIG_PATH=.env.canli pnpm staff:owner --email=<patron e-posta> --name="<Ad Soyad>"` (şifre bir kez yazdırılır,
    ilk girişte panelden değiştirilir). Ardından içerik iskeleti: `DOTENV_CONFIG_PATH=.env.canli pnpm content:init`
-   (site ayarı, 3 mekan/bölge, 11 dükkan; `src/features/content/skeleton-data.ts` tek doğruluk kaynağı; yalnızca eksik
+   (site ayarı, 2 mekan/bölge, 5 dükkan; `src/features/content/skeleton-data.ts` tek doğruluk kaynağı; yalnızca eksik
    kayıtları açar, panelden yapılan düzenlemelere dokunmaz, tekrar çalıştırmak güvenlidir; işlem günlüğüne düşer). Seed
    canlıda çalıştırılmaz: telefon, adres, saat, fiyat, açıklama, görsel ve sorumlular panelden girilir. Komut açık siteyi
    yenilemez (sayfalar 1 saat önbellekli); sonrasında deploy ya da panelden ilk düzenleme siteyi tazeler.
-   **Örnek içerik (gösterim için):** `DOTENV_CONFIG_PATH=.env.canli pnpm content:demo` varsayılan 5 dükkanı (PlayStation Çarşı,
-   İnternet Kafe Çarşı, Tost Iyaş, Tavuk Garden, Lavinya Apart), Black Garden mekanını ve 3 örnek kampanyayı uydurma ama
+   **Örnek içerik (gösterim için):** `DOTENV_CONFIG_PATH=.env.canli pnpm content:demo` varsayılan 4 dükkanı (PlayStation Çarşı,
+   Tost Çarşı, Tavuk Garden, Lavinya Apart), Black Garden mekanını ve 3 örnek kampanyayı uydurma ama
    gerçekçi veriyle doldurur (`src/features/content/demo-data.ts`); yalnızca boş kayıtlara yazar, panelden girilmiş içeriğe
    dokunmaz, günlüğe `content.demo` düşer. Patron panelden gerçeğini girer ya da siler; `--dukkan=slug,slug` ile seçim.
 5. **Domain.** `vercel domains add <domain>` + DNS kaydı (Vercel'in verdiği A/CNAME); sonra `NEXT_PUBLIC_SITE_URL` ve Supabase

@@ -14,7 +14,7 @@ const ALL_SHOPS = SKELETON_SHOPS.map((s) => s.slug)
 beforeEach(resetDatabase)
 
 describe('içerik iskeleti kurulumu (ensureContentSkeleton)', () => {
-  it('boş veritabanında site ayarı, 3 mekan/bölge ve 11 dükkanı doğru bağlarla, aktif açar', async () => {
+  it('boş veritabanında site ayarı, 2 mekan/bölge ve 5 dükkanı doğru bağlarla, aktif açar', async () => {
     const result = await ensureContentSkeleton(db)
     expect(result).toEqual({
       settingsCreated: true,
@@ -49,7 +49,7 @@ describe('içerik iskeleti kurulumu (ensureContentSkeleton)', () => {
       staffId: null,
       action: 'content.skeleton',
       entityType: 'content',
-      summary: 'İçerik iskeleti kuruldu: 3 mekan/bölge, 11 dükkan',
+      summary: 'İçerik iskeleti kuruldu: 2 mekan/bölge, 5 dükkan',
     })
   })
 
@@ -61,8 +61,8 @@ describe('içerik iskeleti kurulumu (ensureContentSkeleton)', () => {
       locations: { created: [], existing: ALL_LOCATIONS },
       shops: { created: [], existing: ALL_SHOPS },
     })
-    expect(await db.location.count()).toBe(3)
-    expect(await db.shop.count()).toBe(11)
+    expect(await db.location.count()).toBe(2)
+    expect(await db.shop.count()).toBe(5)
     expect(await db.auditLog.count()).toBe(1)
   })
 
@@ -71,8 +71,13 @@ describe('içerik iskeleti kurulumu (ensureContentSkeleton)', () => {
     await db.siteSettings.update({ where: { id: 1 }, data: { heroTitle: 'Patronun başlığı' } })
     await db.location.update({ where: { slug: 'carsi' }, data: { name: 'Çarşı Merkez' } })
     await db.shop.update({
-      where: { slug: 'black-tost-garden' },
-      data: { name: 'Black Tost Garden', isActive: false, locationId: null, phone: '05551112233' },
+      where: { slug: 'black-makarna-garden' },
+      data: {
+        name: 'Black Makarna Garden',
+        isActive: false,
+        locationId: null,
+        phone: '05551112233',
+      },
     })
 
     await ensureContentSkeleton(db)
@@ -83,14 +88,14 @@ describe('içerik iskeleti kurulumu (ensureContentSkeleton)', () => {
     expect((await db.location.findUniqueOrThrow({ where: { slug: 'carsi' } })).name).toBe(
       'Çarşı Merkez',
     )
-    expect(await db.shop.findUniqueOrThrow({ where: { slug: 'black-tost-garden' } })).toMatchObject(
-      {
-        name: 'Black Tost Garden',
-        isActive: false,
-        locationId: null,
-        phone: '05551112233',
-      },
-    )
+    expect(
+      await db.shop.findUniqueOrThrow({ where: { slug: 'black-makarna-garden' } }),
+    ).toMatchObject({
+      name: 'Black Makarna Garden',
+      isActive: false,
+      locationId: null,
+      phone: '05551112233',
+    })
   })
 
   it('kısmen dolu veritabanında yalnızca eksikleri açar; dükkanlar var olan mekana bağlanır', async () => {
@@ -100,13 +105,12 @@ describe('içerik iskeleti kurulumu (ensureContentSkeleton)', () => {
 
     const result = await ensureContentSkeleton(db)
     expect(result.settingsCreated).toBe(false)
-    expect(result.locations).toEqual({ created: ['black-garden', 'iyas'], existing: ['carsi'] })
+    expect(result.locations).toEqual({ created: ['black-garden'], existing: ['carsi'] })
     expect(result.shops.existing).toEqual(['lavinya-apart'])
     expect(result.shops.created).toEqual(ALL_SHOPS.filter((s) => s !== 'lavinya-apart'))
 
     const carsiShops = await db.shop.findMany({ where: { locationId: carsi.id } })
     expect(carsiShops.map((s) => s.slug).sort()).toEqual([
-      'black-internet-kafe-carsi',
       'black-playstation-carsi',
       'black-tost-carsi',
     ])
