@@ -15,7 +15,7 @@ import { tr } from '@/lib/i18n/tr'
 
 export const metadata: Metadata = { title: tr.admin.analytics.title, robots: { index: false } }
 
-/** Panel zaten force-dynamic; sayaç sayfası her açılışta güncel sayıyı gösterir. */
+/** requireOwner çerez okur, yani sayfa kendiliğinden dinamik: sayaçlar her açılışta günceldir. */
 export default async function AnalyticsPage({ searchParams }: PageProps<'/admin/istatistik'>) {
   await requireOwner()
   const params = await searchParams

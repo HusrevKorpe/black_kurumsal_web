@@ -16,16 +16,20 @@ export interface CurrentStaff extends StaffContext {
 /**
  * Oturumdaki personeli döndürür. Supabase kullanıcısı var ama StaffUser kaydı yok/pasif ise null.
  * Aynı istek içinde tekrar çağrılar önbellekten gelir.
+ *
+ * getUser değil getClaims: proje asimetrik anahtarla (ES256) imzalıyor, o yüzden jeton
+ * WebCrypto ile yerelde doğrulanıyor ve her sayfa açılışındaki auth sunucusu turu kalkıyor
+ * (canlıda Frankfurt'a gidiş-dönüş). Güvenlik düşmez — imza yine doğrulanır, jetona körlemesine
+ * güvenilmez; proje simetrik sırra dönerse kütüphane kendiliğinden sunucuya sorar.
  */
 export const getCurrentStaff = cache(async (): Promise<CurrentStaff | null> => {
   const supabase = await createSupabaseServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
+  const { data } = await supabase.auth.getClaims()
+  const userId = data?.claims?.sub
+  if (!userId) return null
 
   const staff = await db.staffUser.findUnique({
-    where: { id: user.id },
+    where: { id: userId },
     // Silinen dükkan atamadan düşer: sorumlu, silinmiş dükkanı doğrudan adresten de düzenleyemez.
     include: { assignments: { where: { shop: { deletedAt: null } }, select: { shopId: true } } },
   })

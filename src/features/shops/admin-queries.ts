@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from 'react'
 import { exceptionDateFilter, MAX_EXCEPTIONS } from '@/features/hours'
 import type { Prisma } from '@/generated/prisma/client'
 import { accessibleShopFilter, assertShopAccess, type StaffContext } from '@/lib/auth/authorize'
@@ -48,22 +49,27 @@ export function adminShopInclude(now: Date) {
 
 export type AdminShop = Prisma.ShopGetPayload<{ include: ReturnType<typeof adminShopInclude> }>
 
-/** Erişim yoksa veya dükkan çöp kutusundaysa null (sayfa 404 verir; varlığı sızdırılmaz). */
-export async function getShopForAdmin(
-  staff: StaffContext,
-  shopId: string,
-  now: Date = new Date(),
-): Promise<AdminShop | null> {
-  try {
-    assertShopAccess(staff, shopId)
-  } catch {
-    return null
-  }
-  return db.shop.findFirst({
-    where: { id: shopId, ...notDeletedShopWhere },
-    include: adminShopInclude(now),
-  })
-}
+/**
+ * Erişim yoksa veya dükkan çöp kutusundaysa null (sayfa 404 verir; varlığı sızdırılmaz).
+ *
+ * Aynı istek içinde tekrar çağrılar önbellekten gelir: [id] layout'u başlık için, altındaki
+ * sekme sayfası da içerik için aynı dükkanı istiyordu; sorgu artık bir kez çalışıyor. Bunun
+ * için `now` parametresi kaldırıldı — her çağrıda yeni bir Date, cache anahtarını hep
+ * ıskalatırdı. `staff` referansı sabittir, çünkü requireStaff da cache'li.
+ */
+export const getShopForAdmin = cache(
+  async (staff: StaffContext, shopId: string): Promise<AdminShop | null> => {
+    try {
+      assertShopAccess(staff, shopId)
+    } catch {
+      return null
+    }
+    return db.shop.findFirst({
+      where: { id: shopId, ...notDeletedShopWhere },
+      include: adminShopInclude(new Date()),
+    })
+  },
+)
 
 export async function getShopGalleryForAdmin(staff: StaffContext, shopId: string) {
   assertShopAccess(staff, shopId)
