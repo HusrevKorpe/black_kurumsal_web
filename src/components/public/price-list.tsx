@@ -59,16 +59,23 @@ export function PriceList({ categories }: PriceListProps) {
     return <p className="text-sm text-muted-foreground">{tr.shop.noPrices}</p>
   }
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {categories.map((category) => (
         <section key={category.id} aria-labelledby={`fiyat-${category.id}`}>
-          <h3 id={`fiyat-${category.id}`} className="text-lg font-semibold">
-            {category.name}
-          </h3>
+          {/* Kategori başlığı kalem adlarına karışmasın: marka rengi, versal ve ayırıcı çizgi. */}
+          <div className="flex items-center gap-3">
+            <h3
+              id={`fiyat-${category.id}`}
+              className="text-base font-bold tracking-wide text-brand uppercase"
+            >
+              {category.name}
+            </h3>
+            <span aria-hidden className="h-px flex-1 bg-brand/30" />
+          </div>
           {category.description ? (
             <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
           ) : null}
-          <ul className="mt-2 divide-y">
+          <ul className="mt-1 divide-y divide-border/60">
             {category.items.map((item) => (
               <PriceRow key={item.id} item={item} />
             ))}
