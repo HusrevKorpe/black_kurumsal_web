@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { CampaignCard } from '@/components/public/campaign-card'
 import { ContactActionBar, ContactButtons } from '@/components/public/contact-buttons'
-import { CoverBanner } from '@/components/public/cover-banner'
+import { CoverImage } from '@/components/public/cover-image'
 import { FeatureChips } from '@/components/public/feature-chips'
 import { Gallery } from '@/components/public/gallery'
 import { HoursTable } from '@/components/public/hours-table'
@@ -98,7 +98,13 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
-      <CoverBanner media={shop.coverImage} alt={shop.name} />
+      <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-[21/9]">
+        <CoverImage media={shop.coverImage} alt={shop.name} sizes="100vw" priority />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent"
+          aria-hidden
+        />
+      </div>
 
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <header className="relative -mt-16 sm:-mt-24">
