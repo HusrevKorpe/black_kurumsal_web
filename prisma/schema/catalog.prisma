@@ -45,7 +45,6 @@ model Shop {
   /// Öne çıkan kısa özellikler: "PS5", "Ücretsiz WiFi", "Otopark"
   features       String[]  @default([])
   coverImageId   String?
-  logoImageId    String?
   seoTitle       String?
   seoDescription String?
   sortOrder      Int       @default(0)
@@ -57,7 +56,6 @@ model Shop {
 
   location        Location?             @relation(fields: [locationId], references: [id], onDelete: SetNull)
   coverImage      Media?                @relation("ShopCover", fields: [coverImageId], references: [id], onDelete: SetNull)
-  logoImage       Media?                @relation("ShopLogo", fields: [logoImageId], references: [id], onDelete: SetNull)
   hours           OpeningHours[]
   hoursExceptions HoursException[]
   gallery         GalleryImage[]

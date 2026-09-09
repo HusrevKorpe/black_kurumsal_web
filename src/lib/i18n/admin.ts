@@ -237,6 +237,7 @@ export const admin = {
       isActive: 'Hesap aktif',
       isActiveHint: 'Pasif hesap panele giremez, ilk istekte oturumu kapanır.',
     },
+    generatePassword: 'Şifre Üret',
     resetPassword: 'Şifreyi Sıfırla',
     resetPasswordTitle: 'Yeni şifre belirle',
     newPassword: 'Yeni şifre',

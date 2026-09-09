@@ -1,14 +1,17 @@
 'use client'
 
+import { WandSparklesIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 import { Field, FormError, NativeSelect, SubmitButton } from '@/components/admin/form'
+import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import type { StaffListItem } from '@/features/staff/admin-queries'
 import { createStaffAction, updateStaffAction } from '@/features/staff/actions'
 import { firstError, useAction } from '@/lib/actions/use-action'
+import { generatePassword, PASSWORD_MIN_LENGTH } from '@/lib/auth/generate-password'
 import { ROUTES } from '@/lib/constants/routes'
 import { tr } from '@/lib/i18n/tr'
 
@@ -99,16 +102,27 @@ export function StaffForm({ mode, user, shops, isSelf = false }: StaffFormProps)
       </Field>
       {mode === 'create' ? (
         <Field label={f.password} htmlFor="password" error={err('password')} hint={f.passwordHint}>
-          <Input
-            id="password"
-            type="text"
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="h-10 font-mono"
-            required
-            minLength={8}
-          />
+          {/* Şifre açık yazılır: patron kuralı sağlayan bir şifre üretip kullanıcıya kendisi iletir. */}
+          <div className="flex gap-2">
+            <Input
+              id="password"
+              type="text"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-10 flex-1 font-mono"
+              required
+              minLength={PASSWORD_MIN_LENGTH}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10"
+              onClick={() => setPassword(generatePassword())}
+            >
+              <WandSparklesIcon data-icon="inline-start" /> {tr.admin.users.generatePassword}
+            </Button>
+          </div>
         </Field>
       ) : null}
 

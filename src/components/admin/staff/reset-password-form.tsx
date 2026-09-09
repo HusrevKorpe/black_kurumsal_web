@@ -1,11 +1,13 @@
 'use client'
 
+import { WandSparklesIcon } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Field, FormError } from '@/components/admin/form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { resetStaffPasswordAction } from '@/features/staff/actions'
 import { firstError, useAction } from '@/lib/actions/use-action'
+import { generatePassword, PASSWORD_MIN_LENGTH } from '@/lib/auth/generate-password'
 import { tr } from '@/lib/i18n/tr'
 
 export function ResetPasswordForm({ userId }: { userId: string }) {
@@ -36,20 +38,29 @@ export function ResetPasswordForm({ userId }: { userId: string }) {
           hint={u.fields.passwordHint}
           className="flex-1"
         >
-          <Input
-            id="new-password"
-            type="text"
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="h-10 font-mono"
-            minLength={8}
-          />
+          <div className="flex gap-2">
+            <Input
+              id="new-password"
+              type="text"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="h-10 flex-1 font-mono"
+              minLength={PASSWORD_MIN_LENGTH}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10"
+              onClick={() => setPassword(generatePassword())}
+            >
+              <WandSparklesIcon data-icon="inline-start" /> {u.generatePassword}
+            </Button>
+          </div>
         </Field>
         <Button
           type="submit"
-          variant="outline"
-          disabled={action.pending || password.length < 8}
+          disabled={action.pending || password.length < PASSWORD_MIN_LENGTH}
           className="h-10"
         >
           {u.resetPassword}

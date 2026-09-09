@@ -63,11 +63,11 @@ async function clearLocation(id: string): Promise<string[]> {
 async function clearShop(id: string): Promise<string[]> {
   const shop = await db.shop.findUniqueOrThrow({
     where: { id },
-    select: { coverImageId: true, logoImageId: true, gallery: { select: { mediaId: true } } },
+    select: { coverImageId: true, gallery: { select: { mediaId: true } } },
   })
   await db.openingHours.deleteMany({ where: { shopId: id } })
   await db.priceCategory.deleteMany({ where: { shopId: id } })
-  return deleteMedia([shop.coverImageId, shop.logoImageId, ...shop.gallery.map((g) => g.mediaId)])
+  return deleteMedia([shop.coverImageId, ...shop.gallery.map((g) => g.mediaId)])
 }
 
 async function clearCampaigns(): Promise<string[]> {

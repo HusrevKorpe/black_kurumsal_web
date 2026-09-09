@@ -14,7 +14,6 @@ model Media {
   uploadedBy     StaffUser?     @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
   galleryImage   GalleryImage?
   shopCovers     Shop[]         @relation("ShopCover")
-  shopLogos      Shop[]         @relation("ShopLogo")
   locationCovers Location[]     @relation("LocationCover")
   campaigns      Campaign[]
   priceItems     PriceItem[]

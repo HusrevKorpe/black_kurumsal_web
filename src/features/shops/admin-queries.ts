@@ -43,7 +43,6 @@ export function adminShopInclude(now: Date) {
     hours: true,
     hoursExceptions: exceptions,
     coverImage: true,
-    logoImage: true,
   } satisfies Prisma.ShopInclude
 }
 

@@ -28,11 +28,10 @@ export interface OrphanReport {
   removedObjects: number
 }
 
-/** Media'ya işaret eden her ilişki boş: kapak, logo, galeri, kampanya, fiyat kalemi, site logosu. */
+/** Media'ya işaret eden her ilişki boş: kapak, galeri, kampanya, fiyat kalemi, site logosu. */
 const NO_REFERENCE = {
   galleryImage: null,
   shopCovers: { none: {} },
-  shopLogos: { none: {} },
   locationCovers: { none: {} },
   campaigns: { none: {} },
   priceItems: { none: {} },

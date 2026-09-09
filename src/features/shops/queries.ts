@@ -54,7 +54,6 @@ export async function getActiveShopSlugs(): Promise<string[]> {
 function shopDetailInclude(now: Date) {
   return {
     coverImage: true,
-    logoImage: true,
     hours: true,
     hoursExceptions: exceptionsArgs(now),
     location: {

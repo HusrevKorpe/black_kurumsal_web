@@ -124,7 +124,7 @@ kod değişmez.
 - **Location** (mekan/bölge): slug, name, kind(VENUE|DISTRICT), description, address, mapUrl,
   phone, whatsapp, instagramUrl, coverImage, sortOrder, isActive, deletedAt.
 - **Shop** (dükkan): slug, name, type(PLAYSTATION|INTERNET_CAFE|FOOD|APART|OTHER), location,
-  description, address, mapUrl, phone, whatsapp, instagramUrl, features[], coverImage, logoImage,
+  description, address, mapUrl, phone, whatsapp, instagramUrl, features[], coverImage,
   seoTitle, seoDescription, sortOrder, isActive, deletedAt.
 - **OpeningHours**: shop **veya** location'a bağlı, dayOfWeek(1-7 ISO), opensAt/closesAt "HH:mm", isClosed.
 - **HoursException**: shop **veya** location'a bağlı, date(`@db.Date`, saat dilimsiz takvim günü),

@@ -117,7 +117,6 @@ const SHOP_SELECT = {
   whatsapp: true,
   instagramUrl: true,
   coverImageId: true,
-  logoImageId: true,
   features: true,
   _count: { select: { hours: true, gallery: true, priceCategories: true } },
 } as const
@@ -137,7 +136,6 @@ function shopHasContent(row: ShopRow): boolean {
     row.whatsapp,
     row.instagramUrl,
     row.coverImageId,
-    row.logoImageId,
   ]
   const counts = row._count.hours + row._count.gallery + row._count.priceCategories
   return fields.some((value) => value !== null) || row.features.length > 0 || counts > 0

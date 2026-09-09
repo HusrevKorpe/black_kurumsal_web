@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { StaffRole } from '@/generated/prisma/enums'
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@/lib/auth/generate-password'
 import { idSchema } from '@/lib/validation/common'
 
 /**
@@ -10,8 +11,8 @@ import { idSchema } from '@/lib/validation/common'
  */
 const passwordSchema = z
   .string()
-  .min(12, 'Şifre en az 12 karakter olmalı')
-  .max(72, 'Şifre en fazla 72 karakter')
+  .min(PASSWORD_MIN_LENGTH, `Şifre en az ${PASSWORD_MIN_LENGTH} karakter olmalı`)
+  .max(PASSWORD_MAX_LENGTH, `Şifre en fazla ${PASSWORD_MAX_LENGTH} karakter`)
   .refine(
     (p) => /[a-z]/.test(p) && /[A-Z]/.test(p) && /\d/.test(p),
     'Şifre küçük harf, büyük harf ve rakam içermeli',
