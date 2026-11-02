@@ -1,6 +1,40 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('Açık site', () => {
+  test('geniş ekranda yan pano tıklamayı başka dükkana kaçırmaz', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'pano yalnızca geniş ekranda')
+    await page.goto('/')
+    const photos = page.locator('.shop-row-photo')
+    const pointerEvents = await photos.last().evaluate((el) => getComputedStyle(el).pointerEvents)
+    expect(pointerEvents).toBe('none')
+  })
+
+  test('arka planda video oynar, durdurulabilir', async ({ page }) => {
+    await page.goto('/')
+    const video = page.locator('video.hero-video')
+    await expect(video).toHaveAttribute('data-playing', 'true', { timeout: 15_000 })
+    await page.getByRole('button', { name: 'Arka plan hareketini durdur' }).click()
+    await expect.poll(() => video.evaluate((el: HTMLVideoElement) => el.paused)).toBe(true)
+    await page.getByRole('button', { name: 'Arka plan hareketini başlat' }).click()
+    await expect.poll(() => video.evaluate((el: HTMLVideoElement) => el.paused)).toBe(false)
+  })
+
+  test('marka yazısı açılışta harf harf yanar, normal rengine oturur', async ({ page }) => {
+    await page.goto('/')
+    const letters = page.locator('.hero-wordmark-letter')
+    const delays = await letters.evaluateAll((els) =>
+      els.map((el) => parseFloat(getComputedStyle(el).animationDelay)),
+    )
+    expect(delays.length).toBeGreaterThan(1)
+    expect(delays).toEqual([...delays].sort((a, b) => a - b))
+    await expect
+      .poll(() => letters.evaluateAll((els) => els.flatMap((el) => el.getAnimations()).length), {
+        timeout: 6000,
+      })
+      .toBe(0)
+    await expect(letters.first()).toHaveCSS('background-position', '0px 0px')
+  })
+
   test('ana sayfa: kampanyalar, mekanlar ve dükkanlar görünür', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()

@@ -1,5 +1,6 @@
 'use client'
 
+import { clsx } from 'clsx'
 import { useMemo } from 'react'
 import {
   DAY_NAMES,
@@ -12,7 +13,6 @@ import {
   type WeeklyHours,
 } from '@/features/hours'
 import { tr } from '@/lib/i18n/tr'
-import { cn } from '@/lib/utils'
 import { useMinuteTick } from './use-minute-tick'
 
 interface HoursTableProps {
@@ -44,7 +44,7 @@ export function HoursTable({ week, exceptions, note }: HoursTableProps) {
           return (
             <div
               key={entry.dayOfWeek}
-              className={cn(
+              className={clsx(
                 'flex items-center justify-between px-3 py-2',
                 isToday && 'bg-accent font-semibold',
               )}
@@ -55,7 +55,7 @@ export function HoursTable({ week, exceptions, note }: HoursTableProps) {
                   <span className="text-xs font-medium text-brand">{tr.common.today}</span>
                 ) : null}
               </dt>
-              <dd className={cn('tabular-nums', entry.isClosed && 'text-muted-foreground')}>
+              <dd className={clsx('tabular-nums', entry.isClosed && 'text-muted-foreground')}>
                 {formatHoursEntry(entry)}
               </dd>
             </div>
@@ -81,7 +81,7 @@ export function HoursTable({ week, exceptions, note }: HoursTableProps) {
                   ) : null}
                 </dt>
                 <dd
-                  className={cn(
+                  className={clsx(
                     'shrink-0 tabular-nums',
                     exception.isClosed && 'text-muted-foreground',
                   )}

@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
 import type { LocationCardData } from '@/features/locations/queries'
 import { ROUTES } from '@/lib/constants/routes'
 import { tr } from '@/lib/i18n/tr'
@@ -15,28 +14,26 @@ export function LocationCard({ location }: LocationCardProps) {
     <Link
       href={ROUTES.location(location.slug)}
       data-track="location"
-      className="group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-xl border focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:aspect-[3/2]"
+      className="group relative flex aspect-[16/10] flex-col justify-end overflow-hidden bg-card focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
     >
       <CoverImage
         media={location.coverImage}
         alt={location.name}
-        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-        className="transition-transform duration-300 group-hover:scale-[1.03]"
+        sizes="(min-width: 1024px) 50vw, 100vw"
+        className="transition-transform duration-500 group-hover:scale-[1.03]"
       />
       <div
-        className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent"
+        className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"
         aria-hidden
       />
-      <div className="relative flex items-end justify-between gap-3 p-4">
-        <div>
-          <Badge variant={isVenue ? 'default' : 'outline'} className="mb-2">
-            {isVenue ? tr.location.venue : tr.location.district}
-          </Badge>
-          <h3 className="text-xl font-semibold">{location.name}</h3>
-        </div>
-        <span className="shrink-0 text-sm text-muted-foreground">
+      <div className="relative p-4 lg:p-6">
+        <h3 className="font-display text-4xl leading-none font-bold uppercase lg:text-6xl">
+          {location.name}
+        </h3>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          {isVenue ? tr.location.venue : tr.location.district} ·{' '}
           {tr.home.shopCount(location._count.shops)}
-        </span>
+        </p>
       </div>
     </Link>
   )

@@ -17,6 +17,9 @@ interface ContactButtonsProps {
   hasActionBar?: boolean
 }
 
+/** Açık sitede her düğme 48 px: parmakla rahat. */
+const BUTTON_SIZE_CLASS = 'h-12 px-5 text-base'
+
 const WHATSAPP_CLASS =
   'bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90 border-transparent'
 
@@ -40,7 +43,7 @@ export function ContactButtons({
         <a
           href={tel}
           data-track="call"
-          className={cn(buttonVariants({ size: 'lg' }), primaryClass)}
+          className={cn(buttonVariants({ size: 'lg' }), BUTTON_SIZE_CLASS, primaryClass)}
         >
           <PhoneIcon data-icon="inline-start" /> {tr.common.call}
         </a>
@@ -51,7 +54,12 @@ export function ContactButtons({
           data-track="whatsapp"
           target="_blank"
           rel="noopener noreferrer"
-          className={cn(buttonVariants({ size: 'lg' }), WHATSAPP_CLASS, primaryClass)}
+          className={cn(
+            buttonVariants({ size: 'lg' }),
+            BUTTON_SIZE_CLASS,
+            WHATSAPP_CLASS,
+            primaryClass,
+          )}
         >
           <MessageCircleIcon data-icon="inline-start" /> {tr.common.whatsapp}
         </a>
@@ -62,7 +70,7 @@ export function ContactButtons({
           data-track="directions"
           target="_blank"
           rel="noopener noreferrer"
-          className={buttonVariants({ size: 'lg', variant: 'outline' })}
+          className={cn(buttonVariants({ size: 'lg', variant: 'outline' }), BUTTON_SIZE_CLASS)}
         >
           <MapPinIcon data-icon="inline-start" /> {tr.common.directions}
         </a>
@@ -73,7 +81,7 @@ export function ContactButtons({
           data-track="instagram"
           target="_blank"
           rel="noopener noreferrer"
-          className={buttonVariants({ size: 'lg', variant: 'outline' })}
+          className={cn(buttonVariants({ size: 'lg', variant: 'outline' }), BUTTON_SIZE_CLASS)}
         >
           <InstagramIcon data-icon="inline-start" /> {tr.common.instagram}
         </a>

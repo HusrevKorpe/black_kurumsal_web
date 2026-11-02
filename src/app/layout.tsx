@@ -1,11 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist } from 'next/font/google'
+import localFont from 'next/font/local'
 import { publicEnv } from '@/lib/env'
 import './globals.css'
 
-// Türkçe karakterler (ş, ğ, ı, İ) latin-ext alt kümesindedir. Geist Mono yalnızca panelde yüklenir
-// (admin/(panel)/layout.tsx): açık sayfalar her ziyarette 2 yazı tipi dosyası daha az indirir.
-const geistSans = Geist({ variable: '--font-sans', subsets: ['latin', 'latin-ext'] })
+// Türkçeye göre kırpılmış tek dosya (src/fonts/README.md): latin + latin-ext iki dosyası yerine.
+// Geist Mono yalnızca panelde yüklenir (admin/(panel)/layout.tsx).
+const geistSans = localFont({
+  src: '../fonts/geist-tr.woff2',
+  variable: '--font-sans',
+  weight: '400 700',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.NEXT_PUBLIC_SITE_URL),

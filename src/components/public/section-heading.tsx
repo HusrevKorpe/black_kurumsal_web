@@ -10,17 +10,17 @@ interface SectionHeadingProps {
 
 export function SectionHeading({ title, subtitle, action, as: Tag = 'h2' }: SectionHeadingProps) {
   return (
-    <div className="mb-6 flex items-end justify-between gap-4">
+    <div className="mb-3 flex items-end justify-between gap-4 lg:mb-6">
       <div>
-        <Tag className="text-2xl font-semibold tracking-tight sm:text-3xl">{title}</Tag>
-        {subtitle ? (
-          <p className="mt-1 text-sm text-muted-foreground sm:text-base">{subtitle}</p>
-        ) : null}
+        <Tag className="font-display text-3xl leading-tight font-bold uppercase lg:text-5xl">
+          {title}
+        </Tag>
+        {subtitle ? <p className="mt-1 text-muted-foreground lg:text-lg">{subtitle}</p> : null}
       </div>
       {action ? (
         <Link
           href={action.href}
-          className="shrink-0 text-sm font-medium text-brand hover:underline"
+          className="-my-2 inline-flex min-h-12 shrink-0 items-center text-sm font-medium text-brand hover:underline"
         >
           {action.label}
         </Link>

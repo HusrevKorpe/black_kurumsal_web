@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Badge } from '@/components/ui/badge'
 import { CampaignCard } from '@/components/public/campaign-card'
 import { ContactActionBar, ContactButtons } from '@/components/public/contact-buttons'
 import { CoverImage } from '@/components/public/cover-image'
@@ -28,7 +27,8 @@ export const revalidate = 3600
 export const dynamicParams = true
 
 /** 44 px'lik dokunma hedefi; eksi dikey boşluk metin satırının dışına taşan kısmı yutar. */
-const BREADCRUMB_LINK_CLASS = '-my-3 inline-flex min-h-11 items-center hover:text-foreground'
+const BREADCRUMB_LINK_CLASS = 'inline-flex min-h-11 items-center hover:text-foreground'
+const SECTION_TITLE_CLASS = 'mb-4 font-display text-4xl font-bold uppercase lg:text-5xl'
 
 export async function generateStaticParams() {
   const slugs = await getActiveShopSlugs()
@@ -98,19 +98,21 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
-      <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-[21/9]">
-        <CoverImage media={shop.coverImage} alt={shop.name} sizes="100vw" priority />
-        <div
-          className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent"
-          aria-hidden
-        />
-      </div>
+      {shop.coverImage ? (
+        <div className="relative aspect-[16/10] w-full overflow-hidden lg:aspect-auto lg:h-[28rem]">
+          <CoverImage media={shop.coverImage} alt={shop.name} sizes="100vw" priority />
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"
+            aria-hidden
+          />
+        </div>
+      ) : null}
 
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <header className="relative -mt-16 sm:-mt-24">
+        <header className={shop.coverImage ? 'relative -mt-6 lg:-mt-16' : 'pt-4'}>
           <nav
             aria-label="Konum"
-            className="mb-3 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground"
+            className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground"
           >
             <Link href={ROUTES.home} className={BREADCRUMB_LINK_CLASS}>
               {tr.nav.home}
@@ -124,30 +126,39 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
               </>
             ) : null}
           </nav>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{SHOP_TYPE_META[shop.type].label}</Badge>
-            {locationLabel ? (
-              <span className="text-sm text-muted-foreground">{locationLabel}</span>
-            ) : null}
-          </div>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{shop.name}</h1>
-          <OpenStatusBadge week={week} exceptions={exceptions} detailed className="mt-2 text-sm" />
+          <h1 className="mt-2 font-display text-5xl leading-[0.95] font-bold uppercase lg:text-8xl">
+            {shop.name}
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            {locationLabel
+              ? `${SHOP_TYPE_META[shop.type].label} · ${locationLabel}`
+              : SHOP_TYPE_META[shop.type].label}
+          </p>
+          <OpenStatusBadge week={week} exceptions={exceptions} detailed className="mt-1 text-sm" />
           <ContactButtons
             contact={contact}
             whatsappMessage={whatsappMessage}
-            className="mt-5"
+            className="mt-4"
             hasActionBar
           />
         </header>
 
         {/*
-          Telefonda "açık mı, nerede" fiyat listesinden önce gelir: saat ve iletişim kartları
-          DOM'da da önde. Geniş ekranda hücre yerleşimi açıkça verilir; sağ sütun yine yan panel.
+          Telefonda sıra: fiyat, saat ve iletişim, galeri, hakkında. Müşteri en çok fiyata bakar;
+          üstteki durum satırı "açık mı" sorusunu zaten cevaplar. Geniş ekranda sağ sütun yan panel,
+          son 1fr satırı panelin fazla yüksekliğini soldaki bölümlerin arasına dağıtmaz.
         */}
-        <div className="mt-8 grid gap-8 sm:mt-10 sm:gap-10 lg:grid-cols-[1fr_340px]">
-          <aside className="space-y-6 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:self-start">
-            <section aria-labelledby="saatler" className="rounded-xl border bg-card p-4">
-              <h2 id="saatler" className="mb-3 font-semibold">
+        <div className="mt-8 grid gap-10 lg:mt-14 lg:grid-cols-[1fr_340px] lg:grid-rows-[auto_auto_auto_auto_1fr] lg:gap-x-16">
+          <section aria-labelledby="fiyatlar" className="min-w-0 lg:col-start-1">
+            <h2 id="fiyatlar" className={SECTION_TITLE_CLASS}>
+              {tr.shop.prices}
+            </h2>
+            <PriceList categories={categories} />
+          </section>
+
+          <aside className="space-y-6 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-5 lg:row-start-1 lg:self-start">
+            <section aria-labelledby="saatler" className="bg-card p-4">
+              <h2 id="saatler" className="mb-3 font-display text-2xl font-bold uppercase">
                 {tr.common.hours}
               </h2>
               <HoursTable week={week} exceptions={exceptions} note={hoursNote} />
@@ -155,52 +166,43 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
             <ShopContactCard contact={contact} />
           </aside>
 
-          <div className="space-y-12 lg:col-start-1 lg:row-start-1">
-            {shop.description ? (
-              <section aria-labelledby="hakkinda">
-                <h2 id="hakkinda" className="mb-3 text-xl font-semibold">
-                  {tr.shop.about}
-                </h2>
-                <p className="leading-relaxed whitespace-pre-line text-muted-foreground">
-                  {shop.description}
-                </p>
-                {shop.features.length > 0 ? (
-                  <div className="mt-4">
-                    <FeatureChips features={shop.features} />
-                  </div>
-                ) : null}
-              </section>
-            ) : null}
-
-            {gallery.length > 0 ? (
-              <section aria-labelledby="galeri">
-                <h2 id="galeri" className="mb-3 text-xl font-semibold">
-                  {tr.shop.gallery}
-                </h2>
-                <Gallery images={gallery} title={shop.name} />
-              </section>
-            ) : null}
-
-            <section aria-labelledby="fiyatlar">
-              <h2 id="fiyatlar" className="mb-3 text-xl font-semibold">
-                {tr.shop.prices}
+          {gallery.length > 0 ? (
+            <section aria-labelledby="galeri" className="min-w-0 lg:col-start-1">
+              <h2 id="galeri" className={SECTION_TITLE_CLASS}>
+                {tr.shop.gallery}
               </h2>
-              <PriceList categories={categories} />
+              <Gallery images={gallery} title={shop.name} />
             </section>
+          ) : null}
 
-            {campaigns.length > 0 ? (
-              <section aria-labelledby="kampanyalar">
-                <h2 id="kampanyalar" className="mb-3 text-xl font-semibold">
-                  {tr.shop.campaigns}
-                </h2>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {campaigns.map((campaign) => (
-                    <CampaignCard key={campaign.id} campaign={campaign} hideTarget />
-                  ))}
+          {shop.description ? (
+            <section aria-labelledby="hakkinda" className="min-w-0 lg:col-start-1">
+              <h2 id="hakkinda" className={SECTION_TITLE_CLASS}>
+                {tr.shop.about}
+              </h2>
+              <p className="max-w-2xl leading-relaxed whitespace-pre-line text-muted-foreground">
+                {shop.description}
+              </p>
+              {shop.features.length > 0 ? (
+                <div className="mt-4">
+                  <FeatureChips features={shop.features} />
                 </div>
-              </section>
-            ) : null}
-          </div>
+              ) : null}
+            </section>
+          ) : null}
+
+          {campaigns.length > 0 ? (
+            <section aria-labelledby="kampanyalar" className="min-w-0 lg:col-start-1">
+              <h2 id="kampanyalar" className={SECTION_TITLE_CLASS}>
+                {tr.shop.campaigns}
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {campaigns.map((campaign) => (
+                  <CampaignCard key={campaign.id} campaign={campaign} hideTarget />
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
       </div>
 

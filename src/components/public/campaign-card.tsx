@@ -49,7 +49,7 @@ function scopeLine(campaign: CampaignCardInput) {
  * çizilir (-outline-offset): kartın overflow-hidden'ı dışarıdaki halkayı kırpardı.
  */
 const STRETCHED =
-  'after:absolute after:inset-0 after:content-[""] hover:underline focus-visible:outline-none focus-visible:after:rounded-xl focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-ring'
+  'after:absolute after:inset-0 after:content-[""] hover:underline focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-ring'
 
 export function CampaignCard({
   campaign,
@@ -79,33 +79,28 @@ export function CampaignCard({
   )
 
   return (
-    <article
-      className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-xl border bg-card',
-        linked && 'transition-shadow hover:shadow-lg',
-      )}
-    >
+    <article className={cn('group relative flex h-full flex-col overflow-hidden bg-card')}>
       <div className="relative aspect-video overflow-hidden">
         <CoverImage
           media={campaign.image}
           alt={campaign.title}
           sizes="(min-width: 1024px) 40vw, (min-width: 640px) 60vw, 85vw"
           priority={priority}
-          className={cn(linked && 'transition-transform duration-300 group-hover:scale-[1.03]')}
+          className={cn(linked && 'transition-transform duration-500 group-hover:scale-[1.03]')}
         />
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         {!hideTarget ? (
           <span
             className={cn(
-              'text-xs font-medium tracking-wide uppercase',
+              'text-sm font-medium',
               scope.href ? 'text-brand' : 'text-muted-foreground',
             )}
           >
             {scope.label}
           </span>
         ) : null}
-        <Heading className="text-lg leading-snug font-semibold">
+        <Heading className="font-display text-2xl leading-tight font-bold uppercase">
           {href ? (
             <Link
               href={href}

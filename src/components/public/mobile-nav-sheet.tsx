@@ -46,7 +46,12 @@ export function MobileNavSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent id={id} side="right" className="w-72" finalFocus={finalFocus}>
+      <SheetContent
+        id={id}
+        side="right"
+        className="w-72 [&_[data-slot=sheet-close]]:top-1 [&_[data-slot=sheet-close]]:right-1 [&_[data-slot=sheet-close]]:size-12"
+        finalFocus={finalFocus}
+      >
         <SheetHeader>
           <SheetTitle>{brandName}</SheetTitle>
           <SheetDescription className="sr-only">{tr.nav.menu}</SheetDescription>

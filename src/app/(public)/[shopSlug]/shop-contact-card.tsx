@@ -15,8 +15,8 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
   if (!hasAny) return null
 
   return (
-    <section aria-labelledby="iletisim" className="rounded-xl border bg-card p-4">
-      <h2 id="iletisim" className="mb-3 font-semibold">
+    <section aria-labelledby="iletisim" className="bg-card p-4">
+      <h2 id="iletisim" className="mb-3 font-display text-2xl font-bold uppercase">
         {tr.shop.contact}
       </h2>
       <ul className="space-y-3 text-sm">
@@ -31,7 +31,7 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
                   data-track="directions"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-brand hover:underline"
+                  className="-my-2 inline-flex min-h-11 items-center text-brand hover:underline"
                 >
                   {tr.common.directions}
                 </a>

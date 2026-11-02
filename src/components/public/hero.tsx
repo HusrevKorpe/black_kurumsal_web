@@ -1,37 +1,80 @@
-import Link from 'next/link'
-import { buttonVariants } from '@/components/ui/button'
-import { ROUTES } from '@/lib/constants/routes'
+import { ChevronDownIcon } from 'lucide-react'
+import Image from 'next/image'
 import { tr } from '@/lib/i18n/tr'
+import { HeroMotion } from './hero-motion'
+import { HeroWordmark } from './hero-wordmark'
+import { HeroWordmarkGhost } from './hero-wordmark-ghost'
 
 interface HeroProps {
+  brandName: string
   title: string
   subtitle: string | null
 }
 
-export function Hero({ title, subtitle }: HeroProps) {
+/**
+ * Tek siyah cephe: ilk ekranın tamamını video ve dev marka yazısı kaplar, dükkan listesi kaydırınca
+ * gelir. Listenin aşağıda olduğunu alttaki işaret söyler.
+ */
+const HERO_IMAGE_SIZES = '100vw'
+/** Videonun ilk karesi: video başlayınca sıçrama olmasın. */
+const HERO_POSTER = '/media/hero-poster.jpg'
+
+export function Hero({ brandName, title, subtitle }: HeroProps) {
   return (
-    <section className="relative overflow-hidden border-b">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,var(--tw-gradient-stops))] from-brand/25 via-transparent to-transparent"
+    <section className="hero relative isolate flex flex-col justify-end overflow-hidden">
+      <HeroMotion
+        poster={
+          <Image
+            src={HERO_POSTER}
+            alt=""
+            fill
+            sizes={HERO_IMAGE_SIZES}
+            loading="eager"
+            fetchPriority="high"
+            className="object-cover"
+          />
+        }
       />
-      <div className="relative mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <h1 className="max-w-3xl text-3xl font-bold tracking-tight sm:text-5xl">{title}</h1>
-        {subtitle ? (
-          <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">{subtitle}</p>
-        ) : null}
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link href={ROUTES.homeSection('dukkanlar')} className={buttonVariants({ size: 'lg' })}>
-            {tr.nav.shops}
-          </Link>
-          <Link
-            href={ROUTES.campaigns}
-            className={buttonVariants({ size: 'lg', variant: 'outline' })}
-          >
-            {tr.nav.campaigns}
-          </Link>
-        </div>
+      {/* Video oynarken harfler pencere olur: katman `multiply` ile karartır, beyaz harfler videoyu olduğu gibi geçirir. */}
+      <div className="hero-mask" aria-hidden>
+        <HeroCopy brandName={brandName} title={title} subtitle={subtitle} ghost />
       </div>
+      {/* Karanlık sahnede de yazı seçilsin: ince kontur ve hafif beyaz dolgu. */}
+      <div className="hero-outline" aria-hidden>
+        <HeroCopy brandName={brandName} title={title} subtitle={subtitle} ghost />
+      </div>
+      <HeroCopy brandName={brandName} title={title} subtitle={subtitle} />
+      <a href="#dukkanlar" className="hero-scroll-cue">
+        {tr.nav.shops}
+        <ChevronDownIcon className="size-5" aria-hidden />
+      </a>
     </section>
+  )
+}
+
+/** Yerleşim katmanlarda birebir aynı kalsın diye tek yerde; `ghost` kopyada yalnız harfler görünür. */
+function HeroCopy({
+  brandName,
+  title,
+  subtitle,
+  ghost = false,
+}: Pick<HeroProps, 'brandName' | 'title' | 'subtitle'> & { ghost?: boolean }) {
+  const Title = ghost ? 'p' : 'h1'
+  return (
+    <div className="hero-copy relative z-10 mx-auto w-full max-w-6xl px-4 pt-2 pb-2 sm:px-6 sm:pb-8">
+      {ghost ? <HeroWordmarkGhost text={brandName} /> : <HeroWordmark text={brandName} />}
+      <Title
+        className={`mt-2 pr-10 text-base font-medium text-balance sm:mt-3 sm:text-2xl ${ghost ? 'invisible' : ''}`}
+      >
+        {title}
+      </Title>
+      {subtitle ? (
+        <p
+          className={`mt-2 hidden max-w-2xl text-lg text-muted-foreground sm:block ${ghost ? 'invisible' : ''}`}
+        >
+          {subtitle}
+        </p>
+      ) : null}
+    </div>
   )
 }

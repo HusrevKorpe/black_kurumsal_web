@@ -285,6 +285,20 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
      Testler bu adımdan sonra: 190 birim/bileşen, 94 entegrasyon, 66 e2e (62 koşan + 4 atlanan).
      **Canlıya not:** deploy öncesi prod veritabanında `pnpm db:deploy` gerekir.
 
+8. **M8 Yeni tasarıma geçiş** (02.11.2026'da başladı, `yeni-tasarim` dalı). Açık site baştan yazılıyor; panel kapsam dışı.
+   Fikir: tek siyah cephe, beş tabela. Asıl ölçüt telefondan giriş. Rakip: jetespor.com.
+   - **Faz 0 Temel** ✅: yalnız açık siteye özel tema (`.public-theme`), Barlow Condensed 700 (başlık), kabul ölçütleri.
+   - **Faz 1 Telefon ilk ekranı ve ana sayfa** ✅: dev marka yazısı, ilk ekranda tüm dükkanlar, kampanya ve mekan aşağıda.
+   - **Faz 2 Hareketli arka plan** ✅: sabit dükkan kapakları yavaşça birbirine geçer, üzerlerinde spot ve ışık bandı gezer (yakınlaştırma titrediği için kaldırıldı), durdurma düğmesi;
+     ekran dışında, sekme gizliyken durur. Telefonda otomatik video yok (Safari'de veri tasarrufu anlaşılamıyor,
+     Düşük Güç Modu oynatmayı engelleyebiliyor).
+   - **Faz 3 Dükkan, mekan, kampanya, 404, üst/alt çubuk** ✅: fiyat önce, 48 px hedefler, fotoğrafsız sayfa boş kutu göstermez.
+   - **Faz 4 Doğrulama** ✅ (2 Kasım 2026'da kapatıldı; yazı tipi 34 KB, 3 sayfada ilk 3 sn 333–352 KB. Bilerek bırakılan: ana sayfa 421 KB, JS 184–190 KB, Lighthouse benzetim LCP 2,3–3,1 sn; canlıda yeniden ölçülecek): e2e + axe, ilk ekran ve dokunma testleri, Lighthouse, gerçek iPhone/Android, Instagram ve WhatsApp içi tarayıcı.
+   - **Faz 5 Profesyonel fotoğraflar**: `pnpm media:import` ile yükleme, kapak seçimi, kırpma kontrolü.
+   - **Faz 6 Açılış videosu** ✅ (2 Kasım 2026): fotoğraf slaytı kaldırıldı. Higgsfield/Kling ile üretilen 4 çekim (tost, kol, ızgara, oda anahtarı) `public/media/hero-*.mp4`: bilgisayar 1,3 MB, telefon 0,56 MB, 16,8 sn kesintisiz döngü. Video oynayınca BLACK harfleri pencere olur (`multiply`), çevre loş kalır; oynamazsa dolu yazı ve afiş kalır. Video sayfa yüklenince hemen iner (kullanıcı 3 sn gecikmeyi istemedi; ilk 3 sn ≤ 400 KB ölçütü telefonda bu yüzden aşılabilir, canlıda ölçülecek). Yapay zekâ görüntüsü: tabela, yazı ve gerçek mekan yok. Gerçek çekim gelirse aynı dosyalar değiştirilir.
+   - **Faz 7 Canlıya geçiş**: içerik temizliği (uydurma telefon/adres), `main`'e birleştirme, canlıda ölçüm.
+     Kabul ölçütleri: LCP ≤ 2,5 sn, CLS ≤ 0,05, INP ≤ 200 ms, ilk 3 sn'de ≤ 400 KB, dokunma ≥ 48 px, 360/390 px'te taşma yok.
+
 ## 12. Bilinen Kararlar / Notlar (uygulama sırasında)
 
 - **Sayaç mimarisi (07.09.2026):** ham olay tablosu tek doğruluk kaynağı; günlük özet tablosu (rollup) yazılmadı.

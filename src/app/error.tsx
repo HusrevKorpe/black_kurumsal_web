@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { captureException } from '@/lib/sentry/client'
 import { tr } from '@/lib/i18n/tr'
 
@@ -24,9 +23,14 @@ export default function RouteError({
       {error.digest ? (
         <p className="mt-2 font-mono text-xs text-muted-foreground">{error.digest}</p>
       ) : null}
-      <Button size="lg" className="mt-8" onClick={retry}>
+      {/* Düz düğme: hata sınırı her sayfanın paketine girer, bileşen kütüphanesini taşımasın. */}
+      <button
+        type="button"
+        onClick={retry}
+        className="mt-8 inline-flex h-12 items-center rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+      >
         {tr.common.retry}
-      </Button>
+      </button>
     </main>
   )
 }

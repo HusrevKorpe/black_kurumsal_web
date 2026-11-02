@@ -1,14 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Badge } from '@/components/ui/badge'
 import { CampaignCard } from '@/components/public/campaign-card'
 import { ContactButtons } from '@/components/public/contact-buttons'
 import { CoverImage } from '@/components/public/cover-image'
 import { Gallery } from '@/components/public/gallery'
 import { HoursTable } from '@/components/public/hours-table'
 import { OpenStatusBadge } from '@/components/public/open-status-badge'
-import { ShopCard } from '@/components/public/shop-card'
+import { ShopDirectory } from '@/components/public/shop-directory'
 import { normalizeWeek, toExceptionEntries } from '@/features/hours'
 import { getActiveLocationSlugs, getLocationBySlug } from '@/features/locations/queries'
 import { resolveContact } from '@/features/shops/contact'
@@ -20,7 +19,7 @@ export const revalidate = 3600
 export const dynamicParams = true
 
 /** 44 px'lik dokunma hedefi; eksi dikey boşluk metin satırının dışına taşan kısmı yutar. */
-const BREADCRUMB_LINK_CLASS = '-my-3 inline-flex min-h-11 items-center hover:text-foreground'
+const BREADCRUMB_LINK_CLASS = 'inline-flex min-h-11 items-center hover:text-foreground'
 
 export async function generateStaticParams() {
   const slugs = await getActiveLocationSlugs()
@@ -64,27 +63,29 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
 
   return (
     <article>
-      {isVenue ? (
-        <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-[21/9]">
+      {isVenue && location.coverImage ? (
+        <div className="relative aspect-[16/10] w-full overflow-hidden lg:aspect-auto lg:h-[28rem]">
           <CoverImage media={location.coverImage} alt={location.name} sizes="100vw" priority />
           <div
-            className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent"
+            className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"
             aria-hidden
           />
         </div>
       ) : null}
 
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <header className={isVenue ? 'relative -mt-16 sm:-mt-24' : 'pt-10'}>
-          <nav aria-label="Konum" className="mb-3 flex text-sm text-muted-foreground">
+        <header className={isVenue && location.coverImage ? 'relative -mt-6 lg:-mt-16' : 'pt-4'}>
+          <nav aria-label="Konum" className="flex text-sm text-muted-foreground">
             <Link href={ROUTES.home} className={BREADCRUMB_LINK_CLASS}>
               {tr.nav.home}
             </Link>
           </nav>
-          <Badge variant={isVenue ? 'default' : 'outline'}>
+          <h1 className="mt-2 font-display text-5xl leading-[0.95] font-bold uppercase lg:text-8xl">
+            {location.name}
+          </h1>
+          <p className="mt-2 text-muted-foreground">
             {isVenue ? tr.location.venue : tr.location.district}
-          </Badge>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{location.name}</h1>
+          </p>
           {location.description ? (
             <p className="mt-3 max-w-2xl leading-relaxed text-muted-foreground">
               {location.description}
@@ -103,17 +104,16 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
 
         <div className="mt-10 space-y-12 pb-16">
           <section aria-labelledby="dukkanlar">
-            <h2 id="dukkanlar" className="mb-4 text-xl font-semibold">
+            <h2
+              id="dukkanlar"
+              className="mb-4 font-display text-4xl font-bold uppercase lg:text-5xl"
+            >
               {isVenue ? tr.location.shopsHere : tr.location.shopsInDistrict}
             </h2>
             {location.shops.length === 0 ? (
               <p className="text-sm text-muted-foreground">{tr.location.noShops}</p>
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-                {location.shops.map((shop) => (
-                  <ShopCard key={shop.id} shop={shop} hideLocation />
-                ))}
-              </div>
+              <ShopDirectory shops={location.shops} hideLocation />
             )}
           </section>
 
@@ -122,7 +122,10 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
               <div className="space-y-12">
                 {gallery.length > 0 ? (
                   <section aria-labelledby="galeri">
-                    <h2 id="galeri" className="mb-3 text-xl font-semibold">
+                    <h2
+                      id="galeri"
+                      className="mb-4 font-display text-4xl font-bold uppercase lg:text-5xl"
+                    >
                       {tr.shop.gallery}
                     </h2>
                     <Gallery images={gallery} title={location.name} />
@@ -130,7 +133,10 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
                 ) : null}
                 {location.campaigns.length > 0 ? (
                   <section aria-labelledby="kampanyalar">
-                    <h2 id="kampanyalar" className="mb-3 text-xl font-semibold">
+                    <h2
+                      id="kampanyalar"
+                      className="mb-4 font-display text-4xl font-bold uppercase lg:text-5xl"
+                    >
                       {tr.nav.campaigns}
                     </h2>
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -142,15 +148,15 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
                 ) : null}
               </div>
               <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-                <section aria-labelledby="saatler" className="rounded-xl border bg-card p-4">
-                  <h2 id="saatler" className="mb-3 font-semibold">
+                <section aria-labelledby="saatler" className="bg-card p-4">
+                  <h2 id="saatler" className="mb-3 font-display text-2xl font-bold uppercase">
                     {tr.common.hours}
                   </h2>
                   <HoursTable week={week} exceptions={exceptions} />
                 </section>
                 {contact.address ? (
-                  <section aria-labelledby="adres" className="rounded-xl border bg-card p-4">
-                    <h2 id="adres" className="mb-2 font-semibold">
+                  <section aria-labelledby="adres" className="bg-card p-4">
+                    <h2 id="adres" className="mb-2 font-display text-2xl font-bold uppercase">
                       {tr.common.address}
                     </h2>
                     <p className="text-sm">{contact.address}</p>
@@ -159,7 +165,7 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
                         href={contact.mapUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-1 inline-block text-sm text-brand hover:underline"
+                        className="inline-flex min-h-11 items-center text-sm text-brand hover:underline"
                       >
                         {tr.common.directions}
                       </a>

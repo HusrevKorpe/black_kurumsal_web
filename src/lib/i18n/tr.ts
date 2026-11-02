@@ -59,6 +59,8 @@ export const tr = {
     locationsTitle: 'Nereye gideceksin?',
     locationsSubtitle: 'Mekanlarımız ve bölgelerimiz',
     categoriesTitle: 'Ne yapmak istiyorsun?',
+    motionPause: 'Arka plan hareketini durdur',
+    motionPlay: 'Arka plan hareketini başlat',
     allShopsTitle: 'Tüm Dükkanlar',
     shopCount: (n: number) => `${n} dükkan`,
     inheritedFrom: (name: string) => `${name} içinde`,

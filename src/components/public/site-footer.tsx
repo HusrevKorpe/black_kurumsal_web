@@ -15,20 +15,17 @@ interface SiteFooterProps {
  * boşluğu, satır yüksekliğinin fazlasını yutar ki başlıkla ilk bağlantının arası değişmesin.
  */
 const LIST_CLASS = '-my-3 text-sm text-muted-foreground sm:my-0 sm:space-y-2'
-const LINK_CLASS = 'inline-flex min-h-11 items-center gap-2 hover:text-foreground sm:min-h-0'
+const LINK_CLASS = 'inline-flex min-h-12 items-center gap-2 hover:text-foreground sm:min-h-0'
 
 export function SiteFooter({ settings }: SiteFooterProps) {
   const phoneHref = settings.contactPhone ? telHref(settings.contactPhone) : null
 
   return (
-    <footer className="mt-16 border-t bg-card/40">
+    <footer className="mt-16 overflow-hidden border-t">
       <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3 sm:px-6">
         <div>
-          <p className="text-lg font-semibold">{settings.brandName}</p>
           {settings.heroSubtitle ? (
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {settings.heroSubtitle}
-            </p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{settings.heroSubtitle}</p>
           ) : null}
         </div>
 
@@ -53,32 +50,40 @@ export function SiteFooter({ settings }: SiteFooterProps) {
           </ul>
         </nav>
 
-        <div>
-          <p className="mb-3 text-sm font-semibold">{tr.footer.contact}</p>
-          <ul className={LIST_CLASS}>
-            {phoneHref && settings.contactPhone ? (
-              <li>
-                <a href={phoneHref} data-track="call" className={LINK_CLASS}>
-                  <PhoneIcon className="size-4" /> {formatTrPhone(settings.contactPhone)}
-                </a>
-              </li>
-            ) : null}
-            {settings.instagramUrl ? (
-              <li>
-                <a
-                  href={settings.instagramUrl}
-                  data-track="instagram"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={LINK_CLASS}
-                >
-                  <InstagramIcon className="size-4" /> {tr.common.instagram}
-                </a>
-              </li>
-            ) : null}
-          </ul>
-        </div>
+        {phoneHref || settings.instagramUrl ? (
+          <div>
+            <p className="mb-3 text-sm font-semibold">{tr.footer.contact}</p>
+            <ul className={LIST_CLASS}>
+              {phoneHref && settings.contactPhone ? (
+                <li>
+                  <a href={phoneHref} data-track="call" className={LINK_CLASS}>
+                    <PhoneIcon className="size-4" /> {formatTrPhone(settings.contactPhone)}
+                  </a>
+                </li>
+              ) : null}
+              {settings.instagramUrl ? (
+                <li>
+                  <a
+                    href={settings.instagramUrl}
+                    data-track="instagram"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={LINK_CLASS}
+                  >
+                    <InstagramIcon className="size-4" /> {tr.common.instagram}
+                  </a>
+                </li>
+              ) : null}
+            </ul>
+          </div>
+        ) : null}
       </div>
+      <div
+        aria-hidden
+        data-wordmark={settings.brandName}
+        className="footer-wordmark mx-auto w-full max-w-6xl px-4 font-display font-bold uppercase sm:px-6"
+        style={{ '--brand-length': settings.brandName.length } as React.CSSProperties}
+      />
       <div className="border-t">
         <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-muted-foreground sm:px-6">
           {tr.footer.rights(new Date().getFullYear())}

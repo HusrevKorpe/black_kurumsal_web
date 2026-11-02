@@ -13,7 +13,7 @@ interface PriceListProps {
 
 function PriceRow({ item }: { item: PriceItemView }) {
   return (
-    <li className={cn('flex items-start gap-3 py-3', !item.isAvailable && 'opacity-60')}>
+    <li className={cn('flex items-start gap-3 py-3.5', !item.isAvailable && 'opacity-60')}>
       {item.image ? (
         <div className="relative size-14 shrink-0 overflow-hidden rounded-md">
           <Image
@@ -66,7 +66,7 @@ export function PriceList({ categories }: PriceListProps) {
           <div className="flex items-center gap-3">
             <h3
               id={`fiyat-${category.id}`}
-              className="text-base font-bold tracking-wide text-brand uppercase"
+              className="font-display text-2xl font-bold text-brand uppercase"
             >
               {category.name}
             </h3>

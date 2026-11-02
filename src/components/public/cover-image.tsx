@@ -11,18 +11,10 @@ interface CoverImageProps {
   className?: string
 }
 
-/** Kapak görseli; görsel yoksa marka renginde zemin. Oran dış kapsayıcıdan gelir. */
+/** Kapak görseli; görsel yoksa düz yüzey (üstündeki yazı alanı tamamlar). Oran dış kapsayıcıdan gelir. */
 export function CoverImage({ media, alt, sizes, priority = false, className }: CoverImageProps) {
   if (!media) {
-    return (
-      <div
-        aria-hidden
-        className={cn(
-          'absolute inset-0 bg-gradient-to-br from-brand/30 via-transparent to-background',
-          className,
-        )}
-      />
-    )
+    return <div aria-hidden className={cn('absolute inset-0 bg-card', className)} />
   }
   return (
     <Image

@@ -1,5 +1,6 @@
 'use client'
 
+import { clsx } from 'clsx'
 import { useMemo } from 'react'
 import {
   DAY_NAMES,
@@ -8,7 +9,6 @@ import {
   type WeeklyHours,
 } from '@/features/hours'
 import { tr } from '@/lib/i18n/tr'
-import { cn } from '@/lib/utils'
 import { useMinuteTick } from './use-minute-tick'
 
 interface OpenStatusBadgeProps {
@@ -22,7 +22,7 @@ interface OpenStatusBadgeProps {
 
 /**
  * Sayfalar statik üretildiği için "şu an" tarayıcıda hesaplanır.
- * Sunucuda nötr görünür, yüklendikten sonra gerçek durum gelir ve her dakika yenilenir.
+ * Sunucuda boş yer tutar, yüklendikten sonra gerçek durum gelir ve her dakika yenilenir.
  */
 export function OpenStatusBadge({
   week,
@@ -39,14 +39,8 @@ export function OpenStatusBadge({
   if (week.length === 0) return null
 
   if (!status) {
-    return (
-      <span
-        className={cn('inline-flex items-center gap-1.5 text-xs text-muted-foreground', className)}
-      >
-        <span className="size-2 rounded-full bg-muted-foreground/40" aria-hidden />
-        {tr.common.hours}
-      </span>
-    )
+    // Yer ayrılır, metin göstermez: gerçek durum gelince satır oynamaz, gri yazı da görünmez.
+    return <span aria-hidden className={clsx('inline-block h-[1lh] w-20', className)} />
   }
 
   if (status.kind === 'unknown') return null
@@ -65,14 +59,14 @@ export function OpenStatusBadge({
 
   return (
     <span
-      className={cn(
-        'inline-flex items-center gap-1.5 text-xs font-medium',
+      className={clsx(
+        'inline-flex items-center gap-1.5 font-medium',
         isOpen ? 'text-emerald-400' : 'text-rose-400',
         className,
       )}
     >
       <span
-        className={cn('size-2 rounded-full', isOpen ? 'bg-emerald-400' : 'bg-rose-400')}
+        className={clsx('size-2 rounded-full', isOpen ? 'bg-emerald-400' : 'bg-rose-400')}
         aria-hidden
       />
       {isOpen ? tr.common.openNow : tr.common.closedNow}
