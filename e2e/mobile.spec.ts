@@ -85,7 +85,6 @@ test.describe('Telefondan giriş', () => {
     await page.goto('/')
     const targets = [
       page.getByRole('button', { name: 'Menü' }),
-      page.getByRole('button', { name: /Arka plan hareketini/ }),
       page.locator('#dukkanlar a').first(),
       page.locator('.hero-scroll-cue'),
     ]
@@ -93,20 +92,5 @@ test.describe('Telefondan giriş', () => {
       const box = await target.boundingBox()
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(48)
     }
-  })
-
-  test('hareket durdurulabilir; azaltılmış harekette düğme de hareket de yok', async ({
-    page,
-    browser,
-  }) => {
-    await page.goto('/')
-    await page.getByRole('button', { name: 'Arka plan hareketini durdur' }).click()
-    await expect(page.locator('.hero-stage')).toHaveAttribute('data-paused', 'true')
-
-    const context = await browser.newContext({ reducedMotion: 'reduce' })
-    const reduced = await context.newPage()
-    await reduced.goto('/')
-    await expect(reduced.getByRole('button', { name: 'Arka plan hareketini durdur' })).toBeHidden()
-    await context.close()
   })
 })

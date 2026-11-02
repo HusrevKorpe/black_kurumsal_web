@@ -1,8 +1,6 @@
 'use client'
 
-import { PauseIcon, PlayIcon } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
-import { tr } from '@/lib/i18n/tr'
 
 const VIDEO_WIDE = '/media/hero-genis.mp4'
 const VIDEO_PHONE = '/media/hero-telefon.mp4'
@@ -23,7 +21,7 @@ function subscribeReducedMotion(onChange: () => void): () => void {
 /**
  * Açılışın arka planı: sessiz, döngülü video, altında aynı karenin afişi (LCP). Video sayfa yüklendikten
  * sonra iner. Veri tasarrufunda, azaltılmış harekette ya da tarayıcı oynatmayı reddederse (iOS Düşük Güç
- * Modu) afiş kalır. Ekran dışında, sekme gizliyken ve kullanıcı durdurunca durur (WCAG 2.2.2).
+ * Modu) afiş kalır. Kullanıcı durduramaz (sahibin kararı); yalnız ekran dışında ve sekme gizliyken durur.
  */
 export function HeroMotion({ poster }: { poster: ReactNode }) {
   const stageRef = useRef<HTMLDivElement>(null)
@@ -31,7 +29,6 @@ export function HeroMotion({ poster }: { poster: ReactNode }) {
   const [src, setSrc] = useState<string | null>(null)
   const [playing, setPlaying] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
-  const [userPaused, setUserPaused] = useState(false)
   const [onScreen, setOnScreen] = useState(true)
   const [pageVisible, setPageVisible] = useState(true)
   const reducedMotion = useSyncExternalStore(
@@ -40,7 +37,7 @@ export function HeroMotion({ poster }: { poster: ReactNode }) {
     () => false,
   )
 
-  const paused = userPaused || !onScreen || !pageVisible || reducedMotion
+  const paused = !onScreen || !pageVisible || reducedMotion
 
   useEffect(() => {
     // Hidrasyonun ilk geçişinde `reducedMotion` henüz sunucu değeridir (false); tercih doğrudan okunur.
@@ -65,7 +62,7 @@ export function HeroMotion({ poster }: { poster: ReactNode }) {
       video.pause()
       return
     }
-    // Durdurmanın kestiği play() AbortError verir; gerçek ret ise afişte kalmak demektir.
+    // Ekrandan çıkınca durmanın kestiği play() AbortError verir; gerçek ret ise afişte kalmak demektir.
     video.play().catch((error: unknown) => {
       if (!(error instanceof DOMException) || error.name !== 'AbortError') setUnavailable(true)
     })
@@ -116,17 +113,6 @@ export function HeroMotion({ poster }: { poster: ReactNode }) {
         />
       ) : null}
       <div className="hero-scrim" aria-hidden />
-      {unavailable ? null : (
-        <button
-          type="button"
-          onClick={() => setUserPaused((current) => !current)}
-          aria-pressed={userPaused}
-          aria-label={userPaused ? tr.home.motionPlay : tr.home.motionPause}
-          className="absolute right-1 bottom-1 z-20 inline-flex size-12 items-center justify-center text-foreground/80 hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ring motion-reduce:hidden sm:right-3 sm:bottom-3"
-        >
-          {userPaused ? <PlayIcon className="size-4" /> : <PauseIcon className="size-4" />}
-        </button>
-      )}
     </div>
   )
 }

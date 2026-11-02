@@ -7,8 +7,7 @@ let playedThisVisit = false
 
 /**
  * Süs yazısı: açılışta ışık harf harf soldan sağa geçer, sonra normal rengine oturur. Sonraki hareket
- * CSS'te (`.hero-wordmark-letter`), JS gelmeden de oynar. Tek seferlik ve 5 sn'den kısa olduğu için
- * durdurma düğmesine bağlı değil (WCAG 2.2.2).
+ * CSS'te (`.hero-wordmark-letter`), JS gelmeden de oynar. Tek seferlik ve 5 sn'den kısadır.
  */
 export function HeroWordmark({ text }: { text: string }) {
   const ref = useRef<HTMLParagraphElement>(null)

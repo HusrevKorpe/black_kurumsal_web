@@ -9,13 +9,11 @@ test.describe('Açık site', () => {
     expect(pointerEvents).toBe('none')
   })
 
-  test('arka planda video oynar, durdurulabilir', async ({ page }) => {
+  test('arka planda video oynar, kullanıcı durduramaz', async ({ page }) => {
     await page.goto('/')
     const video = page.locator('video.hero-video')
     await expect(video).toHaveAttribute('data-playing', 'true', { timeout: 15_000 })
-    await page.getByRole('button', { name: 'Arka plan hareketini durdur' }).click()
-    await expect.poll(() => video.evaluate((el: HTMLVideoElement) => el.paused)).toBe(true)
-    await page.getByRole('button', { name: 'Arka plan hareketini başlat' }).click()
+    await expect(page.getByRole('button', { name: /Arka plan hareketini/ })).toHaveCount(0)
     await expect.poll(() => video.evaluate((el: HTMLVideoElement) => el.paused)).toBe(false)
   })
 
