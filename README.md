@@ -70,6 +70,7 @@ Seed hesapları: `patron@black.local / Patron12345!` (Patron) · `sorumlu@black.
   kalır: aynı adresle yeni dükkan açılamaz.
 - Sentry: `NEXT_PUBLIC_SENTRY_DSN` doluysa açık, boşsa tamamen kapalı. Yalnızca hata izleme (tracing/replay paketten çıkarılmış).
   Kaynak haritası yüklemek için Vercel/CI'da `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`.
+- Canlı tutma: günlük Vercel Cron (`/api/cron/canli-tut`, `CRON_SECRET` gerekli) Supabase ücretsiz planında projenin hareketsizlikten durmasını önlemek için veritabanına ve Supabase API'sine istek atar.
 - Yetim medya: canlıda haftalık Vercel Cron (`/api/cron/medya-temizle`, `CRON_SECRET` gerekli), yerelde `pnpm media:cleanup`.
 - İstatistik (`/admin/istatistik`, patron): sayfa görüntüleme ve tıklama sayaçları kendi veritabanımızda; dışarıya
   hiçbir betik yüklenmez. Olaylar 400 gün saklanır, haftalık Vercel Cron (`/api/cron/istatistik-temizle`,

@@ -3,6 +3,10 @@
   "regions": ["fra1"],
   "crons": [
     {
+      "path": "/api/cron/canli-tut",
+      "schedule": "0 6 * * *"
+    },
+    {
       "path": "/api/cron/medya-temizle",
       "schedule": "0 4 * * 1"
     },
