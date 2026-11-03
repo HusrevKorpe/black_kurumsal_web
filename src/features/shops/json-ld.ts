@@ -1,5 +1,6 @@
 import type { HoursExceptionEntry, WeeklyHours } from '@/features/hours'
 import type { ShopType } from '@/generated/prisma/enums'
+import { SITE_CITY } from '@/lib/constants/site'
 
 const SCHEMA_TYPE: Record<ShopType, string> = {
   PLAYSTATION: 'EntertainmentBusiness',
@@ -64,9 +65,13 @@ export function buildShopJsonLd(input: ShopJsonLdInput): Record<string, unknown>
     ...(input.description ? { description: input.description } : {}),
     ...(input.image ? { image: input.image } : {}),
     ...(input.phone ? { telephone: input.phone } : {}),
-    ...(input.address
-      ? { address: { '@type': 'PostalAddress', streetAddress: input.address } }
-      : {}),
+    // Sokak adresi girilmemiş olsa da şehir bilinir; Google işletmeyi doğru şehre bağlar.
+    address: {
+      '@type': 'PostalAddress',
+      ...(input.address ? { streetAddress: input.address } : {}),
+      addressLocality: SITE_CITY,
+      addressCountry: 'TR',
+    },
     ...(openingHoursSpecification.length > 0 ? { openingHoursSpecification } : {}),
     ...(input.exceptions && input.exceptions.length > 0
       ? { specialOpeningHoursSpecification: specialHoursSpecification(input.exceptions) }

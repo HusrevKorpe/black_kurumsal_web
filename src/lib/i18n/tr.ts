@@ -101,7 +101,7 @@ export const tr = {
     invalidInput: 'Girdi doğrulanamadı.',
   },
   footer: {
-    rights: (year: number) => `© ${year} Black. Tüm hakları saklıdır.`,
+    rights: (year: number) => `© ${year} Black · Isparta. Tüm hakları saklıdır.`,
     quickLinks: 'Hızlı Bağlantılar',
     contact: 'İletişim',
   },

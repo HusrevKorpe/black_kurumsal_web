@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_TITLE_TEMPLATE } from '@/lib/constants/site'
 import { publicEnv } from '@/lib/env'
 import './globals.css'
 
@@ -13,8 +14,9 @@ const geistSans = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.NEXT_PUBLIC_SITE_URL),
-  title: { default: 'Black', template: '%s | Black' },
-  description: 'Black dükkanları: PlayStation, internet kafe, yeme-içme ve konaklama.',
+  title: { default: SITE_TITLE, template: SITE_TITLE_TEMPLATE },
+  description: SITE_DESCRIPTION,
+  openGraph: { siteName: 'Black', locale: 'tr_TR', type: 'website' },
 }
 
 export const viewport: Viewport = {

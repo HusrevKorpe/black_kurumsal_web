@@ -12,6 +12,7 @@ import { normalizeWeek, toExceptionEntries } from '@/features/hours'
 import { getActiveLocationSlugs, getLocationBySlug } from '@/features/locations/queries'
 import { resolveContact } from '@/features/shops/contact'
 import { ROUTES } from '@/lib/constants/routes'
+import { pageDescription } from '@/lib/constants/site'
 import { tr } from '@/lib/i18n/tr'
 import { mediaPublicUrl } from '@/lib/media/url'
 
@@ -30,13 +31,19 @@ export async function generateMetadata({ params }: PageProps<'/mekan/[slug]'>): 
   const { slug } = await params
   const location = await getLocationBySlug(slug)
   if (!location) return {}
+  const description =
+    location.description ??
+    pageDescription(
+      location.name,
+      location.kind === 'VENUE' ? tr.location.venue : tr.location.district,
+    )
   return {
     title: location.name,
-    description: location.description ?? undefined,
+    description,
     alternates: { canonical: ROUTES.location(location.slug) },
     openGraph: {
       title: location.name,
-      description: location.description ?? undefined,
+      description,
       type: 'website',
       images: location.coverImage ? [mediaPublicUrl(location.coverImage)] : undefined,
     },

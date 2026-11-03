@@ -18,6 +18,7 @@ import { shopLocationLabel } from '@/features/shops/view'
 import { publicEnv } from '@/lib/env'
 import { ROUTES } from '@/lib/constants/routes'
 import { SHOP_TYPE_META } from '@/lib/constants/shops'
+import { pageDescription } from '@/lib/constants/site'
 import { tr } from '@/lib/i18n/tr'
 import { mediaPublicUrl } from '@/lib/media/url'
 import { isReservedSlug } from '@/lib/utils/slugify'
@@ -40,7 +41,10 @@ export async function generateMetadata({ params }: PageProps<'/[shopSlug]'>): Pr
   const shop = isReservedSlug(shopSlug) ? null : await getShopBySlug(shopSlug)
   if (!shop) return {}
   const title = shop.seoTitle ?? shop.name
-  const description = shop.seoDescription ?? shop.description ?? undefined
+  const description =
+    shop.seoDescription ??
+    shop.description ??
+    pageDescription(shop.name, SHOP_TYPE_META[shop.type].label)
   return {
     title,
     description,

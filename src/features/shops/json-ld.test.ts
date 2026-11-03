@@ -25,7 +25,12 @@ describe('buildShopJsonLd', () => {
         closes: '23:00',
       },
     ])
-    expect(data.address).toEqual({ '@type': 'PostalAddress', streetAddress: 'Çarşı' })
+    expect(data.address).toEqual({
+      '@type': 'PostalAddress',
+      streetAddress: 'Çarşı',
+      addressLocality: 'Isparta',
+      addressCountry: 'TR',
+    })
   })
 
   it('boş alanları hiç yazmaz', () => {
@@ -42,6 +47,12 @@ describe('buildShopJsonLd', () => {
     expect(data['@type']).toBe('LodgingBusiness')
     expect(data).not.toHaveProperty('telephone')
     expect(data).not.toHaveProperty('openingHoursSpecification')
+    // Sokak adresi yoksa da şehir yazılır.
+    expect(data.address).toEqual({
+      '@type': 'PostalAddress',
+      addressLocality: 'Isparta',
+      addressCountry: 'TR',
+    })
   })
 
   it('script kapanışını kaçırır', () => {

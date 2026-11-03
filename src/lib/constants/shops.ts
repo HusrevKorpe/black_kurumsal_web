@@ -12,9 +12,9 @@ export const SHOP_CATEGORIES: readonly ShopCategoryMeta[] = [
   {
     key: 'ENTERTAINMENT',
     label: 'Oyun ve Eğlence',
-    description: 'PlayStation ve internet kafeler',
+    description: 'PlayStation kafe',
   },
-  { key: 'FOOD', label: 'Yeme-İçme', description: 'Tost, tavuk, makarna, sushi' },
+  { key: 'FOOD', label: 'Yeme-İçme', description: 'Tost ve yeme-içme' },
   { key: 'ACCOMMODATION', label: 'Konaklama', description: 'Apart ve konaklama' },
   { key: 'OTHER', label: 'Diğer', description: 'Diğer hizmetler' },
 ]
