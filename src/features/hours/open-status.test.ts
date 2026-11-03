@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getOpenStatus } from './open-status'
+import { getOpenStatus, minutesUntilClose } from './open-status'
 import { normalizeWeek } from './resolve'
 import type { HoursEntry, HoursExceptionEntry } from './types'
 
@@ -178,5 +178,37 @@ describe('getOpenStatus — istisna günler', () => {
         exceptions: [closedOn('2025-09-05')],
       }),
     ).toEqual({ kind: 'open', closesAt: '23:00' })
+  })
+})
+
+describe('minutesUntilClose', () => {
+  const at = (iso: string) => ({ now: istanbul(iso), timeZone: TZ })
+
+  it('aynı gün kapanışa kalan dakikayı sayar', () => {
+    expect(minutesUntilClose({ kind: 'open', closesAt: '23:00' }, at('2026-09-05T22:15:00'))).toBe(
+      45,
+    )
+  })
+
+  it('gece yarısını geçen kapanışı doğru sayar', () => {
+    const status = { kind: 'open', closesAt: '02:00' } as const
+    expect(minutesUntilClose(status, at('2026-09-05T01:30:00'))).toBe(30)
+    expect(minutesUntilClose(status, at('2026-09-05T23:00:00'))).toBe(180)
+  })
+
+  it('kapalı, bilinmeyen ve 24 saat açıkta null', () => {
+    expect(minutesUntilClose({ kind: 'closed', nextOpen: null }, at('2026-09-05T12:00:00'))).toBe(
+      null,
+    )
+    expect(minutesUntilClose({ kind: 'unknown' }, at('2026-09-05T12:00:00'))).toBe(null)
+    expect(minutesUntilClose({ kind: 'open', closesAt: null }, at('2026-09-05T12:00:00'))).toBe(
+      null,
+    )
+  })
+
+  it('getOpenStatus çıktısıyla uçtan uca: 10:00–02:00 dükkan 01:10’da 50 dk', () => {
+    const overnight = normalizeWeek(daily('10:00', '02:00'))
+    const now = at('2026-09-05T01:10:00')
+    expect(minutesUntilClose(getOpenStatus(overnight, now), now)).toBe(50)
   })
 })

@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+@import './shop-motion.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -317,7 +318,8 @@
 }
 /* Soy çizgisi: üstüne gelinen dükkana kökten giden dallar kehribar yanar. */
 .tree-lit {
-  fill: var(--brand);
+  /* Yanan dükkanın tabela rengi (`ShopTreeBranches` verir); mekan düğümünde markanın kehribarı. */
+  fill: var(--lit, var(--brand));
   opacity: 0;
   transition: opacity 0.2s ease;
 }

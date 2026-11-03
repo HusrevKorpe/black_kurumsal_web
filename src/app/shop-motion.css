@@ -1,0 +1,152 @@
+/*
+ * Açık sitenin üç ışığı: dükkan tabelaları, canlı açık/kapalı noktası ve karttan sayfaya geçiş.
+ * Sürekli dönen her şey yalnız transform/opacity; azaltılmış harekette hepsi durur.
+ */
+
+/*
+ * Tabela ışığı. Cephe siyah kalır; `data-accent` taşıyan kart ya da sayfa içinde `--brand` dükkanın
+ * rengine döner, böylece fiyat başlıkları, "Bugün" etiketi ve bağlantılar kendiliğinden o renkte yanar.
+ * Kehribar markanın kendi rengi, ezilmez. Değerler koyu zeminde 4,5:1'in üstünde okunur.
+ */
+[data-accent='neon'] {
+  --brand: oklch(0.74 0.19 288);
+}
+[data-accent='ice'] {
+  --brand: oklch(0.9 0.05 220);
+}
+
+/* Ağaçtaki dükkan kutusu: solda tabela şeridi, hep hafif bir hâle; üstüne gelince (dokununca) yanar. */
+.tree-shop {
+  position: relative;
+  box-shadow:
+    inset 2px 0 0 var(--brand),
+    0 0 22px -12px var(--brand);
+}
+.tree-shop::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border: 1px solid var(--brand);
+  box-shadow: 0 0 24px -6px var(--brand);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.tree-shop:hover::after,
+.tree-shop:focus-visible::after {
+  opacity: 0.85;
+}
+.tree-shop:active::after {
+  opacity: 1;
+  transition-duration: 0s;
+}
+.tree-shop-thumb {
+  background: color-mix(in oklch, var(--brand) 14%, var(--card));
+}
+
+/*
+ * Dükkan sayfası: kapağın altından dükkan renginde ışık vurur, adın etrafında neon hâlesi yanar.
+ * Kenarda çizgi yok: başlık kapağın üstüne bindiği için çizgi "Ana Sayfa" yazısını keserdi.
+ */
+.shop-cover::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  height: 45%;
+  background: radial-gradient(
+    55% 100% at 50% 100%,
+    color-mix(in oklch, var(--brand) 30%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+.shop-title {
+  text-shadow:
+    0 0 2px color-mix(in oklch, var(--brand) 45%, transparent),
+    0 0 22px color-mix(in oklch, var(--brand) 55%, transparent);
+}
+/* Sayfa açılınca tabela bir kez titreyerek yanar; sonra sabit kalır. */
+@media (prefers-reduced-motion: no-preference) {
+  .shop-title {
+    animation: sign-on 1.2s linear 0.35s backwards;
+  }
+}
+@keyframes sign-on {
+  0%,
+  9%,
+  15%,
+  31% {
+    text-shadow: none;
+  }
+  6%,
+  12%,
+  24%,
+  100% {
+    text-shadow:
+      0 0 2px color-mix(in oklch, var(--brand) 45%, transparent),
+      0 0 22px color-mix(in oklch, var(--brand) 55%, transparent);
+  }
+}
+
+/* Canlı durum noktası: açıkken yavaş, kapanışa bir saat kala hızlı halka atar. Renk yazıdan gelir. */
+.status-dot {
+  position: relative;
+}
+.status-dot[data-pulse]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  animation: status-ping 2.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.status-dot[data-pulse='fast']::after {
+  animation-duration: 1.2s;
+}
+@keyframes status-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  75%,
+  to {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+/*
+ * Karttan sayfaya: kapak ve ad (`ShopCoverMorph`, `ShopNameMorph`) eski yerinden yenisine büyür.
+ * Kapak kare küçükten 16:10 şeride geçerken gerilmesin diye iki görüntü de kırpılarak doldurur.
+ * Geçiş sürerken üst katman dokunmayı yutmasın.
+ */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-group(.shop-cover),
+::view-transition-group(.shop-name) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+::view-transition-old(.shop-cover),
+::view-transition-new(.shop-cover) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-shop::after {
+    transition: none;
+  }
+  .status-dot[data-pulse]::after {
+    animation: none;
+    opacity: 0;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

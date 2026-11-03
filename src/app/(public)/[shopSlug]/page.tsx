@@ -9,6 +9,7 @@ import { Gallery } from '@/components/public/gallery'
 import { HoursTable } from '@/components/public/hours-table'
 import { OpenStatusBadge } from '@/components/public/open-status-badge'
 import { PriceList } from '@/components/public/price-list'
+import { ShopCoverMorph, ShopNameMorph } from '@/components/public/shop-morph'
 import { resolveExceptions, resolveHours, toExceptionEntries } from '@/features/hours'
 import { toPriceCategoryViews } from '@/features/pricing/view'
 import { resolveContact } from '@/features/shops/contact'
@@ -96,20 +97,23 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
   })
 
   return (
-    <article className="pb-28 md:pb-0">
+    // data-accent dükkanın tabela ışığını (globals.css) sayfadaki bütün vurgu rengine yayar.
+    <article className="shop-page pb-28 md:pb-0" data-accent={SHOP_TYPE_META[shop.type].accent}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
       {shop.coverImage ? (
-        <div className="relative aspect-[16/10] w-full overflow-hidden lg:aspect-auto lg:h-[28rem]">
-          <CoverImage media={shop.coverImage} alt={shop.name} sizes="100vw" priority />
-          <div
-            className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"
-            aria-hidden
-          />
-        </div>
+        <ShopCoverMorph slug={shop.slug}>
+          <div className="shop-cover relative aspect-[16/10] w-full overflow-hidden lg:aspect-auto lg:h-[28rem]">
+            <CoverImage media={shop.coverImage} alt={shop.name} sizes="100vw" priority />
+            <div
+              className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"
+              aria-hidden
+            />
+          </div>
+        </ShopCoverMorph>
       ) : null}
 
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
@@ -130,9 +134,11 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
               </>
             ) : null}
           </nav>
-          <h1 className="mt-2 font-display text-5xl leading-[0.95] font-bold uppercase lg:text-8xl">
-            {shop.name}
-          </h1>
+          <ShopNameMorph slug={shop.slug}>
+            <h1 className="shop-title mt-2 w-fit max-w-full font-display text-5xl leading-[0.95] font-bold uppercase lg:text-8xl">
+              {shop.name}
+            </h1>
+          </ShopNameMorph>
           <p className="mt-2 text-muted-foreground">
             {locationLabel
               ? `${SHOP_TYPE_META[shop.type].label} · ${locationLabel}`

@@ -207,10 +207,14 @@ export function ShopTreeBranches() {
 
     // Soy çizgisi: bir düğümün üstüne gelince (ya da klavyeyle odaklanınca) kökten ona giden dallar yanar.
     const lit = svg.querySelectorAll<SVGElement>('.tree-lit')
-    const light = (id: string | null) =>
+    const light = (id: string | null) => {
+      // Soy çizgisi yanan dükkanın kendi tabela renginde yansın (data-accent → --brand).
+      const node = id ? container.querySelector<HTMLElement>(`[data-tree-node="${id}"]`) : null
+      if (node) svg.style.setProperty('--lit', getComputedStyle(node).getPropertyValue('--brand'))
       lit.forEach((el) =>
         el.classList.toggle('is-lit', !!id && el.dataset.feeds!.split(' ').includes(id)),
       )
+    }
     const fine = matchMedia('(hover: hover) and (pointer: fine)').matches
     const nodeOf = (e: Event) =>
       (e.target as Element | null)?.closest<HTMLElement>('[data-tree-node]')?.dataset.treeNode ??

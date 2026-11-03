@@ -20,5 +20,12 @@ export {
   exceptionDateFilter,
   MAX_EXCEPTIONS,
 } from './exceptions'
-export { getOpenStatus, isOvernight, isAllDay, type OpenStatusOptions } from './open-status'
+export {
+  getOpenStatus,
+  isOvernight,
+  isAllDay,
+  minutesUntilClose,
+  CLOSING_SOON_MINUTES,
+  type OpenStatusOptions,
+} from './open-status'
 export { DAY_NAMES, DAY_NAMES_SHORT, formatHoursEntry } from './format'

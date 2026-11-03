@@ -18,6 +18,7 @@ export const tr = {
     hours: 'Çalışma Saatleri',
     openNow: 'Şu an açık',
     closedNow: 'Şu an kapalı',
+    closingIn: (minutes: number) => `${minutes} dk sonra kapanıyor`,
     hoursUnknown: 'Saat bilgisi yok',
     allDay: '24 saat açık',
     closesAt: 'Kapanış',

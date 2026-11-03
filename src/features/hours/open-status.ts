@@ -98,3 +98,23 @@ function findNextOpen(
   }
   return null
 }
+
+/** Kapanışa bu kadar dakika (ya da daha az) kalınca site "kapanıyor" uyarısı gösterir. */
+export const CLOSING_SOON_MINUTES = 60
+
+/**
+ * Açık bir dükkanın kapanmasına kaç dakika kaldı. Kapalıysa, saat bilinmiyorsa ya da 24 saat açıksa
+ * null. Gece yarısını geçen kapanışta (01:30'da kapanış 02:00) da doğru sayar.
+ */
+export function minutesUntilClose(
+  status: OpenStatus,
+  options: Pick<OpenStatusOptions, 'now' | 'timeZone'> = {},
+): number | null {
+  if (status.kind !== 'open' || !status.closesAt) return null
+  const closes = parseHm(status.closesAt)
+  if (closes === null) return null
+  const { minutes } = zonedNow(options.now ?? new Date(), options.timeZone ?? ISTANBUL_TZ)
+  const left = (closes - minutes + 1440) % 1440
+  // Açık denmiş ama fark 0 çıktıysa kapanış tam şu dakikada; "0 dk" yerine 1 de.
+  return left === 0 ? 1 : left
+}

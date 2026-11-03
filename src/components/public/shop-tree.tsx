@@ -1,4 +1,5 @@
 import { ChevronRightIcon } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { resolveExceptions, resolveHours, toExceptionEntries } from '@/features/hours'
 import type { ShopCardData } from '@/features/shops/queries'
@@ -6,7 +7,10 @@ import { buildShopTree } from '@/features/shops/tree'
 import { ROUTES } from '@/lib/constants/routes'
 import { SHOP_TYPE_META } from '@/lib/constants/shops'
 import { tr } from '@/lib/i18n/tr'
+import { mediaPublicUrl } from '@/lib/media/url'
 import { OpenStatusBadge } from './open-status-badge'
+import { ShopCoverMorph, ShopNameMorph } from './shop-morph'
+import { ShopTypeIcon } from './shop-type-icon'
 import { ShopTreeAtlas } from './shop-tree-atlas'
 import { ShopTreeBranches } from './shop-tree-branches'
 
@@ -98,6 +102,7 @@ function TreeShop({ shop, parent }: { shop: ShopCardData; parent: string }) {
     toExceptionEntries(shop.hoursExceptions),
     shop.location ? toExceptionEntries(shop.location.hoursExceptions) : null,
   )
+  const meta = SHOP_TYPE_META[shop.type]
 
   return (
     <Link
@@ -105,13 +110,36 @@ function TreeShop({ shop, parent }: { shop: ShopCardData; parent: string }) {
       data-track="shop"
       data-tree-node={shop.id}
       data-tree-parent={parent}
-      className="tree-shop flex min-h-16 items-center gap-3 border border-border bg-card px-3 py-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring active:bg-accent"
+      data-accent={meta.accent}
+      className="tree-shop flex min-h-16 items-center gap-3 border border-border bg-card py-2 pr-3 pl-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring active:bg-accent"
     >
+      {/* Kapağın küçüğü: dokununca büyüyüp dükkan sayfasının kapağı olur (`ShopCoverMorph`). */}
+      <ShopCoverMorph slug={shop.slug}>
+        <span className="tree-shop-thumb relative size-12 shrink-0 overflow-hidden" aria-hidden>
+          {shop.coverImage ? (
+            <Image
+              src={mediaPublicUrl(shop.coverImage)}
+              alt=""
+              fill
+              sizes="48px"
+              className="object-cover"
+            />
+          ) : (
+            <span className="flex size-full items-center justify-center text-brand">
+              <ShopTypeIcon type={shop.type} className="size-6" />
+            </span>
+          )}
+        </span>
+      </ShopCoverMorph>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-base leading-tight font-semibold">{shop.name}</span>
+        <ShopNameMorph slug={shop.slug}>
+          <span className="block w-fit max-w-full truncate text-base leading-tight font-semibold">
+            {shop.name}
+          </span>
+        </ShopNameMorph>
         <span className="mt-0.5 flex items-center gap-x-2 text-sm text-muted-foreground">
           <OpenStatusBadge week={week} exceptions={exceptions} className="shrink-0 text-xs" />
-          <span className="min-w-0 truncate">{SHOP_TYPE_META[shop.type].label}</span>
+          <span className="min-w-0 truncate">{meta.label}</span>
         </span>
       </span>
       <ChevronRightIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden />

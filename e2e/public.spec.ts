@@ -73,7 +73,7 @@ test.describe('Açık site', () => {
     await expect(page.getByText('₺120 / saat')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Çalışma Saatleri' })).toBeVisible()
     await expect(page.getByText('Pazartesi')).toBeVisible()
-    await expect(page.getByText(/Şu an (açık|kapalı)/)).toBeVisible()
+    await expect(page.getByText(/Şu an (açık|kapalı)|dk sonra kapanıyor/)).toBeVisible()
   })
 
   test('Garden içindeki dükkan mekanın saatini ve adresini devralır', async ({ page }) => {
