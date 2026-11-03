@@ -3,34 +3,46 @@ import { expect, test } from '@playwright/test'
 test.describe('Açık site', () => {
   test('geniş ekranda yan pano tıklamayı başka dükkana kaçırmaz', async ({ page, isMobile }) => {
     test.skip(isMobile, 'pano yalnızca geniş ekranda')
-    await page.goto('/')
+    await page.goto('/mekan/carsi')
     const photos = page.locator('.shop-row-photo')
     const pointerEvents = await photos.last().evaluate((el) => getComputedStyle(el).pointerEvents)
     expect(pointerEvents).toBe('none')
   })
 
-  test('arka planda video oynar, kullanıcı durduramaz', async ({ page }) => {
+  test('açılış ağacı: kökten dükkanlara, her uç dükkan sayfasına gider', async ({ page }) => {
     await page.goto('/')
-    const video = page.locator('video.hero-video')
-    await expect(video).toHaveAttribute('data-playing', 'true', { timeout: 15_000 })
-    await expect(page.getByRole('button', { name: /Arka plan hareketini/ })).toHaveCount(0)
-    await expect.poll(() => video.evaluate((el: HTMLVideoElement) => el.paused)).toBe(false)
+    const tree = page.locator('#dukkanlar .tree')
+    await expect(tree.getByRole('link', { name: /Çarşı/ }).first()).toHaveAttribute(
+      'href',
+      '/mekan/carsi',
+    )
+    await tree.getByRole('link', { name: /Black PlayStation Çarşı/ }).click()
+    await expect(page).toHaveURL(/\/black-playstation-carsi$/)
   })
 
-  test('marka yazısı açılışta harf harf yanar, normal rengine oturur', async ({ page }) => {
+  test('açılışta ağaç kökten büyür: dallar her düğüme varır, düğümler sonra açılır', async ({
+    page,
+  }) => {
     await page.goto('/')
-    const letters = page.locator('.hero-wordmark-letter')
-    const delays = await letters.evaluateAll((els) =>
-      els.map((el) => parseFloat(getComputedStyle(el).animationDelay)),
-    )
-    expect(delays.length).toBeGreaterThan(1)
-    expect(delays).toEqual([...delays].sort((a, b) => a - b))
+    const section = page.locator('#dukkanlar')
+    await expect(section).toHaveAttribute('data-grown', /play|still/)
+    const shops = await section.locator('.tree-shop').count()
+    const groups = await section.locator('.tree-group').count()
+    await expect(section.locator('.tree-bud')).toHaveCount(shops + groups)
     await expect
-      .poll(() => letters.evaluateAll((els) => els.flatMap((el) => el.getAnimations()).length), {
-        timeout: 6000,
-      })
-      .toBe(0)
-    await expect(letters.first()).toHaveCSS('background-position', '0px 0px')
+      .poll(() =>
+        section.evaluate((el) =>
+          [...el.querySelectorAll<HTMLElement>('.tree-shop, .tree-group')].every(
+            (n) => getComputedStyle(n).opacity === '1',
+          ),
+        ),
+      )
+      .toBe(true)
+  })
+
+  test('açılışta video yok', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'load' })
+    await expect(page.locator('video')).toHaveCount(0)
   })
 
   test('ana sayfa: kampanyalar, mekanlar ve dükkanlar görünür', async ({ page }) => {

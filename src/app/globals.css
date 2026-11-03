@@ -158,109 +158,10 @@
   --radius: 0.125rem;
 }
 
-/*
- * Açılış ilk ekranın tamamı: kaydırana kadar yalnız video ve marka görünür. Üst çubuk (56/64 px + 1 px
- * çizgi) düşülür; `svh` tarayıcı çubuğu oynarken sıçramaz. Çok kısa ekranda yazı sığsın diye alt sınır var.
- */
-.hero {
-  min-height: max(20rem, calc(100svh - 3.5rem - 1px));
-}
-@media (min-width: 640px) {
-  .hero {
-    min-height: max(26rem, calc(100svh - 4rem - 1px));
-  }
-}
-/* Tüm yazı katmanları aynı sınıfı taşır, harfler hizalı kalır; alttaki boşluk kaydırma işaretinin. */
-.hero-copy {
-  padding-bottom: 4.5rem;
-}
-.hero-scroll-cue {
-  position: absolute;
-  bottom: 0.5rem;
-  left: 50%;
-  z-index: 20;
-  display: inline-flex;
-  min-height: 3rem;
-  align-items: center;
-  gap: 0.25rem;
-  padding-inline: 1rem;
-  font-weight: 500;
-  transform: translateX(-50%);
-}
-/* Üç kez hatırlatıp durur: sürekli zıplayan ok göz yorar, 5 sn altı olduğu için durdurma da gerekmez. */
-.hero-scroll-cue svg {
-  animation: hero-scroll-cue 1.4s ease-in-out 2.6s 3;
-}
-@keyframes hero-scroll-cue {
-  50% {
-    transform: translate3d(0, 0.3rem, 0);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-scroll-cue svg {
-    animation: none;
-  }
-}
-
-.hero-wordmark,
 .footer-wordmark {
   /* Harf sayısına göre genişliği doldurur; ad panelden değişse de taşmaz. */
   font-size: calc((min(100vw, 72rem) - 3rem) / (var(--brand-length) * 0.47));
   line-height: 0.8;
-}
-/*
- * Açılışta tabela yanar: sönük harfleri kor, kehribar ve sıcak beyaz bir ışık B'den K'ya doğru geçer,
- * yazı normal rengine oturur. Renk harfin içinden de aktığı için her harf kendi degradesini taşır;
- * varsayılan konum son hali olduğundan azaltılmış harekette yazı doğrudan normal görünür.
- */
-.hero-wordmark-letter {
-  display: inline-block;
-  white-space: pre;
-  /* Dar satır yüksekliğinde arka plan kutusu harfi kesmesin. */
-  margin-block: -0.1em;
-  padding-block: 0.1em;
-  color: transparent;
-  background-image: linear-gradient(
-    100deg,
-    var(--foreground) 36%,
-    #ffe7b0 44%,
-    var(--brand) 51%,
-    #e8622c 59%,
-    #6b2a16 68%,
-    #2b2b2a 78%
-  );
-  background-position: 0% 0;
-  background-size: 500% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation:
-    hero-wordmark-light 1.8s cubic-bezier(0.45, 0.05, 0.35, 1) backwards,
-    hero-wordmark-rise 1.1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-  animation-delay: calc(0.15s + var(--letter-index) * 0.14s);
-}
-.hero-wordmark[data-played='true'] .hero-wordmark-letter {
-  animation: none;
-}
-@keyframes hero-wordmark-light {
-  from {
-    background-position: 100% 0;
-  }
-  to {
-    background-position: 0% 0;
-  }
-}
-@keyframes hero-wordmark-rise {
-  from {
-    transform: translate3d(0, 0.05em, 0);
-  }
-  to {
-    transform: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-wordmark-letter {
-    animation: none;
-  }
 }
 /* line-height 0.8'de taban çizgisi kutunun altına oturur; harfler alt çizgiye değmesin diye boşluk. */
 .footer-wordmark {
@@ -281,78 +182,6 @@
 .gallery-deferred {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 40rem;
-}
-
-.hero-stage {
-  position: absolute;
-  inset: 0;
-  background: var(--card);
-}
-.hero-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 1.2s ease-in-out;
-}
-.hero-video[data-playing='true'] {
-  opacity: 1;
-}
-.hero-wordmark-ghost-letter {
-  display: inline-block;
-  white-space: pre;
-  margin-block: -0.1em;
-  padding-block: 0.1em;
-}
-.hero-mask,
-.hero-outline {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.7s ease-in-out;
-}
-.hero-mask {
-  color: #fff;
-  background: linear-gradient(to top, #0a0a0a 4%, #3d3d3d 50%, #5c5c5c);
-  mix-blend-mode: multiply;
-}
-.hero-outline {
-  color: rgb(255 255 255 / 10%);
-  -webkit-text-stroke: 1px rgb(255 255 255 / 50%);
-}
-/* Kopyada başlık görünmez; yalnız yazının yerini tutar. Kontur onlara geçmesin. */
-.hero-outline .invisible {
-  -webkit-text-stroke: 0;
-}
-.hero[data-video='playing'] .hero-mask,
-.hero[data-video='playing'] .hero-outline {
-  opacity: 1;
-}
-.hero .hero-wordmark {
-  transition: opacity 0.7s ease-in-out;
-}
-.hero[data-video='playing'] > .hero-copy .hero-wordmark {
-  opacity: 0;
-}
-.hero[data-video='playing'] .hero-scrim {
-  opacity: 0;
-}
-.hero-scrim {
-  transition: opacity 0.7s ease-in-out;
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, #0a0a0a 2%, rgb(10 10 10 / 62%) 45%, rgb(10 10 10 / 28%));
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-video {
-    transition: none;
-  }
 }
 
 /* Telefonda fotoğraf satırın sağında şerit; geniş ekranda listenin yanında tek büyük pano. */
@@ -412,5 +241,323 @@
 @media (prefers-reduced-motion: reduce) {
   .shop-row-photo {
     transition: none;
+  }
+}
+
+/*
+ * Açılış ağacı. Telefonda kök üstte, gövde solda aşağı iner; geniş ekranda kökün altından dallar
+ * yelpaze gibi her mekan sütununa açılır. Dalları `ShopTreeBranches` çizer ve büyütür; buradaki
+ * girintiler dalların sığdığı yeri ayırır. Liste dalsız da okunur.
+ */
+.tree-root-name {
+  font-size: 3.25rem;
+  line-height: 0.85;
+  letter-spacing: 0.01em;
+}
+.tree-root {
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+.tree,
+.tree-twigs {
+  list-style: none;
+}
+.tree > li,
+.tree-twigs > li {
+  position: relative;
+  padding-left: 1.75rem;
+}
+.tree > li {
+  padding-top: 0.75rem;
+}
+.tree-twigs > li {
+  padding-top: 0.5rem;
+}
+.tree-group,
+.tree-shop {
+  transform-origin: left center;
+}
+.tree-shop:hover {
+  border-color: oklch(1 0 0 / 40%);
+}
+
+/*
+ * Dallar gelmeden: düğümler kendiliğinden, sırayla açılır. Dallar zamanında gelirse (data-grown="play")
+ * bu yedek kalkar, her düğüm dalı varınca açılır; geç gelirse (still) düğümler hemen görünür.
+ */
+.tree-section:not([data-grown]) :is(.tree-group, .tree-shop) {
+  animation: tree-node-in 0.45s cubic-bezier(0.23, 1, 0.32, 1) calc(1.3s + var(--open, 0) * 0.07s)
+    backwards;
+}
+@keyframes tree-node-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-6px, 0, 0) scale(0.97);
+  }
+}
+
+.tree-branches {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  overflow: visible;
+  pointer-events: none;
+}
+.tree-mask {
+  fill: none;
+  stroke: #fff;
+  /* Düz uç: yuvarlak uç bir sonraki çizgi parçasından dalın sonunu erken gösterir. */
+  stroke-linecap: butt;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 0;
+}
+.tree-bark {
+  fill: url(#tree-bark);
+}
+/* Soy çizgisi: üstüne gelinen dükkana kökten giden dallar kehribar yanar. */
+.tree-lit {
+  fill: var(--brand);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.tree-lit.is-lit {
+  opacity: 1;
+}
+/* Büyüyen ucun koru ve sonra dallardan akan öz ışığı: aynı kısa çizgi, yalnız kaydırılır. */
+.tree-tip {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 3;
+  stroke-linecap: round;
+  /* Yalnız yürürken görünür; dururken yuvarlak ucu dalın başında nokta bırakmasın. */
+  opacity: 0;
+}
+.tree-leaf-shape {
+  fill: var(--brand);
+  opacity: 0.55;
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+}
+.tree-bud {
+  fill: var(--brand);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.tree-seed {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.tree-seed-halo {
+  fill: var(--brand);
+  opacity: 0.16;
+}
+.tree-seed-core {
+  fill: var(--brand);
+}
+
+@media (min-width: 1024px) {
+  .tree-root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    text-align: center;
+  }
+  .tree-root-name {
+    font-size: 6rem;
+  }
+  /* Dallar kökten yelpaze gibi açılacak kadar yer: tohum kökün dibinde, boşluk ağaçta. */
+  .tree {
+    margin-top: 3.5rem;
+    display: grid;
+    grid-template-columns: repeat(var(--tree-cols), minmax(0, 1fr));
+    column-gap: 1.5rem;
+    align-items: start;
+  }
+  .tree > li {
+    padding-top: 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-section:not([data-grown]) :is(.tree-group, .tree-shop) {
+    animation: none;
+  }
+  .tree-lit {
+    transition: none;
+  }
+}
+
+/*
+ * Ağacın zemini: harita paftası. 96 px'lik ızgara, kenarlarda koordinatlar, eş yükselti çizgileri ve
+ * bir yol. Hepsi çok soluk; dükkan kutuları opak olduğu için yazının arkasına hiçbir şey girmez.
+ */
+.atlas {
+  --atlas-ink: oklch(1 0 0 / 7%);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--atlas-ink) 1px, transparent 1px),
+    linear-gradient(90deg, var(--atlas-ink) 1px, transparent 1px);
+  background-size: 96px 96px;
+  background-position: -1px -1px;
+  /* Alt kenarda pafta söner, sonraki bölüme sert bir çizgiyle geçilmez. */
+  mask-image: linear-gradient(to bottom, #000 75%, transparent);
+}
+.atlas-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.atlas-map--narrow path {
+  vector-effect: non-scaling-stroke;
+}
+.atlas-map--wide {
+  display: none;
+}
+.atlas-contours path {
+  fill: none;
+  stroke: oklch(1 0 0 / 11%);
+  stroke-width: 1;
+}
+/* Çizgiler arazi gibi yavaşça kayar: tek katman transform, kare başına boya yok. */
+.atlas-contours {
+  animation: atlas-drift 26s ease-in-out infinite alternate;
+}
+.atlas-road {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 22;
+  stroke-linecap: round;
+  opacity: 0.12;
+}
+.atlas-map--narrow .atlas-road {
+  stroke-width: 18px;
+}
+/* Yolun orta şeridi: kesik çizgi akar, yolda gidiliyormuş gibi. */
+.atlas-road-lane {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2;
+  stroke-dasharray: 14 18;
+  opacity: 0.55;
+  animation: atlas-lane 3.2s linear infinite;
+}
+.atlas-letters,
+.atlas-numbers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  overflow: hidden;
+  list-style: none;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: oklch(1 0 0 / 28%);
+  font-variant-numeric: tabular-nums;
+}
+.atlas-letters {
+  right: 0;
+  height: 1.25rem;
+}
+.atlas-letters li {
+  flex: none;
+  width: 96px;
+  padding-top: 2px;
+  text-align: center;
+}
+.atlas-numbers {
+  bottom: 0;
+  width: 14px;
+  flex-direction: column;
+}
+.atlas-numbers li {
+  flex: none;
+  display: flex;
+  height: 96px;
+  align-items: center;
+  justify-content: center;
+}
+@keyframes atlas-drift {
+  from {
+    transform: translate3d(-24px, 0, 0);
+  }
+  to {
+    transform: translate3d(24px, 10px, 0);
+  }
+}
+@keyframes atlas-lane {
+  to {
+    stroke-dashoffset: -64;
+  }
+}
+@media (min-width: 1024px) {
+  .atlas-map--narrow {
+    display: none;
+  }
+  .atlas-map--wide {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-contours,
+  .atlas-road-lane {
+    animation: none;
+  }
+}
+
+/*
+ * Düşen eşyalar: her biri bölüm boyunda bir sütun; sütunun kendisi aşağı kayar, yüzde değeri bölüm
+ * yüksekliğine göre işler. Soluk ve küçük, yalnız transform; telefonda yedi, geniş ekranda on iki tane.
+ */
+.atlas-fall {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.atlas-drop {
+  position: absolute;
+  top: -3rem;
+  bottom: 0;
+  color: oklch(1 0 0 / 22%);
+  opacity: 0.75;
+  animation: atlas-drop var(--drop-d) linear var(--drop-o) infinite;
+  will-change: transform;
+}
+.atlas-drop svg {
+  animation: atlas-spin var(--drop-d) linear var(--drop-o) infinite;
+}
+.atlas-drop .text-brand {
+  color: var(--brand);
+  opacity: 0.45;
+}
+.atlas-drop[data-wide] {
+  display: none;
+}
+@keyframes atlas-drop {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+@keyframes atlas-spin {
+  to {
+    transform: rotate(var(--drop-turn));
+  }
+}
+@media (min-width: 1024px) {
+  .atlas-drop[data-wide] {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-fall {
+    display: none;
   }
 }

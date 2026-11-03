@@ -37,56 +37,49 @@ test.describe('Telefondan giriş', () => {
     { width: 390, height: 664 },
     { width: 360, height: 640 },
   ]) {
-    test(`${viewport.width}×${viewport.height}: ilk ekranda yalnız açılış, işaret listeye indirir`, async ({
+    test(`${viewport.width}×${viewport.height}: ilk ekranda ağaç ve dükkanlar, yatay taşma yok`, async ({
       page,
     }) => {
       await page.setViewportSize(viewport)
       await page.goto('/')
-      const hero = await page.locator('.hero').boundingBox()
-      expect((hero?.y ?? 0) + (hero?.height ?? 0)).toBeGreaterThanOrEqual(viewport.height - 1)
-      const rows = page.locator('#dukkanlar .shop-row')
-      await expect(rows).toHaveCount(5)
-      await expect(rows.first()).not.toBeInViewport()
+      const shops = page.locator('#dukkanlar .tree-shop')
+      await expect(shops.first()).toBeInViewport()
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,
       )
       expect(overflow).toBe(0)
-      await page.locator('.hero-scroll-cue').click()
-      await expect(rows.first()).toBeInViewport()
     })
   }
 
-  test('telefonda sayfa yüklenince hafif sürüm oynar', async ({ page }) => {
-    const videoRequests: string[] = []
-    page.on('request', (request) => {
-      if (request.url().includes('/media/hero-') && request.url().endsWith('.mp4')) {
-        videoRequests.push(request.url())
-      }
-    })
-    await page.goto('/', { waitUntil: 'load' })
-    await expect(page.locator('video.hero-video')).toHaveAttribute('data-playing', 'true', {
-      timeout: 15_000,
-    })
-    expect(videoRequests.length).toBeGreaterThan(0)
-    expect(videoRequests.every((url) => url.includes('hero-telefon'))).toBe(true)
-  })
-
-  test('azaltılmış harekette video hiç inmez, afiş kalır', async ({ browser }) => {
+  test('azaltılmış harekette ağaç baştan çizili, hiçbir şey kıpırdamaz', async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: 'reduce' })
     const page = await context.newPage()
     await page.goto('/', { waitUntil: 'load' })
-    await page.waitForTimeout(4000)
-    await expect(page.locator('video')).toHaveCount(0)
-    await expect(page.locator('.hero-stage img')).toBeVisible()
+    await expect(page.locator('#dukkanlar')).toHaveAttribute('data-grown', 'still')
+    await expect(page.locator('.tree-branches .tree-bark').first()).toBeVisible()
+    const running = await page
+      .locator('#dukkanlar')
+      .evaluate((el) => el.getAnimations({ subtree: true }).length)
+    expect(running).toBe(0)
     await context.close()
   })
 
   test('ana kontroller en az 48 px', async ({ page }) => {
     await page.goto('/')
+    // Düğümler açılırken hafif küçük başlar; ölçü açılış bitince alınır (sonsuz öz ışığı hariç).
+    await page.locator('#dukkanlar').evaluate(async (el) => {
+      await new Promise((r) => setTimeout(r, 300))
+      await Promise.all(
+        el
+          .getAnimations({ subtree: true })
+          .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+          .map((a) => a.finished),
+      )
+    })
     const targets = [
       page.getByRole('button', { name: 'Menü' }),
-      page.locator('#dukkanlar a').first(),
-      page.locator('.hero-scroll-cue'),
+      page.locator('#dukkanlar .tree-group').first(),
+      page.locator('#dukkanlar .tree-shop').first(),
     ]
     for (const target of targets) {
       const box = await target.boundingBox()

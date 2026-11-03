@@ -299,6 +299,26 @@ Kapsam hedefi: alan mantığı (`features/*`, `lib/*`) %90+.
    - **Faz 7 Canlıya geçiş**: içerik temizliği (uydurma telefon/adres), `main`'e birleştirme, canlıda ölçüm.
      Kabul ölçütleri: LCP ≤ 2,5 sn, CLS ≤ 0,05, INP ≤ 200 ms, ilk 3 sn'de ≤ 400 KB, dokunma ≥ 48 px, 360/390 px'te taşma yok.
 
+9. **M9 Google yorumları** (plan, 03.11.2026; henüz başlanmadı). Fikir quupaplaystation.com.tr'nin yorum bölümünden
+   alındı: büyük puan, yorum kartları, "Yorum ekle" düğmesi. Onlarda yorum için siteye üyelik gerekiyor, 3 yorumun biri
+   işletme sahibinin. Bizde üyelik yok; kaynak Google.
+   - **Yorum yazma:** her dükkan sayfasında "Google'da yorum yaz" düğmesi doğrudan Google'ın yorum penceresini açar
+     (`https://search.google.com/local/writereview?placeid=<PLACE_ID>`). Yorum Google profilinde birikir.
+   - **Yorumları çekme:** Google Places API (New) Place Details ile `rating`, `userRatingCount`, `reviews` alanları.
+     Sitede **yalnız 4 ve 5 yıldızlı yorumlar** gösterilir (kullanıcı kararı); 4'ün altındakiler hiç gösterilmez.
+     Kart: isim, yıldız, metin, göreli tarih, "Google'da gör" bağlantısı (Google atfı zorunlu).
+   - **Puan ve yorum sayısı** Google'ın kendi değeri olarak gösterilir; biz hesaplamayız, uydurmayız.
+     Ortalama tüm yorumlardan gelir, yalnız kart listesi süzülür.
+   - **Sınırlar:** API yer başına en fazla 5 yorum döndürür; süzmeden sonra 0–5 kart kalır. Hiç 4+ yorum yoksa
+     bölüm yalnız puan + "Google'da yorum yaz" olarak görünür, boş kutu yok. Google içeriği kalıcı saklamayı kısıtladığı
+     için veritabanına yazılmaz; dükkan sayfası günlük yeniden doğrulamayla (ISR) çeker, API hatasında bölüm sessizce gizlenir.
+   - **Panel:** dükkan formuna `googlePlaceId` alanı (migration). Boşsa bölüm çıkmaz.
+   - **SEO notu:** işletmenin kendi sitesindeki yorumlar için Google arama sonucunda yıldız göstermiyor; JSON-LD'ye
+     `aggregateRating` eklenmez. Bölümün amacı ziyaretçiyi ikna etmek.
+   - **Gerekenler:** beş dükkanın Google İşletme profili (Place ID), Google Cloud projesi + faturalandırma açık,
+     yalnız Places API'ye kısıtlı sunucu anahtarı (`GOOGLE_PLACES_API_KEY`, Vercel env). Ücretsiz kotada kalması beklenir
+     (günde dükkan başına 1 istek).
+
 ## 12. Bilinen Kararlar / Notlar (uygulama sırasında)
 
 - **Sayaç mimarisi (07.09.2026):** ham olay tablosu tek doğruluk kaynağı; günlük özet tablosu (rollup) yazılmadı.

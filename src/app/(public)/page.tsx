@@ -1,12 +1,10 @@
 import { CampaignStrip } from '@/components/public/campaign-strip'
-import { Hero } from '@/components/public/hero'
 import { LocationCard } from '@/components/public/location-card'
 import { SectionHeading } from '@/components/public/section-heading'
-import { ShopDirectory } from '@/components/public/shop-directory'
+import { ShopTree } from '@/components/public/shop-tree'
 import { getActiveCampaigns } from '@/features/campaigns/queries'
 import { getActiveLocations } from '@/features/locations/queries'
 import { getSiteSettings } from '@/features/settings/queries'
-import { groupShopsByCategory } from '@/features/shops/group'
 import { getActiveShops } from '@/features/shops/queries'
 import { ROUTES } from '@/lib/constants/routes'
 import { tr } from '@/lib/i18n/tr'
@@ -21,27 +19,17 @@ export default async function HomePage() {
     getActiveLocations(),
     getActiveShops(),
   ])
-  // Kategori sırası korunur (oyun, yeme-içme, konaklama); liste tek parça, seçim tek dokunuş.
-  const orderedShops = groupShopsByCategory(shops).flatMap((group) => group.shops)
 
   return (
     <>
-      <Hero
+      <ShopTree
         brandName={settings.brandName}
         title={settings.heroTitle}
         subtitle={settings.heroSubtitle}
+        shops={shops}
       />
 
-      <div className="mx-auto w-full max-w-6xl space-y-14 px-4 sm:px-6 lg:space-y-24">
-        <section
-          id="dukkanlar"
-          className="scroll-mt-16 pt-3 lg:pt-16"
-          aria-labelledby="dukkanlar-baslik"
-        >
-          <SectionHeading title={tr.home.categoriesTitle} />
-          <ShopDirectory shops={orderedShops} />
-        </section>
-
+      <div className="mx-auto w-full max-w-6xl space-y-14 px-4 pt-12 sm:px-6 lg:space-y-24 lg:pt-20">
         {campaigns.length > 0 ? (
           <section aria-labelledby="kampanyalar-baslik">
             <SectionHeading
