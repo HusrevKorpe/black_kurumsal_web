@@ -5,12 +5,14 @@ import { CampaignCard } from '@/components/public/campaign-card'
 import { ContactActionBar, ContactButtons } from '@/components/public/contact-buttons'
 import { CoverImage } from '@/components/public/cover-image'
 import { FeatureChips } from '@/components/public/feature-chips'
+import { GameShelf } from '@/components/public/game-shelf'
 import { Gallery } from '@/components/public/gallery'
 import { HoursTable } from '@/components/public/hours-table'
 import { OpenStatusBadge } from '@/components/public/open-status-badge'
 import { PriceList } from '@/components/public/price-list'
 import { ShopCoverMorph, ShopNameMorph } from '@/components/public/shop-morph'
 import { resolveExceptions, resolveHours, toExceptionEntries } from '@/features/hours'
+import { isGameShelf } from '@/features/pricing/games'
 import { toPriceCategoryViews } from '@/features/pricing/view'
 import { resolveContact } from '@/features/shops/contact'
 import { buildShopJsonLd, serializeJsonLd } from '@/features/shops/json-ld'
@@ -72,7 +74,11 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
     shop.location ? toExceptionEntries(shop.location.hoursExceptions) : null,
   )
   const contact = resolveContact(shop, shop.location)
-  const categories = toPriceCategoryViews(shop.priceCategories)
+  const allCategories = toPriceCategoryViews(shop.priceCategories)
+  const gamePlatform = SHOP_TYPE_META[shop.type].gamePlatform
+  // Oyun dükkanında kapaklı oyun listesi fiyat listesinden çıkar, kendi vitrininde afiş olarak durur.
+  const gameShelves = gamePlatform ? allCategories.filter(isGameShelf) : []
+  const categories = allCategories.filter((category) => !gameShelves.includes(category))
   const campaigns = [...shop.campaigns, ...(shop.location?.campaigns ?? [])]
   const gallery = shop.gallery.map((g) => ({
     id: g.id,
@@ -158,6 +164,21 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
           üstteki durum satırı "açık mı" sorusunu zaten cevaplar. Geniş ekranda sağ sütun yan panel,
           son 1fr satırı panelin fazla yüksekliğini soldaki bölümlerin arasına dağıtmaz.
         */}
+        {gamePlatform
+          ? gameShelves.map((shelf) => (
+              <section
+                key={shelf.id}
+                aria-labelledby={`vitrin-${shelf.id}`}
+                className="mt-8 lg:mt-14"
+              >
+                <h2 id={`vitrin-${shelf.id}`} className={SECTION_TITLE_CLASS}>
+                  {shelf.name}
+                </h2>
+                <GameShelf category={shelf} platform={gamePlatform} />
+              </section>
+            ))
+          : null}
+
         <div className="mt-8 grid gap-10 lg:mt-14 lg:grid-cols-[1fr_340px] lg:grid-rows-[auto_auto_auto_auto_1fr] lg:gap-x-16">
           <section aria-labelledby="fiyatlar" className="min-w-0 lg:col-start-1">
             <h2 id="fiyatlar" className={SECTION_TITLE_CLASS}>

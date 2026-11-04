@@ -31,6 +31,8 @@ export interface ShopTypeMeta {
   accent: ShopAccent
   /** Fiyat kaleminde varsayılan birim önerisi. */
   defaultUnit: string | null
+  /** Oyun vitrini kartlarının köşe etiketi; vitrin yalnızca bu alanı olan türlerde açılır. */
+  gamePlatform?: string
 }
 
 export const SHOP_TYPE_META: Record<ShopType, ShopTypeMeta> = {
@@ -39,12 +41,14 @@ export const SHOP_TYPE_META: Record<ShopType, ShopTypeMeta> = {
     category: 'ENTERTAINMENT',
     accent: 'neon',
     defaultUnit: 'saat',
+    gamePlatform: 'PS5',
   },
   [ShopType.INTERNET_CAFE]: {
     label: 'Espor Salonu',
     category: 'ENTERTAINMENT',
     accent: 'neon',
     defaultUnit: 'saat',
+    gamePlatform: 'PC',
   },
   [ShopType.FOOD]: {
     label: 'Yeme-İçme',
