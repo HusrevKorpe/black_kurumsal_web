@@ -2,6 +2,7 @@ import { ChevronRightIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { resolveExceptions, resolveHours, toExceptionEntries } from '@/features/hours'
+import type { LocationCardData } from '@/features/locations/queries'
 import type { ShopCardData } from '@/features/shops/queries'
 import { buildShopTree } from '@/features/shops/tree'
 import { ROUTES } from '@/lib/constants/routes'
@@ -19,6 +20,8 @@ interface ShopTreeProps {
   title: string
   subtitle: string | null
   shops: readonly ShopCardData[]
+  /** Mekan/bölgeler: sırası ağaçtaki dal sırasıdır. Mekan (Black Garden) tek uç olarak çizilir. */
+  locations: readonly LocationCardData[]
 }
 
 /**
@@ -27,8 +30,8 @@ interface ShopTreeProps {
  * çizer ve açılışta kökten büyütür. Dallar olmasa da liste kendi başına anlaşılır.
  * `data-tree-node` / `data-tree-parent` dalların neyi neye bağlayacağını söyler.
  */
-export function ShopTree({ brandName, title, subtitle, shops }: ShopTreeProps) {
-  const nodes = buildShopTree(shops)
+export function ShopTree({ brandName, title, subtitle, shops, locations }: ShopTreeProps) {
+  const nodes = buildShopTree(shops, locations)
   // Dallar geç gelirse dükkanların CSS'te kendiliğinden açılma sırası (liste sırası).
   let row = 0
 
@@ -39,7 +42,7 @@ export function ShopTree({ brandName, title, subtitle, shops }: ShopTreeProps) {
       aria-labelledby="acilis-baslik"
     >
       <ShopTreeAtlas />
-      <div className="relative isolate mx-auto w-full max-w-6xl px-4 pt-8 pb-12 sm:px-6 lg:pt-16 lg:pb-20">
+      <div className="relative isolate mx-auto w-full max-w-7xl px-4 pt-8 pb-12 sm:px-6 lg:pt-16 lg:pb-20">
         <ShopTreeBranches />
         <div className="tree-root" data-tree-node="root">
           <p className="tree-root-name font-display font-bold uppercase" aria-hidden>
@@ -53,7 +56,10 @@ export function ShopTree({ brandName, title, subtitle, shops }: ShopTreeProps) {
           ) : null}
         </div>
 
-        <ul className="tree" style={{ '--tree-cols': nodes.length } as React.CSSProperties}>
+        <ul
+          className="tree"
+          style={{ '--tree-template': treeTemplate(nodes) } as React.CSSProperties}
+        >
           {nodes.map((node) =>
             node.kind === 'group' ? (
               <li key={node.key} className="tree-branch" style={openAt(row++)}>
@@ -78,6 +84,10 @@ export function ShopTree({ brandName, title, subtitle, shops }: ShopTreeProps) {
                   ))}
                 </ul>
               </li>
+            ) : node.kind === 'venue' ? (
+              <li key={node.key} className="tree-branch tree-leaf" style={openAt(row++)}>
+                <TreeVenue venue={node.location} shopCount={node.shopCount} />
+              </li>
             ) : (
               <li key={node.key} className="tree-branch tree-leaf" style={openAt(row++)}>
                 <TreeShop shop={node.shop} parent="root" />
@@ -88,6 +98,14 @@ export function ShopTree({ brandName, title, subtitle, shops }: ShopTreeProps) {
       </div>
     </section>
   )
+}
+
+/**
+ * Masaüstü sütunları: dükkanları altında sıralanan dallar (Çarşı, Iyaş) tek kutuluk uçlardan
+ * geniştir; yoksa dört sütunda dükkan adları sıkışır.
+ */
+function treeTemplate(nodes: readonly { kind: string }[]): string {
+  return nodes.map((n) => (n.kind === 'group' ? 'minmax(0, 1.5fr)' : 'minmax(0, 1fr)')).join(' ')
 }
 
 /** Yedek açılış sırası (globals.css `--open`). */
@@ -133,13 +151,56 @@ function TreeShop({ shop, parent }: { shop: ShopCardData; parent: string }) {
       </ShopCoverMorph>
       <span className="min-w-0 flex-1">
         <ShopNameMorph slug={shop.slug}>
-          <span className="block w-fit max-w-full truncate text-base leading-tight font-semibold">
+          {/* Dar sütunda (masaüstünde 4 dal) ad kesilmesin: iki satıra iner. */}
+          <span className="line-clamp-2 block w-fit max-w-full text-base leading-tight font-semibold">
             {shop.name}
           </span>
         </ShopNameMorph>
-        <span className="mt-0.5 flex items-center gap-x-2 text-sm text-muted-foreground">
+        <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
           <OpenStatusBadge week={week} exceptions={exceptions} className="shrink-0 text-xs" />
           <span className="min-w-0 truncate">{meta.label}</span>
+        </span>
+      </span>
+      <ChevronRightIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+    </Link>
+  )
+}
+
+/**
+ * Mekan ucu (Black Garden): dükkan kutusuyla aynı görünür, dokununca mekan sayfası açılır;
+ * içindeki dükkanlar orada listelenir.
+ */
+function TreeVenue({ venue, shopCount }: { venue: LocationCardData; shopCount: number }) {
+  return (
+    <Link
+      href={ROUTES.location(venue.slug)}
+      data-track="location"
+      data-tree-node={venue.id}
+      data-tree-parent="root"
+      data-accent="amber"
+      className="tree-shop flex min-h-16 items-center gap-3 border border-border bg-card py-2 pr-3 pl-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring active:bg-accent"
+    >
+      <span className="tree-shop-thumb relative size-12 shrink-0 overflow-hidden" aria-hidden>
+        {venue.coverImage ? (
+          <Image
+            src={mediaPublicUrl(venue.coverImage)}
+            alt=""
+            fill
+            sizes="48px"
+            className="object-cover"
+          />
+        ) : (
+          <span className="flex size-full items-center justify-center text-brand">
+            <ShopTypeIcon type="FOOD" className="size-6" />
+          </span>
+        )}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="line-clamp-2 block w-fit max-w-full text-base leading-tight font-semibold">
+          {venue.name}
+        </span>
+        <span className="mt-0.5 block truncate text-sm text-muted-foreground">
+          {shopCount > 0 ? `${tr.location.venue} · ${shopCount} dükkan` : tr.location.venue}
         </span>
       </span>
       <ChevronRightIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden />

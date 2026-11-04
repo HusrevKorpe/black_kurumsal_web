@@ -24,6 +24,7 @@
     "content:demo": "tsx scripts/demo-content.ts",
     "content:real": "tsx scripts/real-content.ts",
     "content:clean": "tsx scripts/clean-demo.ts",
+    "content:sync": "tsx scripts/sync-content.ts",
     "storage:init": "tsx scripts/init-storage.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "db:generate": "prisma generate",

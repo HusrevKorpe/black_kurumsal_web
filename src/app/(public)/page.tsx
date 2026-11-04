@@ -27,6 +27,7 @@ export default async function HomePage() {
         title={settings.heroTitle}
         subtitle={settings.heroSubtitle}
         shops={shops}
+        locations={locations}
       />
 
       <div className="mx-auto w-full max-w-6xl space-y-14 px-4 pt-12 sm:px-6 lg:space-y-24 lg:pt-20">

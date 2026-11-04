@@ -7,11 +7,12 @@ import { SKELETON_LOCATIONS, SKELETON_SETTINGS, SKELETON_SHOPS } from './skeleto
 const unique = <T>(values: readonly T[]) => new Set(values).size === values.length
 
 describe('içerik iskeleti verisi', () => {
-  it('5 dükkan ve 2 mekan/bölge: Garden mekan, Çarşı bölge', () => {
-    expect(SKELETON_SHOPS).toHaveLength(5)
+  it('8 dükkan ve 3 mekan/bölge: Çarşı ve Iyaş bölge, Black Garden mekan', () => {
+    expect(SKELETON_SHOPS).toHaveLength(8)
     expect(SKELETON_LOCATIONS.map((l) => [l.slug, l.kind])).toEqual([
-      ['black-garden', 'VENUE'],
       ['carsi', 'DISTRICT'],
+      ['iyas', 'DISTRICT'],
+      ['black-garden', 'VENUE'],
     ])
   })
 
@@ -22,15 +23,21 @@ describe('içerik iskeleti verisi', () => {
     expect(unique(SKELETON_SHOPS.map((s) => s.sortOrder))).toBe(true)
   })
 
-  it('her dükkanın mekanı iskelette vardır; yalnızca Lavinya Apart bağımsızdır', () => {
+  it('her dükkanın mekanı iskelette vardır; yalnızca Lulu Kafe bağımsızdır', () => {
     const locationSlugs = new Set<string>(SKELETON_LOCATIONS.map((l) => l.slug))
     const independent = SKELETON_SHOPS.filter((s) => s.locationSlug === null).map((s) => s.slug)
-    expect(independent).toEqual(['lavinya-apart'])
+    expect(independent).toEqual(['lulu-kafe'])
     for (const shop of SKELETON_SHOPS) {
       if (shop.locationSlug !== null) expect(locationSlugs.has(shop.locationSlug)).toBe(true)
     }
-    const gardenShops = SKELETON_SHOPS.filter((s) => s.locationSlug === 'black-garden')
-    expect(gardenShops.map((s) => s.name)).toEqual(['Black Tavuk', 'Black Makarna'])
+    // Şubeli üç marka her iki bölgede de var; Garden'ın dükkanları iskelete girmez.
+    const typesIn = (district: string) =>
+      SKELETON_SHOPS.filter((s) => s.locationSlug === district).map((s) => s.type)
+    expect(typesIn('carsi')).toEqual(['PLAYSTATION', 'INTERNET_CAFE', 'FOOD', 'APART'])
+    expect(typesIn('iyas')).toEqual(['PLAYSTATION', 'INTERNET_CAFE', 'FOOD'])
+    expect(SKELETON_SHOPS.some((s) => (s.locationSlug as string | null) === 'black-garden')).toBe(
+      false,
+    )
   })
 
   it('panel formlarının doğrulamasından geçer (ad, slug, tür, sıra; ayar metin uzunlukları)', () => {

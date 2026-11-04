@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { applyDemoContent } from '@/features/content/demo'
-import {
-  DEFAULT_DEMO_SHOP_SLUGS,
-  DEMO_CAMPAIGNS,
-  DEMO_LOCATIONS,
-  DEMO_SHOPS,
-} from '@/features/content/demo-data'
+import { DEFAULT_DEMO_SHOP_SLUGS, DEMO_CAMPAIGNS, DEMO_SHOPS } from '@/features/content/demo-data'
 import { GALLERY_COUNT } from '@/features/content/demo-fill'
 import type { ImageUploader } from '@/features/content/demo-media'
 import { ensureContentSkeleton } from '@/features/content/skeleton'
@@ -17,7 +12,8 @@ import { createMedia, createOwner, resetDatabase } from './helpers'
 const DEFAULT: SkeletonShopSlug[] = [...DEFAULT_DEMO_SHOP_SLUGS]
 const DEFAULT_SET = new Set<string>(DEFAULT)
 const OTHERS = SKELETON_SHOPS.map((s) => s.slug).filter((slug) => !DEFAULT_SET.has(slug))
-const CAMPAIGN_TITLES = DEMO_CAMPAIGNS.map((c) => c.title)
+/** Garden kampanyası (LOCATION) dükkanı seçilmeyen mekana yazılmaz. */
+const CAMPAIGN_TITLES = DEMO_CAMPAIGNS.filter((c) => c.scope !== 'LOCATION').map((c) => c.title)
 
 /** Depolamaya dokunmayan yükleyici: yolları ve gövde boyutlarını kaydeder. */
 function fakeUploader() {
@@ -45,14 +41,14 @@ const shopWithDetails = (slug: string) =>
 beforeEach(resetDatabase)
 
 describe('örnek içerik (applyDemoContent)', () => {
-  it('iskelet üstünde varsayılan 4 dükkanı, Garden mekanını ve 3 kampanyayı doldurur; diğer dükkana dokunmaz', async () => {
+  it('iskelet üstünde varsayılan 4 dükkanı ve ilgili 2 kampanyayı doldurur; diğer dükkana ve Garden’a dokunmaz', async () => {
     await ensureContentSkeleton(db)
     const owner = await createOwner()
     const { upload, uploaded } = fakeUploader()
 
     const result = await applyDemoContent(db, { upload })
     expect(result).toEqual({
-      locations: { filled: ['black-garden'], skipped: [] },
+      locations: { filled: [], skipped: [] },
       shops: { filled: DEFAULT, skipped: [] },
       campaigns: { created: CAMPAIGN_TITLES, skipped: false },
     })
@@ -96,18 +92,14 @@ describe('örnek içerik (applyDemoContent)', () => {
       expect(shop.priceCategories).toHaveLength(0)
     }
 
+    // Garden'ın iskelette dükkanı yok; demo onu doldurmaz (canlıda uydurma adres çıkmasın).
     const garden = await db.location.findUniqueOrThrow({
       where: { slug: 'black-garden' },
-      include: { coverImage: true, hours: true },
+      include: { hours: true },
     })
-    const gardenDemo = DEMO_LOCATIONS['black-garden']
-    expect(garden).toMatchObject({ address: gardenDemo.address, phone: gardenDemo.phone })
-    expect(garden.hours).toHaveLength(7)
-    expect(parseMediaPath(garden.coverImage?.path ?? '')).toEqual({
-      kind: 'location',
-      ownerId: garden.id,
-    })
-    for (const slug of ['carsi']) {
+    expect(garden).toMatchObject({ address: null, phone: null, coverImageId: null })
+    expect(garden.hours).toHaveLength(0)
+    for (const slug of ['carsi', 'iyas']) {
       const district = await db.location.findUniqueOrThrow({ where: { slug } })
       expect(district).toMatchObject({ address: null, phone: null, coverImageId: null })
     }
@@ -119,7 +111,6 @@ describe('örnek içerik (applyDemoContent)', () => {
     expect(campaigns.map((c) => [c.title, c.scope, c.shop?.slug, c.location?.slug])).toEqual([
       ['Black Garden Açıldı', 'GLOBAL', undefined, undefined],
       ['Cuma Turnuva Gecesi', 'SHOP', 'black-playstation-carsi', undefined],
-      ['Hafta Sonu Aile Menüsü', 'LOCATION', undefined, 'black-garden'],
     ])
     for (const campaign of campaigns) {
       expect(campaign.createdById).toBe(owner.id)
@@ -127,12 +118,12 @@ describe('örnek içerik (applyDemoContent)', () => {
     }
 
     const mediaPaths = (await db.media.findMany({ select: { path: true } })).map((m) => m.path)
-    expect(uploaded).toHaveLength(DEFAULT.length * (1 + GALLERY_COUNT) + 1 + CAMPAIGN_TITLES.length)
+    expect(uploaded).toHaveLength(DEFAULT.length * (1 + GALLERY_COUNT) + CAMPAIGN_TITLES.length)
     expect(new Set(mediaPaths)).toEqual(new Set(uploaded))
 
     const logs = await db.auditLog.findMany({ where: { action: 'content.demo' } })
     expect(logs.map((l) => l.entityType).sort()).toEqual(
-      ['Campaign', 'Location', ...DEFAULT.map(() => 'Shop')].sort(),
+      ['Campaign', ...DEFAULT.map(() => 'Shop')].sort(),
     )
     expect(logs.every((l) => l.staffId === null)).toBe(true)
   })
@@ -151,7 +142,7 @@ describe('örnek içerik (applyDemoContent)', () => {
     const second = fakeUploader()
     const result = await applyDemoContent(db, { upload: second.upload })
     expect(result).toEqual({
-      locations: { filled: [], skipped: ['black-garden'] },
+      locations: { filled: [], skipped: [] },
       shops: { filled: [], skipped: DEFAULT },
       campaigns: { created: [], skipped: true },
     })
@@ -182,11 +173,11 @@ describe('örnek içerik (applyDemoContent)', () => {
 
     const result = await applyDemoContent(db, {
       upload,
-      shopSlugs: ['black-playstation-carsi', 'black-tavuk-garden'],
+      shopSlugs: ['black-playstation-carsi', 'black-espor-iyas'],
     })
     expect(result).toEqual({
-      locations: { filled: [], skipped: ['black-garden'] },
-      shops: { filled: ['black-tavuk-garden'], skipped: ['black-playstation-carsi'] },
+      locations: { filled: [], skipped: [] },
+      shops: { filled: ['black-espor-iyas'], skipped: ['black-playstation-carsi'] },
       campaigns: { created: [], skipped: true },
     })
     expect(uploaded).toHaveLength(1 + GALLERY_COUNT)
@@ -201,7 +192,7 @@ describe('örnek içerik (applyDemoContent)', () => {
     expect(garden).toMatchObject({ address: 'Patronun girdiği adres', phone: null })
     expect(garden.hours).toHaveLength(0)
     expect(await db.campaign.count()).toBe(1)
-    expect((await shopWithDetails('black-tavuk-garden')).priceCategories.length).toBeGreaterThan(0)
+    expect((await shopWithDetails('black-espor-iyas')).priceCategories.length).toBeGreaterThan(0)
   })
 
   it('yalnızca bölge dükkanı seçilince Garden’a ve mekan/dükkan kampanyalarına dokunulmaz', async () => {

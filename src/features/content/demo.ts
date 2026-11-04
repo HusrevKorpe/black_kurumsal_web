@@ -67,7 +67,7 @@ function selectShops(slugs: readonly string[]): ShopEntry[] {
 
 /** Seçili dükkanların bağlı olduğu mekanlar (VENUE). Bölgelerin (DISTRICT) dolduracak ayrıntısı yoktur. */
 function selectVenues(shops: readonly ShopEntry[]): LocationEntry[] {
-  const slugs = new Set(shops.map((shop) => shop.locationSlug))
+  const slugs = new Set<string | null>(shops.map((shop) => shop.locationSlug))
   return SKELETON_LOCATIONS.filter((loc) => loc.kind === 'VENUE' && slugs.has(loc.slug))
 }
 

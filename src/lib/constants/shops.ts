@@ -12,7 +12,7 @@ export const SHOP_CATEGORIES: readonly ShopCategoryMeta[] = [
   {
     key: 'ENTERTAINMENT',
     label: 'Oyun ve Eğlence',
-    description: 'PlayStation kafe',
+    description: 'PlayStation ve espor',
   },
   { key: 'FOOD', label: 'Yeme-İçme', description: 'Tost ve yeme-içme' },
   { key: 'ACCOMMODATION', label: 'Konaklama', description: 'Apart ve konaklama' },
@@ -41,7 +41,7 @@ export const SHOP_TYPE_META: Record<ShopType, ShopTypeMeta> = {
     defaultUnit: 'saat',
   },
   [ShopType.INTERNET_CAFE]: {
-    label: 'İnternet Kafe',
+    label: 'Espor Salonu',
     category: 'ENTERTAINMENT',
     accent: 'neon',
     defaultUnit: 'saat',

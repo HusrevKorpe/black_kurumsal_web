@@ -20,7 +20,7 @@ async function expectNoViolations(page: Page): Promise<void> {
 const PUBLIC_PAGES = [
   '/',
   '/black-playstation-carsi',
-  '/black-tavuk-garden',
+  '/lulu-kafe',
   '/lavinya-apart',
   '/mekan/black-garden',
   '/mekan/carsi',

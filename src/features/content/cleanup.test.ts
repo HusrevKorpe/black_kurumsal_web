@@ -78,10 +78,10 @@ describe('demo temizliği planı', () => {
     expect(plan.shops[0]?.hideCategories).toEqual([{ id: 'rooms', name: rooms?.name }])
   })
 
-  it('içeriği gelmemiş dükkanı ve boş kalan mekanı gizler, demo kampanyaları kaldırır', () => {
+  it('mekanın demo bilgisini boşaltır ama mekanı gizlemez, demo kampanyaları kaldırır', () => {
     const garden = DEMO_LOCATIONS['black-garden']
     const plan = buildCleanupPlan({
-      shops: [shop({ slug: 'black-makarna-garden' })],
+      shops: [],
       locations: [
         {
           id: 'g',
@@ -98,8 +98,7 @@ describe('demo temizliği planı', () => {
         { id: 'c2', title: 'Gerçek kampanya', isActive: true },
       ],
     })
-    expect(plan.shops[0]?.hide).toBe(true)
-    expect(plan.locations[0]?.hide).toBe(true)
+    expect(plan.locations[0]?.hide).toBe(false)
     expect(plan.locations[0]?.cleared).toEqual({ phone: garden.phone, address: garden.address })
     expect(plan.locations[0]?.deleteHours).toBe('11:00–23:30')
     expect(plan.campaigns).toEqual([{ id: 'c1', title: 'Cuma Turnuva Gecesi' }])
@@ -109,7 +108,7 @@ describe('demo temizliği planı', () => {
     const plan = buildCleanupPlan({
       shops: [
         shop({ slug: 'black-tost-carsi', phone: '0541 284 24 60' }),
-        shop({ slug: 'black-tavuk-garden', isActive: false }),
+        shop({ slug: 'lulu-kafe' }),
       ],
       locations: [],
       campaigns: [{ id: 'c1', title: 'Cuma Turnuva Gecesi', isActive: false }],

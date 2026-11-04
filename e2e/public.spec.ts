@@ -76,22 +76,25 @@ test.describe('Açık site', () => {
     await expect(page.getByText(/Şu an (açık|kapalı)|dk sonra kapanıyor/)).toBeVisible()
   })
 
-  test('Garden içindeki dükkan mekanın saatini ve adresini devralır', async ({ page }) => {
-    await page.goto('/black-tavuk-garden')
-    await expect(page.getByText('Black Garden içinde').first()).toBeVisible()
-    await expect(page.getByText('Saatler Black Garden ile aynı')).toBeVisible()
-    await expect(page.getByText('11:00 – 23:30').first()).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Ara' }).first()).toHaveAttribute(
-      'href',
-      'tel:+905550000001',
-    )
-  })
-
-  test('mekan sayfası dükkanları listeler', async ({ page }) => {
-    await page.goto('/mekan/black-garden')
+  test('ağaç: Çarşı ve Iyaş dal, Black Garden tek uç ve kendi sayfasına gider', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    const tree = page.locator('#dukkanlar')
+    for (const name of ['Black Espor Çarşı', 'Black Tost Iyaş', 'Lulu Kafe']) {
+      await expect(tree.getByRole('link', { name: new RegExp(name) })).toBeVisible()
+    }
+    const garden = tree.getByRole('link', { name: /Black Garden/ })
+    await expect(garden).toHaveAttribute('href', '/mekan/black-garden')
+    await garden.click()
     await expect(page.getByRole('heading', { level: 1, name: 'Black Garden' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Buradaki dükkanlar' })).toBeVisible()
-    await expect(page.getByRole('link', { name: /Black Makarna/ })).toBeVisible()
+  })
+
+  test('bölge sayfası dükkanları listeler', async ({ page }) => {
+    await page.goto('/mekan/carsi')
+    await expect(page.getByRole('heading', { level: 1, name: 'Çarşı' })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Lavinya Apart/ })).toBeVisible()
   })
 
   test('kampanyalar sayfası ve 404', async ({ page }) => {

@@ -5,16 +5,16 @@ test.describe('Dükkan yönetimi', () => {
   test('açıklama değişir ve açık siteye yansır', async ({ page }) => {
     await login(page, OWNER)
     await page.goto('/admin/dukkanlar')
-    await page.getByRole('link', { name: /Black Tavuk/ }).click()
-    await expect(page.getByRole('heading', { level: 1, name: 'Black Tavuk' })).toBeVisible()
+    await page.getByRole('link', { name: /Lulu Kafe/ }).click()
+    await expect(page.getByRole('heading', { level: 1, name: 'Lulu Kafe' })).toBeVisible()
 
     const marker = `E2E ${Date.now()}`
     const description = page.locator('#description')
-    await description.fill(`Izgara ve döner tavuk çeşitleri, kanat sepetleri ve menüler. ${marker}`)
+    await description.fill(`Kahve, tatlı ve sohbet için sakin bir köşe. ${marker}`)
     await page.getByRole('button', { name: 'Kaydet' }).click()
     await expect(page.getByText('Dükkan kaydedildi.')).toBeVisible()
 
-    await page.goto('/black-tavuk-garden')
+    await page.goto('/lulu-kafe')
     await expect(page.getByText(marker)).toBeVisible()
   })
 
@@ -54,7 +54,7 @@ test.describe('Dükkan yönetimi', () => {
   test('fiyat kategorisi ve kalemi eklenir, sitede görünür, sonra silinir', async ({ page }) => {
     await login(page, OWNER)
     await page.goto('/admin/dukkanlar')
-    await page.getByRole('link', { name: /Black Makarna/ }).click()
+    await page.getByRole('link', { name: /Lulu Kafe/ }).click()
     await page.getByRole('link', { name: 'Fiyat Listesi' }).click()
 
     await page.getByRole('button', { name: 'Kategori Ekle' }).click()
@@ -72,12 +72,12 @@ test.describe('Dükkan yönetimi', () => {
     await expect(card.getByText('Tiramisu')).toBeVisible()
     await expect(card.getByText('₺145 / porsiyon')).toBeVisible()
 
-    await page.goto('/black-makarna-garden')
+    await page.goto('/lulu-kafe')
     await expect(page.getByRole('heading', { name: 'E2E Tatlılar' })).toBeVisible()
     await expect(page.getByText('Tiramisu')).toBeVisible()
 
     await page.goto('/admin/dukkanlar')
-    await page.getByRole('link', { name: /Black Makarna/ }).click()
+    await page.getByRole('link', { name: /Lulu Kafe/ }).click()
     await page.getByRole('link', { name: 'Fiyat Listesi' }).click()
     const card2 = page.locator('section', {
       has: page.getByRole('heading', { name: 'E2E Tatlılar' }),

@@ -41,16 +41,15 @@ function expectValidHours(hours: DemoHours) {
 }
 
 describe('örnek içerik verisi (demo-data)', () => {
-  it('varsayılan küme: 4 iskelet dükkanı, her tür, Çarşı ve Garden içinden birer dükkan', () => {
+  it('varsayılan küme: 4 iskelet dükkanı, her türden biri', () => {
     expect(DEFAULT_DEMO_SHOP_SLUGS).toHaveLength(4)
     expect(new Set(DEFAULT_DEMO_SHOP_SLUGS).size).toBe(4)
     const selected = SKELETON_SHOPS.filter((s) =>
       (DEFAULT_DEMO_SHOP_SLUGS as readonly string[]).includes(s.slug),
     )
     expect(selected).toHaveLength(4)
-    expect(new Set(selected.map((s) => s.type))).toEqual(new Set(['PLAYSTATION', 'FOOD', 'APART']))
-    expect(new Set(selected.map((s) => s.locationSlug))).toEqual(
-      new Set(['carsi', 'black-garden', null]),
+    expect(new Set(selected.map((s) => s.type))).toEqual(
+      new Set(['PLAYSTATION', 'INTERNET_CAFE', 'FOOD', 'APART']),
     )
   })
 
@@ -74,13 +73,7 @@ describe('örnek içerik verisi (demo-data)', () => {
     }
   })
 
-  it('Garden içindeki dükkanlar adres, telefon ve saati mekandan devralır (kendi kaydı yok)', () => {
-    const gardenShops = SKELETON_SHOPS.filter((s) => s.locationSlug === 'black-garden')
-    expect(gardenShops).toHaveLength(2)
-    for (const shop of gardenShops) {
-      const demo = DEMO_SHOPS[shop.slug]
-      expect([demo.address, demo.phone, demo.hours]).toEqual([undefined, undefined, undefined])
-    }
+  it('Black Garden mekanının kendi adresi, telefonu ve saati vardır', () => {
     const garden = DEMO_LOCATIONS['black-garden']
     expect(garden.address).toBeTruthy()
     expect(garden.phone).toBeTruthy()
@@ -90,8 +83,9 @@ describe('örnek içerik verisi (demo-data)', () => {
     )
   })
 
-  it('bölgenin (Çarşı) dolduracak ayrıntısı yoktur; yalnızca görsel rengi', () => {
+  it('bölgelerin (Çarşı, Iyaş) dolduracak ayrıntısı yoktur; yalnızca görsel rengi', () => {
     expect(Object.keys(DEMO_LOCATIONS.carsi)).toEqual(['hue'])
+    expect(Object.keys(DEMO_LOCATIONS.iyas)).toEqual(['hue'])
   })
 
   it('fiyat listeleri panel doğrulamasından geçer; bilgi listesi (fiyatsız) kalemler de olabilir', () => {

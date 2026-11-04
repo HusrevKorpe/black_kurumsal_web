@@ -32,15 +32,13 @@ const TX_OPTIONS = { timeout: 60_000 }
 const ACTION = 'content.clean'
 
 /** Gerçek içeriği gelene kadar sitede görünmeyecek dükkanlar (yalnızca demo veya tamamen boş). */
-export const HIDDEN_SHOP_SLUGS = [
-  'black-tavuk-garden',
-  'black-makarna-garden',
-] as const satisfies readonly SkeletonShopSlug[]
+export const HIDDEN_SHOP_SLUGS = [] as const satisfies readonly SkeletonShopSlug[]
 
-/** İçindeki dükkanların hepsi gizlenince boş kalan mekanlar. */
-export const HIDDEN_LOCATION_SLUGS = [
-  'black-garden',
-] as const satisfies readonly SkeletonLocationSlug[]
+/**
+ * Gizlenecek mekanlar. Black Garden 2026-11-04'ten beri boş olsa da açılış ağacında kendi ucuyla görünür
+ * (patronun listesi), bu yüzden burada değildir.
+ */
+export const HIDDEN_LOCATION_SLUGS = [] as const satisfies readonly SkeletonLocationSlug[]
 
 const TEXT_FIELDS = [
   'description',

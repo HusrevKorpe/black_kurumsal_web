@@ -67,13 +67,13 @@ export type DemoCampaign = DemoCampaignBase &
   )
 
 /**
- * `pnpm content:demo` varsayılan kümesi: her dükkan türünden biri, Çarşı bölgesi ve Garden içinden bir
- * dükkan; böylece saat devralma, fiyat listesi türleri ve apart odaları tek bakışta görülür.
+ * `pnpm content:demo` varsayılan kümesi: her dükkan türünden biri; böylece fiyat listesi türleri ve apart
+ * odaları tek bakışta görülür.
  */
 export const DEFAULT_DEMO_SHOP_SLUGS = [
   'black-playstation-carsi',
+  'black-espor-carsi',
   'black-tost-carsi',
-  'black-tavuk-garden',
   'lavinya-apart',
 ] as const satisfies readonly SkeletonShopSlug[]
 
@@ -88,6 +88,7 @@ export const DEMO_LOCATIONS: Record<SkeletonLocationSlug, DemoLocation> = {
     hue: 140,
   },
   carsi: { hue: 30 },
+  iyas: { hue: 250 },
 }
 
 const DRINKS: DemoPriceCategory = {
@@ -140,7 +141,20 @@ const tostPrices = (): DemoPriceCategory[] => [
   DRINKS,
 ]
 
+const esporPrices = (): DemoPriceCategory[] => [
+  {
+    name: 'Oyun Ücretleri',
+    items: [
+      { name: 'Bilgisayar Saatlik', price: 60, unit: 'saat', isFeatured: true },
+      { name: 'VIP Oda Saatlik', price: 90, unit: 'saat' },
+      { name: '5 Saat Paketi', price: 250, unit: 'paket', description: 'Gün içinde geçerli' },
+    ],
+  },
+  DRINKS,
+]
+
 const PS_FEATURES = ['PS5', '4K TV', '12 Konsol', 'Turnuva Geceleri']
+const ESPOR_FEATURES = ['240 Hz Monitör', 'Oyuncu Koltuğu', 'VIP Oda']
 const TOST_FEATURES = ['Odun Fırını', 'Paket Servis', 'Kahvaltı']
 
 export const DEMO_SHOPS: Record<SkeletonShopSlug, DemoShop> = {
@@ -164,44 +178,65 @@ export const DEMO_SHOPS: Record<SkeletonShopSlug, DemoShop> = {
     priceCategories: tostPrices(),
     hue: 35,
   },
-  'black-tavuk-garden': {
-    description:
-      'Izgara ve döner tavuk çeşitleri, kanat sepetleri ve menüler. Black Garden içinde.',
-    features: ['Izgara', 'Menüler', 'Aile Boyu'],
-    priceCategories: [
-      {
-        name: 'Menüler',
-        items: [
-          {
-            name: 'Tavuk Döner Menü',
-            price: 180,
-            unit: 'porsiyon',
-            isFeatured: true,
-            description: 'Döner, patates, içecek',
-          },
-          { name: 'Izgara Tavuk Tabağı', price: 220, unit: 'porsiyon' },
-          { name: 'Kanat Sepeti', price: 200, unit: 'porsiyon', description: '10 adet kanat, sos' },
-        ],
-      },
-      { name: 'Ekstralar', items: [{ name: 'Patates Kızartması', price: 60, unit: 'porsiyon' }] },
-    ],
-    hue: 20,
+  'black-espor-carsi': {
+    description: 'Yüksek tazelemeli monitörler, oyuncu koltukları ve takım odası.',
+    address: 'Çarşı Merkez, Örnek Sokak No: 7',
+    phone: '0555 000 00 12',
+    whatsapp: '0555 000 00 12',
+    features: ESPOR_FEATURES,
+    hours: { opensAt: '10:00', closesAt: '02:00' },
+    priceCategories: esporPrices(),
+    hue: 260,
   },
-  'black-makarna-garden': {
-    description: 'Taze soslarla hazırlanan İtalyan makarnalar. Black Garden içinde.',
-    features: ['Taze Sos', 'Vejetaryen Seçenek'],
+  'black-playstation-iyas': {
+    description: "Iyaş'ta PS5 konsollar ve geniş ekranlar.",
+    address: 'Iyaş, Örnek Bulvarı No: 12',
+    phone: '0555 000 00 21',
+    whatsapp: '0555 000 00 21',
+    features: PS_FEATURES,
+    hours: { opensAt: '10:00', closesAt: '22:00' },
+    priceCategories: playstationPrices(),
+    hue: 220,
+  },
+  'black-espor-iyas': {
+    description: "Iyaş'ta oyuncu bilgisayarları ve takım odası.",
+    address: 'Iyaş, Örnek Bulvarı No: 12',
+    phone: '0555 000 00 22',
+    whatsapp: '0555 000 00 22',
+    features: ESPOR_FEATURES,
+    hours: { opensAt: '10:00', closesAt: '22:00' },
+    priceCategories: esporPrices(),
+    hue: 270,
+  },
+  'black-tost-iyas': {
+    description: "Iyaş'ta tost, kahvaltı ve paket servis.",
+    address: 'Iyaş, Örnek Bulvarı No: 14',
+    phone: '0555 000 00 23',
+    whatsapp: '0555 000 00 23',
+    features: TOST_FEATURES,
+    hours: { opensAt: '10:00', closesAt: '22:00' },
+    priceCategories: tostPrices(),
+    hue: 40,
+  },
+  'lulu-kafe': {
+    description: 'Kahve, tatlı ve sohbet için sakin bir köşe.',
+    address: 'Örnek Caddesi No: 2 (örnek adres)',
+    phone: '0555 000 00 41',
+    whatsapp: '0555 000 00 41',
+    features: ['Kahve', 'Tatlı', 'Ücretsiz WiFi'],
+    hours: { opensAt: '09:00', closesAt: '23:00' },
     priceCategories: [
       {
-        name: 'Makarnalar',
+        name: 'Kahveler',
         items: [
-          { name: 'Alfredo', price: 190, unit: 'porsiyon' },
-          { name: 'Bolonez', price: 200, unit: 'porsiyon', isFeatured: true },
-          { name: 'Pesto', price: 210, unit: 'porsiyon' },
-          { name: 'Napoliten', price: 170, unit: 'porsiyon' },
+          { name: 'Türk Kahvesi', price: 70, unit: 'fincan' },
+          { name: 'Latte', price: 110, unit: 'bardak', isFeatured: true },
+          { name: 'Filtre Kahve', price: 90, unit: 'bardak' },
         ],
       },
+      DRINKS,
     ],
-    hue: 60,
+    hue: 330,
   },
   'lavinya-apart': {
     description:

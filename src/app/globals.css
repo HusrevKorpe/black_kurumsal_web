@@ -373,7 +373,7 @@
   .tree {
     margin-top: 3.5rem;
     display: grid;
-    grid-template-columns: repeat(var(--tree-cols), minmax(0, 1fr));
+    grid-template-columns: var(--tree-template);
     column-gap: 1.5rem;
     align-items: start;
   }
