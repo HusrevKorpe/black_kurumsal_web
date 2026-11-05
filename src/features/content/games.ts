@@ -3,10 +3,10 @@ import { logAudit } from '@/features/audit/log'
 import { buildMediaPath } from '@/features/media/paths'
 import type { PrismaClient } from '@/generated/prisma/client'
 import {
-  GAME_CATEGORY_DESCRIPTION,
   GAME_CATEGORY_NAME,
   GAMES,
   SHOP_GAMES,
+  gameCategoryDescription,
   gameDescription,
   type GameShopSlug,
   type GameSlug,
@@ -114,7 +114,7 @@ export async function applyGames(db: PrismaClient, io: GamesIO): Promise<GameSho
               where: { id: existing.id },
               data: {
                 name: GAME_CATEGORY_NAME,
-                description: GAME_CATEGORY_DESCRIPTION,
+                description: gameCategoryDescription(plan.slug),
                 isActive: true,
               },
               select: { id: true },
@@ -123,7 +123,7 @@ export async function applyGames(db: PrismaClient, io: GamesIO): Promise<GameSho
               data: {
                 shopId,
                 name: GAME_CATEGORY_NAME,
-                description: GAME_CATEGORY_DESCRIPTION,
+                description: gameCategoryDescription(plan.slug),
                 sortOrder: lastOrder + 1,
               },
               select: { id: true },
