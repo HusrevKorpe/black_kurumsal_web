@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { CampaignCard } from '@/components/public/campaign-card'
 import { ContactButtons } from '@/components/public/contact-buttons'
 import { CoverImage } from '@/components/public/cover-image'
+import { DisplayName } from '@/components/public/display-name'
 import { Gallery } from '@/components/public/gallery'
 import { HoursTable } from '@/components/public/hours-table'
 import { OpenStatusBadge } from '@/components/public/open-status-badge'
@@ -74,21 +75,22 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
         <div className="relative aspect-[16/10] w-full overflow-hidden lg:aspect-auto lg:h-[28rem]">
           <CoverImage media={location.coverImage} alt={location.name} sizes="100vw" priority />
           <div
-            className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"
+            className="absolute inset-0 bg-gradient-to-t from-background via-background/25 via-35% to-transparent"
             aria-hidden
           />
         </div>
       ) : null}
 
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <header className={isVenue && location.coverImage ? 'relative -mt-6 lg:-mt-16' : 'pt-4'}>
+        {/* Başlık kapağın altında başlar: "Ana Sayfa" ve ad resmin üstüne binmez. */}
+        <header className={isVenue && location.coverImage ? 'pt-3 lg:pt-4' : 'pt-4'}>
           <nav aria-label="Konum" className="flex text-sm text-muted-foreground">
             <Link href={ROUTES.home} className={BREADCRUMB_LINK_CLASS}>
               {tr.nav.home}
             </Link>
           </nav>
           <h1 className="mt-2 font-display text-5xl leading-[0.95] font-bold uppercase lg:text-8xl">
-            {location.name}
+            <DisplayName>{location.name}</DisplayName>
           </h1>
           <p className="mt-2 text-muted-foreground">
             {isVenue ? tr.location.venue : tr.location.district}

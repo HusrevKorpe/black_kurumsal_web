@@ -6,6 +6,7 @@ import { tr } from '@/lib/i18n/tr'
 import { mediaPublicUrl } from '@/lib/media/url'
 import { cn } from '@/lib/utils'
 import { formatPriceWithUnit } from '@/lib/utils/format'
+import { DisplayName } from './display-name'
 
 interface PriceListProps {
   categories: PriceCategoryView[]
@@ -68,7 +69,7 @@ export function PriceList({ categories }: PriceListProps) {
               id={`fiyat-${category.id}`}
               className="font-display text-2xl font-bold text-brand uppercase"
             >
-              {category.name}
+              <DisplayName>{category.name}</DisplayName>
             </h3>
             <span aria-hidden className="h-px flex-1 bg-brand/30" />
           </div>

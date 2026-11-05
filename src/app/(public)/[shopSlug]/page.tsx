@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { CampaignCard } from '@/components/public/campaign-card'
 import { ContactActionBar, ContactButtons } from '@/components/public/contact-buttons'
 import { CoverImage } from '@/components/public/cover-image'
+import { DisplayName } from '@/components/public/display-name'
 import { FeatureChips } from '@/components/public/feature-chips'
 import { GameShelf } from '@/components/public/game-shelf'
 import { Gallery } from '@/components/public/gallery'
@@ -33,6 +34,8 @@ export const dynamicParams = true
 /** 44 px'lik dokunma hedefi; eksi dikey boşluk metin satırının dışına taşan kısmı yutar. */
 const BREADCRUMB_LINK_CLASS = 'inline-flex min-h-11 items-center hover:text-foreground'
 const SECTION_TITLE_CLASS = 'mb-4 font-display text-4xl font-bold uppercase lg:text-5xl'
+const COVER_FADE_CLASS =
+  'absolute inset-0 z-[2] bg-gradient-to-t from-background via-background/25 via-35% to-transparent'
 
 export async function generateStaticParams() {
   const slugs = await getActiveShopSlugs()
@@ -114,16 +117,15 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
         <ShopCoverMorph slug={shop.slug}>
           <div className="shop-cover relative aspect-[16/10] w-full overflow-hidden lg:aspect-auto lg:h-[28rem]">
             <CoverImage media={shop.coverImage} alt={shop.name} sizes="100vw" priority />
-            <div
-              className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"
-              aria-hidden
-            />
+            {/* Kapak zemine erir; dükkan ışığı (::before) bu katmanın altında kalır, kenarda çizgi oluşmaz. */}
+            <div className={COVER_FADE_CLASS} aria-hidden />
           </div>
         </ShopCoverMorph>
       ) : null}
 
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <header className={shop.coverImage ? 'relative -mt-6 lg:-mt-16' : 'pt-4'}>
+        {/* Başlık kapağın altında başlar: "Ana Sayfa" ve ad resmin üstüne binmez. */}
+        <header className={shop.coverImage ? 'pt-3 lg:pt-4' : 'pt-4'}>
           <nav
             aria-label="Konum"
             className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground"
@@ -142,7 +144,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
           </nav>
           <ShopNameMorph slug={shop.slug}>
             <h1 className="shop-title mt-2 w-fit max-w-full font-display text-5xl leading-[0.95] font-bold uppercase lg:text-8xl">
-              {shop.name}
+              <DisplayName>{shop.name}</DisplayName>
             </h1>
           </ShopNameMorph>
           <p className="mt-2 text-muted-foreground">
@@ -172,7 +174,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
                 className="mt-8 lg:mt-14"
               >
                 <h2 id={`vitrin-${shelf.id}`} className={SECTION_TITLE_CLASS}>
-                  {shelf.name}
+                  <DisplayName>{shelf.name}</DisplayName>
                 </h2>
                 <GameShelf category={shelf} platform={gamePlatform} />
               </section>

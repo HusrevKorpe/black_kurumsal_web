@@ -46,7 +46,8 @@
 
 /*
  * Dükkan sayfası: kapağın altından dükkan renginde ışık vurur, adın etrafında neon hâlesi yanar.
- * Kenarda çizgi yok: başlık kapağın üstüne bindiği için çizgi "Ana Sayfa" yazısını keserdi.
+ * Kenarda çizgi yok; ışık, kapağı zemine eriten katmanın (z-index 2) altında kalır ki alt kenarda
+ * sert bir mor şerit oluşmasın.
  */
 .shop-cover::before {
   content: '';

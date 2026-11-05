@@ -8,6 +8,7 @@ import { SHOP_TYPE_META } from '@/lib/constants/shops'
 import { mediaPublicUrl } from '@/lib/media/url'
 import { OpenStatusBadge } from './open-status-badge'
 import { ShopCoverMorph, ShopNameMorph } from './shop-morph'
+import { DisplayName } from './display-name'
 
 interface ShopRowProps {
   shop: ShopCardData
@@ -42,7 +43,7 @@ export function ShopRow({ shop, hideLocation = false }: ShopRowProps) {
         <div className="relative z-10 min-w-0">
           <ShopNameMorph slug={shop.slug}>
             <h3 className="shop-row-name w-fit max-w-full font-display text-2xl leading-[1.05] font-bold uppercase transition-colors lg:text-5xl">
-              {shop.name}
+              <DisplayName>{shop.name}</DisplayName>
             </h3>
           </ShopNameMorph>
           <p className="mt-0.5 flex items-center gap-x-2 text-sm text-muted-foreground lg:mt-2">

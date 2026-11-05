@@ -3,6 +3,7 @@ import type { LocationCardData } from '@/features/locations/queries'
 import { ROUTES } from '@/lib/constants/routes'
 import { tr } from '@/lib/i18n/tr'
 import { CoverImage } from './cover-image'
+import { DisplayName } from './display-name'
 
 interface LocationCardProps {
   location: LocationCardData
@@ -28,7 +29,7 @@ export function LocationCard({ location }: LocationCardProps) {
       />
       <div className="relative p-4 lg:p-6">
         <h3 className="font-display text-4xl leading-none font-bold uppercase lg:text-6xl">
-          {location.name}
+          <DisplayName>{location.name}</DisplayName>
         </h3>
         <p className="mt-1.5 text-sm text-muted-foreground">
           {isVenue ? tr.location.venue : tr.location.district} ·{' '}
