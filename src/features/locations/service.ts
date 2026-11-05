@@ -5,6 +5,7 @@ import { fail, fromZodError, ok, type ActionResult } from '@/lib/actions/result'
 import { assertOwner, type StaffContext } from '@/lib/auth/authorize'
 import { db } from '@/lib/db'
 import { tr } from '@/lib/i18n/tr'
+import { coverFocusSchema, normalizeFocusY } from '@/features/media/cover-focus'
 import { locationFormSchema } from './schema'
 
 /** Silinen mekanın kaydı kaldığı için slug'ı da tutulu kalır; çakışma nedenini söyler. */
@@ -80,6 +81,36 @@ export async function setLocationCover(
       entityType: 'Location',
       entityId: locationId,
       summary: `${location.name} kapak görseli değişti`,
+    })
+  })
+  return ok(null)
+}
+
+/** Kapağın şeritte görünen dikey dilimi (`Media.focusY`). Kapak yoksa yazılacak bir şey de yok. */
+export async function setLocationCoverFocus(
+  staff: StaffContext,
+  locationId: string,
+  input: unknown,
+): Promise<ActionResult<null>> {
+  assertOwner(staff)
+  const parsed = coverFocusSchema.safeParse(input)
+  if (!parsed.success) return fromZodError(parsed.error)
+  const focusY = normalizeFocusY(parsed.data.focusY)
+  const location = await db.location.findFirst({
+    where: { id: locationId, deletedAt: null },
+    select: { name: true, coverImageId: true },
+  })
+  if (!location?.coverImageId) return fail('Önce bir kapak görseli seçin.')
+  const coverImageId = location.coverImageId
+  await db.$transaction(async (tx) => {
+    await tx.media.update({ where: { id: coverImageId }, data: { focusY } })
+    await logAudit(tx, {
+      staffId: staff.id,
+      action: 'location.cover_focus',
+      entityType: 'Location',
+      entityId: locationId,
+      summary: `${location.name} kapak odağı ${focusY ?? 'orta'}`,
+      data: { mediaId: coverImageId, focusY },
     })
   })
   return ok(null)

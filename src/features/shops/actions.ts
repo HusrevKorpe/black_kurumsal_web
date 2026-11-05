@@ -48,3 +48,15 @@ export async function deleteShopAction(shopId: string): Promise<ActionResult<nul
     return result
   })
 }
+
+export async function setShopCoverFocusAction(
+  shopId: string,
+  input: unknown,
+): Promise<ActionResult<null>> {
+  return runAction(async () => {
+    const staff = await requireStaff()
+    const result = await service.setShopCoverFocus(staff, shopId, input)
+    if (result.ok) revalidatePublicSite()
+    return result
+  })
+}

@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthorizationError } from '@/lib/auth/authorize'
 import { db } from '@/lib/db'
-import { createShop, deleteShop, setShopCover, updateShop } from '@/features/shops/service'
+import {
+  createShop,
+  deleteShop,
+  setShopCover,
+  setShopCoverFocus,
+  updateShop,
+} from '@/features/shops/service'
 import {
   createManager,
   createMedia,
@@ -128,6 +134,42 @@ describe('setShopCover', () => {
     )
     expect((await setShopCover(owner, shop.id, null)).ok).toBe(true)
     expect((await db.shop.findUniqueOrThrow({ where: { id: shop.id } })).coverImageId).toBeNull()
+  })
+})
+
+describe('setShopCoverFocus', () => {
+  it('kapağın odağını yazar, 50 boş kaydedilir, günlüğe düşer', async () => {
+    const shop = await makeShop()
+    const owner = await createOwner()
+    const media = await createMedia(`shop/${shop.id}/a.webp`)
+    await setShopCover(owner, shop.id, media.id)
+
+    expect((await setShopCoverFocus(owner, shop.id, { focusY: 30 })).ok).toBe(true)
+    expect((await db.media.findUniqueOrThrow({ where: { id: media.id } })).focusY).toBe(30)
+    expect((await setShopCoverFocus(owner, shop.id, { focusY: 50 })).ok).toBe(true)
+    expect((await db.media.findUniqueOrThrow({ where: { id: media.id } })).focusY).toBeNull()
+
+    const logs = await db.auditLog.findMany({ where: { action: 'shop.cover_focus' } })
+    expect(logs).toHaveLength(2)
+  })
+
+  it('aralık dışı değer ve kapaksız dükkan reddedilir', async () => {
+    const shop = await makeShop()
+    const owner = await createOwner()
+    expect((await setShopCoverFocus(owner, shop.id, { focusY: 30 })).ok).toBe(false)
+    const media = await createMedia(`shop/${shop.id}/a.webp`)
+    await setShopCover(owner, shop.id, media.id)
+    expect((await setShopCoverFocus(owner, shop.id, { focusY: 140 })).ok).toBe(false)
+    expect((await db.media.findUniqueOrThrow({ where: { id: media.id } })).focusY).toBeNull()
+  })
+
+  it('sorumlu yalnız kendi dükkanının kapağını ayarlar', async () => {
+    const shop = await makeShop()
+    const other = await makeShop()
+    const manager = await createManager([other.id])
+    await expect(setShopCoverFocus(manager, shop.id, { focusY: 30 })).rejects.toThrow(
+      AuthorizationError,
+    )
   })
 })
 

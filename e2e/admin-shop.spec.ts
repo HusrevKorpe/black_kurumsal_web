@@ -18,6 +18,28 @@ test.describe('Dükkan yönetimi', () => {
     await expect(page.getByText(marker)).toBeVisible()
   })
 
+  test('kapakta görünen kısım panelden seçilir ve sitede uygulanır', async ({ page }) => {
+    await login(page, OWNER)
+    await page.goto('/admin/dukkanlar')
+    await page.getByRole('link', { name: /Black Tost Çarşı/ }).click()
+    await page.getByRole('link', { name: 'Galeri' }).click()
+
+    const editor = page.getByRole('region', { name: 'Kapakta görünen kısım' })
+    await expect(editor).toBeVisible()
+    await editor.getByRole('slider', { name: 'Görünen kısım' }).fill('20')
+    await editor.getByRole('button', { name: 'Kaydet' }).click()
+    await expect(page.getByText('Kapakta görünen kısım kaydedildi.')).toBeVisible()
+
+    await page.goto('/black-tost-carsi')
+    await expect(page.locator('.shop-cover img')).toHaveCSS('object-position', '50% 20%')
+
+    // Sonraki çalıştırmalar ve diğer testler için ortaya geri al.
+    await page.goBack()
+    await editor.getByRole('button', { name: 'Ortala' }).click()
+    await editor.getByRole('button', { name: 'Kaydet' }).click()
+    await expect(page.getByText('Kapakta görünen kısım kaydedildi.')).toBeVisible()
+  })
+
   test('slug rezerve kelime olamaz', async ({ page }) => {
     await login(page, OWNER)
     await page.goto('/admin/dukkanlar/yeni')

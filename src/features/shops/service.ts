@@ -1,5 +1,6 @@
 import 'server-only'
 import { logAudit } from '@/features/audit/log'
+import { coverFocusSchema, normalizeFocusY } from '@/features/media/cover-focus'
 import type { Shop } from '@/generated/prisma/client'
 import { fail, fromZodError, ok, type ActionResult } from '@/lib/actions/result'
 import { assertOwner, assertShopAccess, isOwner, type StaffContext } from '@/lib/auth/authorize'
@@ -103,6 +104,36 @@ export async function setShopCover(
       summary: mediaId
         ? `${shop.name} kapak görseli değişti`
         : `${shop.name} kapak görseli kaldırıldı`,
+    })
+  })
+  return ok(null)
+}
+
+/** Kapağın şeritte görünen dikey dilimi (`Media.focusY`). Kapak yoksa yazılacak bir şey de yok. */
+export async function setShopCoverFocus(
+  staff: StaffContext,
+  shopId: string,
+  input: unknown,
+): Promise<ActionResult<null>> {
+  assertShopAccess(staff, shopId)
+  const parsed = coverFocusSchema.safeParse(input)
+  if (!parsed.success) return fromZodError(parsed.error)
+  const focusY = normalizeFocusY(parsed.data.focusY)
+  const shop = await db.shop.findFirst({
+    where: { id: shopId, deletedAt: null },
+    select: { name: true, coverImageId: true },
+  })
+  if (!shop?.coverImageId) return fail('Önce bir kapak görseli seçin.')
+  const coverImageId = shop.coverImageId
+  await db.$transaction(async (tx) => {
+    await tx.media.update({ where: { id: coverImageId }, data: { focusY } })
+    await logAudit(tx, {
+      staffId: staff.id,
+      action: 'shop.cover_focus',
+      entityType: 'Shop',
+      entityId: shopId,
+      summary: `${shop.name} kapak odağı ${focusY ?? 'orta'}`,
+      data: { mediaId: coverImageId, focusY },
     })
   })
   return ok(null)

@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { CoverFocusEditor } from '@/components/admin/cover-focus-editor'
 import { GalleryManager } from '@/components/admin/shops/gallery-manager'
 import { getLocationForAdmin, getLocationGalleryForAdmin } from '@/features/locations/admin-queries'
-import { setLocationCoverAction } from '@/features/locations/actions'
+import { setLocationCoverAction, setLocationCoverFocusAction } from '@/features/locations/actions'
 import { requireOwner } from '@/lib/auth/session'
 import { tr } from '@/lib/i18n/tr'
 import { mediaPublicUrl } from '@/lib/media/url'
@@ -25,13 +26,27 @@ export default async function LocationGalleryPage({
   }))
 
   return (
-    <GalleryManager
-      key={items.map((i) => i.id).join(',')}
-      owner={{ locationId: location.id }}
-      uploadOwner={{ kind: 'location', id: location.id }}
-      items={items}
-      coverMediaId={location.coverImageId}
-      setCoverAction={setLocationCoverAction.bind(null, location.id)}
-    />
+    <div className="space-y-6">
+      {location.coverImage ? (
+        <CoverFocusEditor
+          // Kapak değişince düzenleyici kaydedilmiş değerden yeniden başlasın.
+          key={location.coverImage.id}
+          url={mediaPublicUrl(location.coverImage)}
+          alt={location.coverImage.alt ?? location.name}
+          width={location.coverImage.width}
+          height={location.coverImage.height}
+          focusY={location.coverImage.focusY}
+          saveAction={setLocationCoverFocusAction.bind(null, location.id)}
+        />
+      ) : null}
+      <GalleryManager
+        key={items.map((i) => i.id).join(',')}
+        owner={{ locationId: location.id }}
+        uploadOwner={{ kind: 'location', id: location.id }}
+        items={items}
+        coverMediaId={location.coverImageId}
+        setCoverAction={setLocationCoverAction.bind(null, location.id)}
+      />
+    </div>
   )
 }

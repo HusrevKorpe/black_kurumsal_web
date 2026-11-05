@@ -35,3 +35,12 @@ export async function setLocationCoverAction(
 export async function deleteLocationAction(locationId: string): Promise<ActionResult<null>> {
   return withRevalidate(async () => service.deleteLocation(await requireStaff(), locationId))
 }
+
+export async function setLocationCoverFocusAction(
+  locationId: string,
+  input: unknown,
+): Promise<ActionResult<null>> {
+  return withRevalidate(async () =>
+    service.setLocationCoverFocus(await requireStaff(), locationId, input),
+  )
+}

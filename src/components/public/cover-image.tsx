@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import type { Media } from '@/generated/prisma/client'
+import { coverObjectPosition } from '@/features/media/cover-focus'
 import { mediaPublicUrl } from '@/lib/media/url'
 import { cn } from '@/lib/utils'
 
@@ -7,7 +8,8 @@ import { cn } from '@/lib/utils'
 export function coverFocusStyle(
   media: Partial<Pick<Media, 'focusY'>>,
 ): { objectPosition: string } | undefined {
-  return media.focusY == null ? undefined : { objectPosition: `50% ${media.focusY}%` }
+  const objectPosition = coverObjectPosition(media.focusY)
+  return objectPosition ? { objectPosition } : undefined
 }
 
 interface CoverImageProps {
