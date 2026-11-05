@@ -14,13 +14,14 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { slugify } from '@/lib/utils/slugify'
 
 /**
- * Dükkanın gerçek fotoğraflarını klasörden kapağa ve galeriye yükler (patronun WhatsApp'tan
+ * Dükkanın (ya da Black Garden gibi bir mekanın) gerçek fotoğraflarını klasörden kapağa ve galeriye yükler (patronun WhatsApp'tan
  * gönderdiği toplu fotoğraflar için; tek tek yükleme paneldedir).
  *   pnpm media:import --klasor=~/Desktop/BlackGaleri                      → yalnızca raporlar
  *   pnpm media:import --klasor=~/Desktop/BlackGaleri --apply              → yerele yükler
  *   DOTENV_CONFIG_PATH=.env.canli pnpm media:import --klasor=... --apply  → canlıya yükler
  *
- * Klasör düzeni: her alt klasör bir dükkandır, adı dükkanın adı ya da slug'ıyla eşleşir; büyük/küçük
+ * Klasör düzeni: her alt klasör bir dükkandır, adı dükkanın adı ya da slug'ıyla eşleşir (dükkan
+ * yoksa aynı kuralla mekana bakılır, yol `location/<id>/…` olur); büyük/küçük
  * harf, boşluk, tire ve Türkçe karakter farkı önemsizdir ("BlackTostCarsı" → "black-tost-carsi").
  * Dosya adı sırası galeri sırasıdır. "kapak" ile başlayan dosya kapak olur ve galeriye girmez; böyle
  * bir dosya yoksa ilk fotoğraf hem kapak hem galerinin ilk karesi olur. Dosya adının başındaki sıra
@@ -59,8 +60,12 @@ interface PreparedImage {
   alt: string
 }
 
+/** Fotoğrafların sahibi: dükkan ya da mekan. Panelin medya yolu türüyle aynı adlar. */
+type OwnerKind = 'shop' | 'location'
+
 interface ShopPlan {
   folder: string
+  kind: OwnerKind
   shopId: string
   shopName: string
   slug: string
@@ -139,6 +144,7 @@ async function encode(source: Buffer, file: string): Promise<EncodedImage> {
 async function prepareImage(
   folder: string,
   file: string,
+  kind: OwnerKind,
   shopId: string,
   shopName: string,
 ): Promise<PreparedImage> {
@@ -148,7 +154,7 @@ async function prepareImage(
   const fallback = isCover(file) ? `${shopName} kapak görseli` : shopName
   return {
     file,
-    path: buildMediaPath('shop', shopId, 'image/webp', randomUUID()),
+    path: buildMediaPath(kind, shopId, 'image/webp', randomUUID()),
     body: image.body,
     mimeType: 'image/webp',
     sizeBytes: image.body.byteLength,
@@ -162,12 +168,16 @@ async function prepareImage(
 
 async function planShop(root: string, folder: string): Promise<ShopPlan> {
   const key = matchKey(folder)
-  const shops = await db.shop.findMany({
-    where: { deletedAt: null },
-    select: { id: true, slug: true, name: true },
-  })
-  const shop = shops.find((s) => matchKey(s.slug) === key || matchKey(s.name) === key)
-  if (!shop) throw new Error(`"${folder}" klasörünün karşılığı olan dükkan bulunamadı`)
+  const select = { id: true, slug: true, name: true } as const
+  const matches = (row: { slug: string; name: string }) =>
+    matchKey(row.slug) === key || matchKey(row.name) === key
+  const shops = await db.shop.findMany({ where: { deletedAt: null }, select })
+  const locations = await db.location.findMany({ where: { deletedAt: null }, select })
+  const ownShop = shops.find(matches)
+  const ownLocation = ownShop ? undefined : locations.find(matches)
+  const shop = ownShop ?? ownLocation
+  const kind: OwnerKind = ownShop ? 'shop' : 'location'
+  if (!shop) throw new Error(`"${folder}" klasörünün karşılığı olan dükkan ya da mekan bulunamadı`)
 
   const dir = join(root, folder)
   const files = (await readdir(dir))
@@ -176,13 +186,18 @@ async function planShop(root: string, folder: string): Promise<ShopPlan> {
   if (files.length === 0) throw new Error(`"${folder}" klasöründe fotoğraf yok`)
 
   const prepared: PreparedImage[] = []
-  for (const file of files) prepared.push(await prepareImage(dir, file, shop.id, shop.name))
+  for (const file of files) prepared.push(await prepareImage(dir, file, kind, shop.id, shop.name))
 
   const marked = prepared.findIndex((image) => isCover(image.file))
   // Kapak işaretlenmemişse ilk fotoğraf hem kapak hem galerinin ilk karesi olur: fotoğraf kaybolmasın.
-  const cover = marked === -1 ? (prepared[0] as PreparedImage) : (prepared[marked] as PreparedImage)
+  // Kapak kopyası ayrı yola yüklenir; aynı yol iki kez yüklenemez, Media.path de tekildir.
+  const first = prepared[0] as PreparedImage
+  const cover =
+    marked === -1
+      ? { ...first, path: buildMediaPath(kind, shop.id, 'image/webp', randomUUID()) }
+      : (prepared[marked] as PreparedImage)
   const gallery = marked === -1 ? prepared : prepared.filter((_, i) => i !== marked)
-  return { folder, shopId: shop.id, shopName: shop.name, slug: shop.slug, cover, gallery }
+  return { folder, kind, shopId: shop.id, shopName: shop.name, slug: shop.slug, cover, gallery }
 }
 
 function describe(plan: ShopPlan): string {
@@ -190,7 +205,7 @@ function describe(plan: ShopPlan): string {
   const size = (image: PreparedImage) =>
     `${image.width}×${image.height}, ${kb(image)}${image.reencoded ? '' : ', dokunulmadı'}`
   const lines = [
-    `${plan.folder} → ${plan.slug} (${plan.shopName})`,
+    `${plan.folder} → ${plan.kind === 'location' ? 'mekan ' : ''}${plan.slug} (${plan.shopName})`,
     `  kapak  ${plan.cover.file} [${size(plan.cover)}] → ${plan.cover.alt}`,
     ...plan.gallery.map(
       (image, i) =>
@@ -228,16 +243,18 @@ async function createMedia(tx: Prisma.TransactionClient, image: PreparedImage): 
 
 /** Yazma bittikten SONRA silinecek eski dosya yolları. */
 async function writeShop(plan: ShopPlan): Promise<string[]> {
-  const prefix = `shop/${plan.shopId}/`
+  const prefix = `${plan.kind}/${plan.shopId}/`
+  const owner = plan.kind === 'shop' ? { shopId: plan.shopId } : { locationId: plan.shopId }
+  const coverSelect = { coverImageId: true, coverImage: { select: { path: true } } } as const
   return db.$transaction(async (tx) => {
     const previousGallery = await tx.galleryImage.findMany({
-      where: { shopId: plan.shopId },
+      where: owner,
       select: { mediaId: true, media: { select: { path: true } } },
     })
-    const shop = await tx.shop.findUniqueOrThrow({
-      where: { id: plan.shopId },
-      select: { coverImageId: true, coverImage: { select: { path: true } } },
-    })
+    const shop =
+      plan.kind === 'shop'
+        ? await tx.shop.findUniqueOrThrow({ where: { id: plan.shopId }, select: coverSelect })
+        : await tx.location.findUniqueOrThrow({ where: { id: plan.shopId }, select: coverSelect })
 
     const coverImageId = await createMedia(tx, plan.cover)
     const gallery: { mediaId: string; caption: string | null }[] = []
@@ -245,9 +262,13 @@ async function writeShop(plan: ShopPlan): Promise<string[]> {
       gallery.push({ mediaId: await createMedia(tx, image), caption: image.label || null })
     }
     // Kapak yeni satıra bağlandıktan sonra eskisi silinir; sıra tersine dönerse kapak boşalır.
-    await tx.shop.update({ where: { id: plan.shopId }, data: { coverImageId } })
+    if (plan.kind === 'shop') {
+      await tx.shop.update({ where: { id: plan.shopId }, data: { coverImageId } })
+    } else {
+      await tx.location.update({ where: { id: plan.shopId }, data: { coverImageId } })
+    }
     await tx.galleryImage.createMany({
-      data: gallery.map((entry, sortOrder) => ({ ...entry, shopId: plan.shopId, sortOrder })),
+      data: gallery.map((entry, sortOrder) => ({ ...entry, ...owner, sortOrder })),
     })
 
     // Eski kapak ve galeri: Media silinince galeri satırı ve (kapaksa) bağ da düşer. Yol öneki
@@ -263,7 +284,7 @@ async function writeShop(plan: ShopPlan): Promise<string[]> {
     await logAudit(tx, {
       staffId: null,
       action: 'gallery.import',
-      entityType: 'Shop',
+      entityType: plan.kind === 'shop' ? 'Shop' : 'Location',
       entityId: plan.shopId,
       summary: `${plan.shopName}: gerçek fotoğraflar yüklendi (kapak + ${plan.gallery.length} galeri)`,
       data: { folder: plan.folder, gallery: plan.gallery.length, replaced: removable.length },
