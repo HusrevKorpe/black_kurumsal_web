@@ -1,6 +1,7 @@
 import { ExternalLinkIcon, LogOutIcon } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import type { StaffRole } from '@/generated/prisma/enums'
@@ -52,6 +53,7 @@ export function AdminShell({ staff, children }: AdminShellProps) {
             >
               <ExternalLinkIcon className="size-4" /> {tr.admin.nav.viewSite}
             </Link>
+            <ThemeToggle className="size-10" />
             <form action={ROUTES.admin.signOut} method="post">
               <Button type="submit" variant="ghost" size="sm" aria-label={tr.admin.nav.signOut}>
                 <LogOutIcon data-icon="inline-start" />{' '}

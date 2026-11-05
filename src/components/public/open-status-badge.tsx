@@ -74,7 +74,12 @@ export function OpenStatusBadge({
     <span
       className={clsx(
         'inline-flex items-center gap-1.5 font-medium',
-        closingSoon ? 'text-amber-400' : isOpen ? 'text-emerald-400' : 'text-rose-400',
+        // Açık zeminde koyu, koyu zeminde parlak ton: ikisinde de 4,5:1'in üstü.
+        closingSoon
+          ? 'text-amber-800 dark:text-amber-400'
+          : isOpen
+            ? 'text-emerald-700 dark:text-emerald-400'
+            : 'text-rose-700 dark:text-rose-400',
         className,
       )}
     >

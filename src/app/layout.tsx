@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_TITLE_TEMPLATE } from '@/lib/constants/site'
+import { InlineScript } from '@/components/inline-script'
+import { DEFAULT_THEME, THEME_SCRIPT } from '@/lib/browser/theme'
 import { publicEnv } from '@/lib/env'
 import './globals.css'
 
@@ -19,15 +21,24 @@ export const metadata: Metadata = {
   openGraph: { siteName: 'Black', locale: 'tr_TR', type: 'website' },
 }
 
+// theme-color'ı tema betiği kurar ve tercihe göre günceller (src/lib/browser/theme.ts).
 export const viewport: Viewport = {
-  themeColor: '#212121',
   width: 'device-width',
   initialScale: 1,
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="tr" className={`${geistSans.variable} dark h-full antialiased`}>
+    // Tema betiği `dark` sınıfını ve color-scheme'i hidrasyondan önce değiştirebilir.
+    <html
+      lang="tr"
+      className={`${geistSans.variable} dark h-full antialiased`}
+      style={{ colorScheme: DEFAULT_THEME }}
+      suppressHydrationWarning
+    >
+      <head>
+        <InlineScript html={THEME_SCRIPT} />
+      </head>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   )

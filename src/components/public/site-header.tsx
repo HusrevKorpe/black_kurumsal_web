@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ROUTES } from '@/lib/constants/routes'
 import { tr } from '@/lib/i18n/tr'
 import { formatTrPhone, telHref } from '@/lib/utils/format'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { MobileNav, type NavContact, type NavItem } from './mobile-nav'
 
 interface SiteHeaderProps {
@@ -30,7 +31,7 @@ export function SiteHeader({ brandName, contact }: SiteHeaderProps) {
           {brandName}
         </Link>
 
-        <nav aria-label="Ana menü" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Ana menü" className="ml-auto hidden items-center gap-1 md:flex">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
@@ -51,7 +52,10 @@ export function SiteHeader({ brandName, contact }: SiteHeaderProps) {
           ) : null}
         </nav>
 
-        <MobileNav items={NAV_ITEMS} brandName={brandName} contact={contact} />
+        <div className="flex items-center md:ml-1">
+          <ThemeToggle />
+          <MobileNav items={NAV_ITEMS} brandName={brandName} contact={contact} />
+        </div>
       </div>
     </header>
   )

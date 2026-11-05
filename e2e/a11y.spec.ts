@@ -29,61 +29,68 @@ const PUBLIC_PAGES = [
   '/olmayan-sayfa',
 ]
 
-test.describe('Erişilebilirlik (axe)', () => {
-  for (const path of PUBLIC_PAGES) {
-    test(`açık site: ${path}`, async ({ page }) => {
-      await page.goto(path)
+/** Her sayfa iki temada da denetlenir: kontrast kuralları temaya göre değişir. */
+for (const theme of ['dark', 'light'] as const) {
+  test.describe(`Erişilebilirlik (axe) — ${theme === 'dark' ? 'koyu' : 'açık'} tema`, () => {
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript((t) => localStorage.setItem('tema', t), theme)
+    })
+
+    for (const path of PUBLIC_PAGES) {
+      test(`açık site: ${path}`, async ({ page }) => {
+        await page.goto(path)
+        await expectNoViolations(page)
+      })
+    }
+
+    test('mobil menü açıkken', async ({ page, isMobile }) => {
+      test.skip(!isMobile, 'yalnızca mobil projede')
+      await page.goto('/')
+      await page.getByRole('button', { name: 'Menü' }).click()
+      await expect(page.getByRole('navigation', { name: 'Mobil menü' })).toBeVisible()
+      // Panel 200 ms'lik opaklık geçişiyle açılır; yarı saydamken kontrast ölçümü yanlış çıkar.
+      await expect(page.getByRole('dialog')).toHaveCSS('opacity', '1')
       await expectNoViolations(page)
     })
-  }
 
-  test('mobil menü açıkken', async ({ page, isMobile }) => {
-    test.skip(!isMobile, 'yalnızca mobil projede')
-    await page.goto('/')
-    await page.getByRole('button', { name: 'Menü' }).click()
-    await expect(page.getByRole('navigation', { name: 'Mobil menü' })).toBeVisible()
-    // Panel 200 ms'lik opaklık geçişiyle açılır; yarı saydamken kontrast ölçümü yanlış çıkar.
-    await expect(page.getByRole('dialog')).toHaveCSS('opacity', '1')
-    await expectNoViolations(page)
-  })
-
-  test('panel: özet, dükkan sekmeleri ve patron sayfaları', async ({ page }) => {
-    await login(page, OWNER)
-    await expectNoViolations(page)
-
-    await page.goto('/admin/dukkanlar')
-    await expectNoViolations(page)
-    await page.getByRole('link', { name: /Black PlayStation Çarşı/ }).click()
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Black PlayStation Çarşı' }),
-    ).toBeVisible()
-    await expectNoViolations(page)
-    const tabs = page.getByRole('navigation', { name: 'Dükkan sekmeleri' })
-    for (const [tab, segment] of [
-      ['Saatler', 'saatler'],
-      ['Galeri', 'galeri'],
-      ['Fiyat Listesi', 'fiyatlar'],
-    ] as const) {
-      await tabs.getByRole('link', { name: tab }).click()
-      await expect(page).toHaveURL(new RegExp(`/admin/dukkanlar/[^/]+/${segment}$`))
-      await expect(tabs.getByRole('link', { name: tab })).toHaveAttribute('aria-current', 'page')
+    test('panel: özet, dükkan sekmeleri ve patron sayfaları', async ({ page }) => {
+      await login(page, OWNER)
       await expectNoViolations(page)
-    }
 
-    for (const path of [
-      '/admin/dukkanlar/yeni',
-      '/admin/kampanyalar',
-      '/admin/kampanyalar/yeni',
-      '/admin/mekanlar',
-      '/admin/kullanicilar',
-      '/admin/kullanicilar/yeni',
-      '/admin/ayarlar',
-      '/admin/gunluk',
-      '/admin/istatistik',
-    ]) {
-      await page.goto(path)
-      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+      await page.goto('/admin/dukkanlar')
       await expectNoViolations(page)
-    }
+      await page.getByRole('link', { name: /Black PlayStation Çarşı/ }).click()
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Black PlayStation Çarşı' }),
+      ).toBeVisible()
+      await expectNoViolations(page)
+      const tabs = page.getByRole('navigation', { name: 'Dükkan sekmeleri' })
+      for (const [tab, segment] of [
+        ['Saatler', 'saatler'],
+        ['Galeri', 'galeri'],
+        ['Fiyat Listesi', 'fiyatlar'],
+      ] as const) {
+        await tabs.getByRole('link', { name: tab }).click()
+        await expect(page).toHaveURL(new RegExp(`/admin/dukkanlar/[^/]+/${segment}$`))
+        await expect(tabs.getByRole('link', { name: tab })).toHaveAttribute('aria-current', 'page')
+        await expectNoViolations(page)
+      }
+
+      for (const path of [
+        '/admin/dukkanlar/yeni',
+        '/admin/kampanyalar',
+        '/admin/kampanyalar/yeni',
+        '/admin/mekanlar',
+        '/admin/kullanicilar',
+        '/admin/kullanicilar/yeni',
+        '/admin/ayarlar',
+        '/admin/gunluk',
+        '/admin/istatistik',
+      ]) {
+        await page.goto(path)
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+        await expectNoViolations(page)
+      }
+    })
   })
-})
+}

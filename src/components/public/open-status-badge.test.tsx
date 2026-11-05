@@ -34,7 +34,7 @@ describe('OpenStatusBadge', () => {
     vi.setSystemTime(new Date('2026-09-05T01:15:00+03:00')) // 10:00–02:00, kapanışa 45 dk
     render(<OpenStatusBadge week={daily('10:00', '02:00')} detailed />)
     const badge = screen.getByText(/45 dk sonra kapanıyor/)
-    expect(badge).toHaveClass('text-amber-400')
+    expect(badge).toHaveClass('text-amber-800', 'dark:text-amber-400')
     expect(badge).toHaveTextContent('Kapanış 02:00')
     expect(screen.queryByText(/Şu an açık/)).not.toBeInTheDocument()
   })
@@ -42,7 +42,7 @@ describe('OpenStatusBadge', () => {
   it('kapanışa bir saatten çok varken normal "Şu an açık" der', () => {
     vi.setSystemTime(new Date('2026-09-05T00:30:00+03:00')) // kapanışa 90 dk
     render(<OpenStatusBadge week={daily('10:00', '02:00')} />)
-    expect(screen.getByText('Şu an açık')).toHaveClass('text-emerald-400')
+    expect(screen.getByText('Şu an açık')).toHaveClass('text-emerald-700', 'dark:text-emerald-400')
   })
 
   it('saat bilgisi yoksa hiçbir şey çizmez', () => {

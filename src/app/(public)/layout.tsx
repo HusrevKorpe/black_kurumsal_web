@@ -1,12 +1,9 @@
-import type { Viewport } from 'next'
 import localFont from 'next/font/local'
 import { SiteFooter } from '@/components/public/site-footer'
 import { SiteHeader } from '@/components/public/site-header'
 import { getSiteSettings } from '@/features/settings/queries'
 
 export const revalidate = 3600
-
-export const viewport: Viewport = { themeColor: '#0a0a0a' }
 
 // Yalnızca marka ve başlıklar: tek ağırlık, panelin yüküne girmez. Türkçeye göre kırpılmış dosya.
 const display = localFont({

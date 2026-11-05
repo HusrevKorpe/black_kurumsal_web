@@ -57,9 +57,10 @@
 }
 
 :root {
-  /* Marka: tek yerden değişir. Sıcak amber vurgu, koyu zemin. */
-  --brand: oklch(0.82 0.15 78);
-  --brand-foreground: oklch(0.22 0.03 78);
+  /* Marka: tek yerden değişir. Sıcak amber vurgu; açık zeminde metin olarak okunsun diye koyu ton. */
+  color-scheme: light;
+  --brand: oklch(0.55 0.12 70);
+  --brand-foreground: oklch(1 0 0);
   --whatsapp: oklch(0.72 0.19 150);
   --whatsapp-foreground: oklch(0.15 0.03 150);
   --background: oklch(1 0 0);
@@ -98,6 +99,8 @@
 
 .dark {
   color-scheme: dark;
+  --brand: oklch(0.82 0.15 78);
+  --brand-foreground: oklch(0.22 0.03 78);
   --background: oklch(0.13 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -144,19 +147,83 @@
 }
 
 /*
- * Açık sitenin kimliği: tek siyah cephe. Panel aynı jetonları kullandığı için değerler yalnızca bu
- * kapsayıcıda ezilir. Köşeler neredeyse keskin, gölge yok.
+ * Açık sitenin kimliği: koyuda tek siyah cephe, açıkta kâğıt beyazı. Panel aynı jetonları kullandığı
+ * için değerler yalnızca bu kapsayıcıda ezilir (mobil menü gibi portallar da sınıfı kendisi taşır).
+ * Köşeler neredeyse keskin, gölge yok.
+ *
+ * Altın iki görevde: `--brand` metin ve çizgi (açıkta koyu ton, zeminde 4,5:1'in üstü), `--primary`
+ * düğme dolgusu (iki temada da parlak altın, üstünde koyu yazı). Süs renkleri (`--atlas-*`, `--bark-*`,
+ * `--ghost`, `--sign-*`) temaya göre değişir; bileşenlerde sabit renk yok.
  */
 .public-theme {
+  --background: #fbfbf8;
+  --foreground: #141413;
+  --card: #ffffff;
+  --card-foreground: #141413;
+  --popover: #ffffff;
+  --popover-foreground: #141413;
+  --primary: #f2b544;
+  --primary-foreground: #2a1f05;
+  --secondary: #efeee9;
+  --secondary-foreground: #141413;
+  --muted: #efeee9;
+  --muted-foreground: #5d5d56;
+  --accent: #efeee9;
+  --accent-foreground: #141413;
+  --border: oklch(0 0 0 / 13%);
+  --input: oklch(0 0 0 / 18%);
+  --brand: #8f5d00;
+  --brand-foreground: #ffffff;
+  --ring: #b8860b;
+  --radius: 0.125rem;
+
+  /* Büyük süs yazısı (aria-hidden): metin kuralı değil, altının canlı tonu. */
+  --brand-display: #c98a12;
+  --ghost: #e7e6e0;
+  --edge-strong: oklch(0 0 0 / 35%);
+  --atlas-ink: oklch(0 0 0 / 6%);
+  --atlas-line: oklch(0 0 0 / 10%);
+  --atlas-label: oklch(0 0 0 / 38%);
+  --atlas-drop: oklch(0 0 0 / 16%);
+  --bark-mid: #8c7448;
+  --bark-end: #b3a68a;
+  /* Tabela hâlesinin gücü; renk `.shop-title`'da dükkanın `--brand`'ından gelir. */
+  --sign-core: 35%;
+  --sign-halo: 30%;
+}
+.dark .public-theme,
+.public-theme.dark {
   --background: #0a0a0a;
   --foreground: #f4f4ef;
   --card: #151514;
   --card-foreground: #f4f4ef;
+  --popover: #151514;
+  --popover-foreground: #f4f4ef;
+  --primary: #f2b544;
+  --primary-foreground: #2a1f05;
+  --secondary: #262624;
+  --secondary-foreground: #f4f4ef;
+  --muted: #262624;
   --muted-foreground: #b8b8b0;
   --accent: #1f1f1d;
+  --accent-foreground: #f4f4ef;
   --border: oklch(1 0 0 / 16%);
+  --input: oklch(1 0 0 / 15%);
   --brand: #f2b544;
-  --radius: 0.125rem;
+  --brand-foreground: #2a1f05;
+  --ring: #f2b544;
+
+  --brand-display: #f2b544;
+  --ghost: #2b2b2a;
+  --edge-strong: oklch(1 0 0 / 40%);
+  --atlas-ink: oklch(1 0 0 / 7%);
+  --atlas-line: oklch(1 0 0 / 11%);
+  --atlas-label: oklch(1 0 0 / 28%);
+  --atlas-drop: oklch(1 0 0 / 22%);
+  --bark-mid: #e0cda4;
+  --bark-end: #a89d86;
+  --sign-core: 45%;
+  --sign-halo: 55%;
 }
 
 .footer-wordmark {
@@ -172,7 +239,7 @@
 /* Süs yazısı: metin değil sözde öğe, ekran okuyucuya ve kontrast denetimine girmez. */
 .footer-wordmark::before {
   content: attr(data-wordmark);
-  color: #2b2b2a;
+  color: var(--ghost);
 }
 
 /*
@@ -264,7 +331,7 @@
   line-height: 0.9;
   /* Sora geniş bir yazı; büyük boyda harfler hafif sıkı daha güçlü durur. */
   letter-spacing: -0.035em;
-  color: #f5f5f5;
+  color: var(--foreground);
   font-kerning: normal;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
@@ -276,7 +343,7 @@
   animation: hero-wordmark-in 0.9s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 .hero-wordmark-accent {
-  color: var(--brand);
+  color: var(--brand-display);
   /* L'nin sağı ve A'nın eğik ayakları açık boşluk bırakır; optik olarak aradaki boşluğu kapatır. */
   margin-left: -0.018em;
   /* Sıkı, harfe yakın ışıltı: komşu harflere taşmaz. */
@@ -299,7 +366,7 @@
   filter: drop-shadow(0 0 2.5px rgb(242 181 68 / 45%));
 }
 .hero-wordmark-stop {
-  stop-color: var(--brand);
+  stop-color: var(--brand-display);
 }
 .hero-wordmark-ribbon--wide {
   display: none;
@@ -357,7 +424,7 @@
   transform-origin: left center;
 }
 .tree-shop:hover {
-  border-color: oklch(1 0 0 / 40%);
+  border-color: var(--edge-strong);
 }
 
 /*
@@ -393,6 +460,15 @@
 }
 .tree-bark {
   fill: url(#tree-bark);
+}
+.tree-bark-root {
+  stop-color: var(--brand);
+}
+.tree-bark-mid {
+  stop-color: var(--bark-mid);
+}
+.tree-bark-end {
+  stop-color: var(--bark-end);
 }
 /* Soy çizgisi: üstüne gelinen dükkana kökten giden dallar kehribar yanar. */
 .tree-lit {
@@ -490,7 +566,6 @@
  * bir yol. Hepsi çok soluk; dükkan kutuları opak olduğu için yazının arkasına hiçbir şey girmez.
  */
 .atlas {
-  --atlas-ink: oklch(1 0 0 / 7%);
   position: absolute;
   inset: 0;
   z-index: -1;
@@ -517,7 +592,7 @@
 }
 .atlas-contours path {
   fill: none;
-  stroke: oklch(1 0 0 / 11%);
+  stroke: var(--atlas-line);
   stroke-width: 1;
 }
 /* Çizgiler arazi gibi yavaşça kayar: tek katman transform, kare başına boya yok. */
@@ -553,7 +628,7 @@
   list-style: none;
   font-size: 0.6875rem;
   font-weight: 600;
-  color: oklch(1 0 0 / 28%);
+  color: var(--atlas-label);
   font-variant-numeric: tabular-nums;
 }
 .atlas-letters {
@@ -619,7 +694,7 @@
   position: absolute;
   top: -3rem;
   bottom: 0;
-  color: oklch(1 0 0 / 22%);
+  color: var(--atlas-drop);
   opacity: 0.75;
   animation: atlas-drop var(--drop-d) linear var(--drop-o) infinite;
   will-change: transform;
@@ -656,4 +731,12 @@
   .atlas-fall {
     display: none;
   }
+}
+
+/* Açık sitede sayfa kenarı (iOS esnemesi, kısa sayfa altı) da sitenin zemininde kalsın. */
+body:has(> .public-theme) {
+  background-color: #fbfbf8;
+}
+.dark body:has(> .public-theme) {
+  background-color: #0a0a0a;
 }

@@ -261,9 +261,9 @@ export function ShopTreeBranches() {
               x2="0"
               y2={drawing.height}
             >
-              <stop offset="0" stopColor="var(--brand)" />
-              <stop offset="0.35" stopColor="#e0cda4" stopOpacity="0.78" />
-              <stop offset="1" stopColor="#a89d86" stopOpacity="0.6" />
+              <stop offset="0" className="tree-bark-root" />
+              <stop offset="0.35" className="tree-bark-mid" stopOpacity="0.78" />
+              <stop offset="1" className="tree-bark-end" stopOpacity="0.6" />
             </linearGradient>
             {growth.pieces.map((piece, i) => (
               <mask

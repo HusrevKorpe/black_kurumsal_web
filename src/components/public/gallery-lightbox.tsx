@@ -29,7 +29,8 @@ export function GalleryLightbox({
 
   return (
     <Dialog open={active !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl border-none bg-transparent p-0 shadow-none sm:max-w-4xl">
+      {/* Kapatma düğmesi siyah görsel alanının üstünde durur: iki temada da açık simge, koyu zemin. */}
+      <DialogContent className="max-w-4xl border-none bg-transparent p-0 shadow-none sm:max-w-4xl [&_[data-slot=dialog-close]]:bg-black/60 [&_[data-slot=dialog-close]]:text-white [&_[data-slot=dialog-close]]:hover:bg-black/80 [&_[data-slot=dialog-close]]:hover:text-white">
         <DialogTitle className="sr-only">{title}</DialogTitle>
         <DialogDescription className="sr-only">{label}</DialogDescription>
         {active ? (

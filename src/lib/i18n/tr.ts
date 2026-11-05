@@ -101,6 +101,10 @@ export const tr = {
     unexpected: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
     invalidInput: 'Girdi doğrulanamadı.',
   },
+  theme: {
+    toLight: 'Açık temaya geç',
+    toDark: 'Koyu temaya geç',
+  },
   footer: {
     rights: (year: number) => `© ${year} Black · Isparta. Tüm hakları saklıdır.`,
     quickLinks: 'Hızlı Bağlantılar',

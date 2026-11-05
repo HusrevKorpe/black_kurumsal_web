@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { applyTheme, DEFAULT_THEME, parseTheme, THEME_STORAGE_KEY } from '@/lib/browser/theme'
 import { captureException } from '@/lib/sentry/client'
 import { tr } from '@/lib/i18n/tr'
 import './globals.css'
@@ -20,6 +21,15 @@ export default function GlobalError({
   useEffect(() => {
     void captureException(error)
   }, [error])
+
+  // Kök layout'un tema betiği burada yok; kayıtlı tema elle uygulanır.
+  useEffect(() => {
+    let stored: string | null = null
+    try {
+      stored = localStorage.getItem(THEME_STORAGE_KEY)
+    } catch {}
+    applyTheme(parseTheme(stored) ?? DEFAULT_THEME)
+  }, [])
 
   return (
     <html lang="tr" className="dark h-full antialiased">

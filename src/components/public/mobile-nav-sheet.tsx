@@ -49,7 +49,8 @@ export function MobileNavSheet({
       <SheetContent
         id={id}
         side="right"
-        className="w-72 [&_[data-slot=sheet-close]]:top-1 [&_[data-slot=sheet-close]]:right-1 [&_[data-slot=sheet-close]]:size-12"
+        // Portal `.public-theme` dışına açılır: sitenin renklerini kendisi taşır.
+        className="public-theme w-72 [&_[data-slot=sheet-close]]:top-1 [&_[data-slot=sheet-close]]:right-1 [&_[data-slot=sheet-close]]:size-12"
         finalFocus={finalFocus}
       >
         <SheetHeader>
