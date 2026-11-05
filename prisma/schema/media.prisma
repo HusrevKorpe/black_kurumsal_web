@@ -8,6 +8,9 @@ model Media {
   width        Int?
   height       Int?
   alt          String?
+  /// Kırpılan kapak şeridinde görünecek dikey nokta, yüzde (0 = üst, 100 = alt). Boşsa ortası (50).
+  /// Dik telefon fotoğrafı geniş şeritte ince bir dilime iner; tabelanın kesilmemesi bununla seçilir.
+  focusY       Int?
   uploadedById String?
   createdAt    DateTime @default(now())
 

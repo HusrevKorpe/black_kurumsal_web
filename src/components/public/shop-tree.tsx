@@ -15,6 +15,7 @@ import { ShopCoverMorph, ShopNameMorph } from './shop-morph'
 import { ShopTypeIcon } from './shop-type-icon'
 import { ShopTreeAtlas } from './shop-tree-atlas'
 import { ShopTreeBranches } from './shop-tree-branches'
+import { coverFocusStyle } from './cover-image'
 
 interface ShopTreeProps {
   brandName: string
@@ -145,6 +146,7 @@ function TreeShop({ shop, parent }: { shop: ShopCardData; parent: string }) {
               fill
               sizes="48px"
               className="object-cover"
+              style={coverFocusStyle(shop.coverImage)}
             />
           ) : (
             <span className="flex size-full items-center justify-center text-brand">
@@ -192,6 +194,7 @@ function TreeVenue({ venue, shopCount }: { venue: LocationCardData; shopCount: n
             fill
             sizes="48px"
             className="object-cover"
+            style={coverFocusStyle(venue.coverImage)}
           />
         ) : (
           <span className="flex size-full items-center justify-center text-brand">

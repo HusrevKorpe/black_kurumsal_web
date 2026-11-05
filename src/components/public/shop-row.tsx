@@ -9,6 +9,7 @@ import { mediaPublicUrl } from '@/lib/media/url'
 import { OpenStatusBadge } from './open-status-badge'
 import { ShopCoverMorph, ShopNameMorph } from './shop-morph'
 import { DisplayName } from './display-name'
+import { coverFocusStyle } from './cover-image'
 
 interface ShopRowProps {
   shop: ShopCardData
@@ -63,6 +64,7 @@ export function ShopRow({ shop, hideLocation = false }: ShopRowProps) {
                 fill
                 sizes="(min-width: 1024px) 44vw, 88px"
                 className="object-cover"
+                style={coverFocusStyle(shop.coverImage)}
               />
             </div>
           </ShopCoverMorph>
