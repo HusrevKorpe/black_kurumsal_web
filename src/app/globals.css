@@ -252,65 +252,70 @@
  */
 /*
  * Açılıştaki büyük marka adı (Sora 800). Beyaz harfler, altın "A", arkadan geçen ince altın ışık
- * çizgisi. Yazı yavaşça belirir, çizgi kendini çizer; sonra çizgi üzerinde arada bir ışık süzülür.
+ * çizgisi. Altın, ağacın dallarıyla aynı `--brand`. Açılışta yazı belirir, çizgi kendini çizer, A'nın
+ * ışıltısı yavaşça güçlenip sabitlenir; hepsi bir kez, 1,4 saniyede biter.
  */
 .hero-wordmark {
-  --gold: #f5bd32;
   position: relative;
   isolation: isolate;
   width: fit-content;
   font-size: 3.5rem;
   font-weight: 800;
   line-height: 0.9;
-  letter-spacing: -0.03em;
+  /* Sora geniş bir yazı; büyük boyda harfler hafif sıkı daha güçlü durur. */
+  letter-spacing: -0.035em;
   color: #f5f5f5;
+  font-kerning: normal;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 .hero-wordmark-text {
   position: relative;
   display: block;
-  animation: hero-wordmark-in 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation: hero-wordmark-in 0.9s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 .hero-wordmark-accent {
-  color: var(--gold);
+  color: var(--brand);
+  /* L'nin sağı ve A'nın eğik ayakları açık boşluk bırakır; optik olarak aradaki boşluğu kapatır. */
+  margin-left: -0.018em;
+  /* Sıkı, harfe yakın ışıltı: komşu harflere taşmaz. */
   text-shadow:
-    0 0 0.1em rgb(245 189 50 / 35%),
-    0 0 0.35em rgb(245 189 50 / 14%);
+    0 0 0.05em rgb(242 181 68 / 55%),
+    0 0 0.16em rgb(242 181 68 / 22%);
+  animation: hero-accent-glow 1.4s ease-out both;
 }
 .hero-wordmark-line {
   position: absolute;
-  top: -0.06em;
+  top: 50%;
   left: -0.3em;
   z-index: -1;
   width: calc(100% + 0.6em);
-  height: calc(100% + 0.12em);
+  /* viewBox oranı: şerit eğilip bükülmez, uçlar gerçekten incelir. */
+  aspect-ratio: 440 / 100;
+  translate: 0 -50%;
   overflow: visible;
   pointer-events: none;
-  filter: drop-shadow(0 0 3px rgb(245 189 50 / 50%));
+  filter: drop-shadow(0 0 2.5px rgb(242 181 68 / 45%));
 }
-.hero-wordmark-line path {
+.hero-wordmark-stop {
+  stop-color: var(--brand);
+}
+.hero-wordmark-ribbon--wide {
+  display: none;
+}
+.hero-wordmark-draw {
   fill: none;
+  stroke: #fff;
+  stroke-width: 10;
   stroke-linecap: round;
-}
-.hero-wordmark-stroke {
-  stroke: var(--gold);
-  stroke-width: 2.6;
-  opacity: 0.8;
   stroke-dasharray: 1 1;
-  animation: hero-line-draw 1.3s cubic-bezier(0.65, 0, 0.35, 1) 0.15s both;
-}
-/* Çizgi üzerinde kısa, açık bir ışık: 8 saniyede bir, yavaşça baştan sona akar. */
-.hero-wordmark-spark {
-  stroke: #ffe7a8;
-  stroke-width: 3;
-  stroke-dasharray: 0.14 1.14;
-  stroke-dashoffset: 0.14;
-  opacity: 0;
-  animation: hero-line-spark 8s ease-in-out 1.6s infinite;
+  animation: hero-line-draw 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.15s both;
 }
 @keyframes hero-wordmark-in {
   from {
     opacity: 0;
-    transform: translate3d(0, 0.06em, 0);
+    transform: translate3d(0, 0.05em, 0);
   }
 }
 @keyframes hero-line-draw {
@@ -321,21 +326,11 @@
     stroke-dashoffset: 0;
   }
 }
-@keyframes hero-line-spark {
-  0% {
-    stroke-dashoffset: 0.14;
-    opacity: 0;
-  }
-  5% {
-    opacity: 0.9;
-  }
-  30% {
-    opacity: 0.9;
-  }
-  35%,
-  100% {
-    stroke-dashoffset: -1;
-    opacity: 0;
+@keyframes hero-accent-glow {
+  from {
+    text-shadow:
+      0 0 0.05em rgb(242 181 68 / 0%),
+      0 0 0.16em rgb(242 181 68 / 0%);
   }
 }
 .tree-root {
@@ -451,12 +446,17 @@
   }
   .hero-wordmark {
     font-size: 6.5rem;
+    letter-spacing: -0.04em;
   }
-  .hero-wordmark-stroke {
-    stroke-width: 1.8;
+  /* Büyük yazının alt boşluğu artar; harf tabanıyla slogan arası telefondaki gibi ~12 px kalsın. */
+  .tree-root-title {
+    margin-top: -0.375rem;
   }
-  .hero-wordmark-spark {
-    stroke-width: 2.2;
+  .hero-wordmark-ribbon--narrow {
+    display: none;
+  }
+  .hero-wordmark-ribbon--wide {
+    display: inline;
   }
   /* Dallar kökten yelpaze gibi açılacak kadar yer: tohum kökün dibinde, boşluk ağaçta. */
   .tree {
@@ -476,11 +476,9 @@
     animation: none;
   }
   .hero-wordmark-text,
-  .hero-wordmark-stroke {
+  .hero-wordmark-accent,
+  .hero-wordmark-draw {
     animation: none;
-  }
-  .hero-wordmark-spark {
-    display: none;
   }
   .tree-lit {
     transition: none;

@@ -47,11 +47,16 @@ export function ShopTree({ brandName, title, subtitle, shops, locations }: ShopT
         <ShopTreeBranches />
         <div className="tree-root" data-tree-node="root">
           <HeroWordmark name={brandName} />
-          <h1 id="acilis-baslik" className="mt-1 text-base font-medium text-balance lg:text-xl">
+          <h1
+            id="acilis-baslik"
+            className="tree-root-title text-base font-medium text-balance lg:text-xl"
+          >
             {title}
           </h1>
           {subtitle ? (
-            <p className="mt-1 max-w-xl text-sm text-muted-foreground lg:text-base">{subtitle}</p>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-pretty text-muted-foreground lg:text-base">
+              {subtitle}
+            </p>
           ) : null}
         </div>
 
