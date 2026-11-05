@@ -28,7 +28,9 @@ function GameCard({
   return (
     <li
       className={cn(
-        'relative aspect-[2/3] w-[68vw] max-w-72 shrink-0 snap-start overflow-hidden border border-border/60 bg-card sm:w-auto sm:max-w-none',
+        // Fareyle üstüne gelince hafifçe öne çıkar. Tailwind 4'te hover: yalnız fareli cihazda
+        // çalışır, telefonda dokunuşta takılı kalmaz; hareket azaltmayı seçene büyüme anlık olur.
+        'relative aspect-[2/3] w-[68vw] max-w-72 shrink-0 snap-start overflow-hidden border border-border/60 bg-card transition-transform duration-300 ease-out hover:z-10 hover:scale-[1.04] motion-reduce:transition-none sm:w-auto sm:max-w-none',
         !item.isAvailable && 'opacity-60',
       )}
     >
