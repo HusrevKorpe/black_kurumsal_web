@@ -11,8 +11,8 @@ import { db } from '@/lib/db'
  *   DOTENV_CONFIG_PATH=.env.canli pnpm content:real --apply    → canlıya yazar
  *
  * Dükkanın fiyat listesinin tamamı değiştirilir: eski (çoğunlukla demo) kategoriler silinir, yerine
- * gerçek liste yazılır. Rapor hangi kategorilerin silineceğini önceden gösterir. Telefon, adres,
- * açıklama ve görsellere dokunulmaz. Açık site 1 saat önbellekli: değişiklik en geç bir saat içinde,
+ * gerçek liste yazılır. Rapor hangi kategorilerin silineceğini önceden gösterir. Telefon yalnız
+ * verildiyse yazılır; adres, açıklama ve görsellere dokunulmaz. Açık site 1 saat önbellekli: değişiklik en geç bir saat içinde,
  * panelden yapılacak ilk düzenlemede ya da yeni deploy'da hemen görünür.
  */
 const SHOPS_ARG = '--dukkan='
@@ -33,6 +33,7 @@ function describe(plan: RealShopPlan): string {
     const from = plan.hours.from ?? 'kendi saati yoktu'
     lines.push(`  saat   : ${from} → ${plan.hours.to} (7 gün)`)
   }
+  if (plan.phone) lines.push(`  telefon: ${plan.phone.from ?? 'yoktu'} → ${plan.phone.to}`)
   if (plan.categories > 0) {
     lines.push(`  fiyat  : ${plan.categories} kategori, ${plan.items} ürün yazılacak`)
     const replaced = plan.replaced.map((c) => `${c.name} (${c.items})`).join(', ')

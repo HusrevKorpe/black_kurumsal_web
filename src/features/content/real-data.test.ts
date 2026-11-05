@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { dayHoursSchema } from '@/features/hours/schema'
 import { priceCategorySchema, priceItemSchema } from '@/features/pricing/schema'
+import { optionalPhone } from '@/lib/validation/common'
 import { REAL_SHOP_CONTENT, REAL_SHOP_SLUGS } from './real-data'
 import { SKELETON_SHOPS } from './skeleton-data'
 
@@ -17,6 +18,13 @@ describe('gerçek içerik verisi', () => {
 
   it('her dükkan bilginin nereden geldiğini yazar (uydurma veriden ayırt etmek için)', () => {
     for (const [, content] of entries) expect(content.source.trim().length).toBeGreaterThan(10)
+  })
+
+  it('telefonlar panelin telefon doğrulamasından geçer', () => {
+    for (const [slug, content] of entries) {
+      if (content.phone === undefined) continue
+      expect(optionalPhone.safeParse(content.phone).success, slug).toBe(true)
+    }
   })
 
   it('panelin fiyat doğrulamasından geçer (veritabanına yazıldığı biçimde)', () => {

@@ -9,7 +9,8 @@ import { REAL_SHOP_CONTENT, REAL_SHOP_SLUGS, type RealShopSlug } from './real-da
  * `real-data.ts`'deki listeyle değiştirir ve saatlerini yeniden yazar. Sebebi: bu dükkanlarda çoğunlukla
  * demo fiyatı vardır, gerçek fiyat onun yanına eklenirse sitede iki liste görünür.
  *
- * Dokunulmayan alanlar: açıklama, adres, telefon, WhatsApp, Instagram, özellikler, kapak ve galeri.
+ * Telefon yalnız verildiyse yazılır. Dokunulmayan alanlar: açıklama, adres, WhatsApp, Instagram,
+ * özellikler, kapak ve galeri.
  * Her dükkan kendi transaction'ında yazılır ve günlüğe `content.real` satırı düşer.
  */
 const TX_OPTIONS = { timeout: 60_000 }
@@ -32,6 +33,8 @@ export interface RealShopPlan {
   replaced: ReplacedCategory[]
   /** Saat verilmediyse null. `from` boşsa dükkanın kendi saati yoktu (mekanınkini devralıyordu). */
   hours: { from: string | null; to: string } | null
+  /** Telefon verilmediyse null. */
+  phone: { from: string | null; to: string } | null
 }
 
 function selectSlugs(slugs: readonly string[] | undefined): RealShopSlug[] {
@@ -50,6 +53,7 @@ function selectSlugs(slugs: readonly string[] | undefined): RealShopSlug[] {
 const SHOP_SELECT = {
   id: true,
   name: true,
+  phone: true,
   hours: {
     orderBy: { dayOfWeek: 'asc' },
     select: { opensAt: true, closesAt: true, isClosed: true },
@@ -63,6 +67,7 @@ const SHOP_SELECT = {
 type ShopRow = {
   id: string
   name: string
+  phone: string | null
   hours: { opensAt: string | null; closesAt: string | null; isClosed: boolean }[]
   priceCategories: { name: string; _count: { items: number } }[]
 }
@@ -107,6 +112,7 @@ function toPlan(slug: RealShopSlug, shop: ShopRow): RealShopPlan {
           to: `${content.hours.opensAt}–${content.hours.closesAt}`,
         }
       : null,
+    phone: content.phone ? { from: shop.phone, to: content.phone } : null,
   }
 }
 
@@ -128,8 +134,9 @@ export async function planRealContent(
 
 async function writeShop(db: PrismaClient, plan: RealShopPlan): Promise<void> {
   const content = REAL_SHOP_CONTENT[plan.slug]
-  const { priceCategories, hours } = content
+  const { priceCategories, hours, phone } = content
   await db.$transaction(async (tx) => {
+    if (phone) await tx.shop.update({ where: { id: plan.shopId }, data: { phone } })
     if (priceCategories) {
       // Kategori silinince ürünleri de gider (cascade); demo listesi gerçeğinin yanında kalmaz.
       await tx.priceCategory.deleteMany({ where: { shopId: plan.shopId } })
@@ -170,7 +177,7 @@ async function writeShop(db: PrismaClient, plan: RealShopPlan): Promise<void> {
       action: ACTION,
       entityType: 'Shop',
       entityId: plan.shopId,
-      summary: `${plan.name}: gerçek fiyat/saat bilgisi yazıldı (${plan.categories} kategori, ${plan.items} ürün)`,
+      summary: `${plan.name}: gerçek fiyat/saat/telefon bilgisi yazıldı (${plan.categories} kategori, ${plan.items} ürün)`,
       data: {
         slug: plan.slug,
         source: plan.source,
@@ -178,6 +185,7 @@ async function writeShop(db: PrismaClient, plan: RealShopPlan): Promise<void> {
         items: plan.items,
         replaced: plan.replaced.map((category) => category.name),
         hours: plan.hours ? plan.hours.to : null,
+        phone: plan.phone ? plan.phone.to : null,
       },
     })
   }, TX_OPTIONS)

@@ -36,6 +36,8 @@ export interface RealShopContent {
   source: string
   hours?: RealWeekHours
   priceCategories?: readonly RealPriceCategory[]
+  /** Dükkanın kendi telefonu; verilmezse mevcut telefona dokunulmaz. */
+  phone?: string
 }
 
 const TOST_CARSI: RealShopContent = {
@@ -155,9 +157,30 @@ const PLAYSTATION_CARSI: RealShopContent = {
   ],
 }
 
+// Iyaş şubeleri Fatih Mah. 4504/1 Sk.'da (Iyaş AVM yanı), Çarşı şubeleri Çınar Sk. No:7'de.
+const MAPS_SOURCE = 'Google Haritalar işletme kaydı, site yöneticisinin onayıyla, 2026-11-05'
+
+const ESPOR_CARSI: RealShopContent = {
+  source: `${MAPS_SOURCE} ("ÇARŞI BLACK ESPOR", Çınar Sk. No:7)`,
+  phone: '0501 113 41 13',
+}
+
+const ESPOR_IYAS: RealShopContent = {
+  source: `${MAPS_SOURCE} ("Black E-Spor Center", Fatih Mah. 4504/1 Sk.)`,
+  phone: '0552 732 78 32',
+}
+
+const PLAYSTATION_IYAS: RealShopContent = {
+  source: `${MAPS_SOURCE} ("Black Playstation V.I.P Lounge", Fatih Mah.)`,
+  phone: '0506 090 93 72',
+}
+
 export const REAL_SHOP_CONTENT = {
   'black-playstation-carsi': PLAYSTATION_CARSI,
   'black-tost-carsi': TOST_CARSI,
+  'black-espor-carsi': ESPOR_CARSI,
+  'black-espor-iyas': ESPOR_IYAS,
+  'black-playstation-iyas': PLAYSTATION_IYAS,
 } as const satisfies Partial<Record<SkeletonShopSlug, RealShopContent>>
 
 export type RealShopSlug = keyof typeof REAL_SHOP_CONTENT
