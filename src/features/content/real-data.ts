@@ -175,12 +175,18 @@ const PLAYSTATION_IYAS: RealShopContent = {
   phone: '0506 090 93 72',
 }
 
+const TOST_IYAS: RealShopContent = {
+  source: `${MAPS_SOURCE} ("Black Toast & Fast Food", Fatih Mah. 4504/1 Sk. No:1)`,
+  phone: '0501 246 24 60',
+}
+
 export const REAL_SHOP_CONTENT = {
   'black-playstation-carsi': PLAYSTATION_CARSI,
   'black-tost-carsi': TOST_CARSI,
   'black-espor-carsi': ESPOR_CARSI,
   'black-espor-iyas': ESPOR_IYAS,
   'black-playstation-iyas': PLAYSTATION_IYAS,
+  'black-tost-iyas': TOST_IYAS,
 } as const satisfies Partial<Record<SkeletonShopSlug, RealShopContent>>
 
 export type RealShopSlug = keyof typeof REAL_SHOP_CONTENT
