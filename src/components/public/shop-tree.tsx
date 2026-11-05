@@ -9,6 +9,7 @@ import { ROUTES } from '@/lib/constants/routes'
 import { SHOP_TYPE_META } from '@/lib/constants/shops'
 import { tr } from '@/lib/i18n/tr'
 import { mediaPublicUrl } from '@/lib/media/url'
+import { HeroWordmark } from './hero-wordmark'
 import { OpenStatusBadge } from './open-status-badge'
 import { ShopCoverMorph, ShopNameMorph } from './shop-morph'
 import { ShopTypeIcon } from './shop-type-icon'
@@ -45,9 +46,7 @@ export function ShopTree({ brandName, title, subtitle, shops, locations }: ShopT
       <div className="relative isolate mx-auto w-full max-w-7xl px-4 pt-8 pb-12 sm:px-6 lg:pt-16 lg:pb-20">
         <ShopTreeBranches />
         <div className="tree-root" data-tree-node="root">
-          <p className="tree-root-name font-display font-bold uppercase" aria-hidden>
-            {brandName}
-          </p>
+          <HeroWordmark name={brandName} />
           <h1 id="acilis-baslik" className="mt-1 text-base font-medium text-balance lg:text-xl">
             {title}
           </h1>

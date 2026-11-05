@@ -250,10 +250,93 @@
  * yelpaze gibi her mekan sütununa açılır. Dalları `ShopTreeBranches` çizer ve büyütür; buradaki
  * girintiler dalların sığdığı yeri ayırır. Liste dalsız da okunur.
  */
-.tree-root-name {
-  font-size: 3.25rem;
-  line-height: 0.85;
-  letter-spacing: 0.01em;
+/*
+ * Açılıştaki büyük marka adı (Sora 800). Beyaz harfler, altın "A", arkadan geçen ince altın ışık
+ * çizgisi. Yazı yavaşça belirir, çizgi kendini çizer; sonra çizgi üzerinde arada bir ışık süzülür.
+ */
+.hero-wordmark {
+  --gold: #f5bd32;
+  position: relative;
+  isolation: isolate;
+  width: fit-content;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: #f5f5f5;
+}
+.hero-wordmark-text {
+  position: relative;
+  display: block;
+  animation: hero-wordmark-in 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.hero-wordmark-accent {
+  color: var(--gold);
+  text-shadow:
+    0 0 0.1em rgb(245 189 50 / 35%),
+    0 0 0.35em rgb(245 189 50 / 14%);
+}
+.hero-wordmark-line {
+  position: absolute;
+  top: -0.06em;
+  left: -0.3em;
+  z-index: -1;
+  width: calc(100% + 0.6em);
+  height: calc(100% + 0.12em);
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 0 3px rgb(245 189 50 / 50%));
+}
+.hero-wordmark-line path {
+  fill: none;
+  stroke-linecap: round;
+}
+.hero-wordmark-stroke {
+  stroke: var(--gold);
+  stroke-width: 2.6;
+  opacity: 0.8;
+  stroke-dasharray: 1 1;
+  animation: hero-line-draw 1.3s cubic-bezier(0.65, 0, 0.35, 1) 0.15s both;
+}
+/* Çizgi üzerinde kısa, açık bir ışık: 8 saniyede bir, yavaşça baştan sona akar. */
+.hero-wordmark-spark {
+  stroke: #ffe7a8;
+  stroke-width: 3;
+  stroke-dasharray: 0.14 1.14;
+  stroke-dashoffset: 0.14;
+  opacity: 0;
+  animation: hero-line-spark 8s ease-in-out 1.6s infinite;
+}
+@keyframes hero-wordmark-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.06em, 0);
+  }
+}
+@keyframes hero-line-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes hero-line-spark {
+  0% {
+    stroke-dashoffset: 0.14;
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.9;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  35%,
+  100% {
+    stroke-dashoffset: -1;
+    opacity: 0;
+  }
 }
 .tree-root {
   position: relative;
@@ -366,8 +449,14 @@
     padding-bottom: 0.75rem;
     text-align: center;
   }
-  .tree-root-name {
-    font-size: 6rem;
+  .hero-wordmark {
+    font-size: 6.5rem;
+  }
+  .hero-wordmark-stroke {
+    stroke-width: 1.8;
+  }
+  .hero-wordmark-spark {
+    stroke-width: 2.2;
   }
   /* Dallar kökten yelpaze gibi açılacak kadar yer: tohum kökün dibinde, boşluk ağaçta. */
   .tree {
@@ -385,6 +474,13 @@
 @media (prefers-reduced-motion: reduce) {
   .tree-section:not([data-grown]) :is(.tree-group, .tree-shop) {
     animation: none;
+  }
+  .hero-wordmark-text,
+  .hero-wordmark-stroke {
+    animation: none;
+  }
+  .hero-wordmark-spark {
+    display: none;
   }
   .tree-lit {
     transition: none;
