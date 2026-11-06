@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.NEXT_PUBLIC_SITE_URL),
   title: { default: SITE_TITLE, template: SITE_TITLE_TEMPLATE },
   description: SITE_DESCRIPTION,
+  // Açık site panelden yüklenen logo varsa bunu ezer ((public)/layout.tsx).
+  icons: { icon: '/favicon.ico' },
   openGraph: { siteName: 'Black', locale: 'tr_TR', type: 'website' },
 }
 

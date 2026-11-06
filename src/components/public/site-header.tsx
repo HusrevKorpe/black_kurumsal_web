@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/constants/routes'
 import { tr } from '@/lib/i18n/tr'
@@ -7,6 +8,8 @@ import { MobileNav, type NavContact, type NavItem } from './mobile-nav'
 
 interface SiteHeaderProps {
   brandName: string
+  /** Panelden yüklenen logo; yoksa yalnız marka adı yazılır. */
+  logoUrl?: string | null
   contact: NavContact
 }
 
@@ -16,7 +19,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.campaigns, label: tr.nav.campaigns },
 ]
 
-export function SiteHeader({ brandName, contact }: SiteHeaderProps) {
+export function SiteHeader({ brandName, logoUrl, contact }: SiteHeaderProps) {
   const phoneHref = contact.phone ? telHref(contact.phone) : null
 
   return (
@@ -26,8 +29,19 @@ export function SiteHeader({ brandName, contact }: SiteHeaderProps) {
           href={ROUTES.home}
           // Her sayfada ana sayfayı önceden indirmesin (~19 KB); gezinme yine çalışır.
           prefetch={false}
-          className="-ml-1 flex min-h-12 items-center px-1 font-display text-3xl font-bold uppercase"
+          className="-ml-1 flex min-h-12 items-center gap-2.5 px-1 font-display text-3xl font-bold uppercase"
         >
+          {logoUrl ? (
+            // Logonun en/boy oranı bilinmiyor: yükseklik sabit, genişlik görsele göre.
+            <Image
+              src={logoUrl}
+              alt=""
+              width={160}
+              height={40}
+              priority
+              className="h-9 w-auto max-w-40 object-contain sm:h-10"
+            />
+          ) : null}
           {brandName}
         </Link>
 
