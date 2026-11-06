@@ -86,10 +86,12 @@ export function SiteFooter({ settings }: SiteFooterProps) {
           </div>
         ) : null}
       </div>
+      {/* Dev harflerin kutusu dar satır yüksekliğinden ~90 px yukarı taşar, üstteki bağlantıların
+          tıklamasını yutmasın diye pointer-events-none. */}
       <div
         aria-hidden
         data-wordmark={settings.brandName}
-        className="footer-wordmark mx-auto w-full max-w-6xl px-4 font-display font-bold uppercase sm:px-6"
+        className="footer-wordmark pointer-events-none mx-auto w-full max-w-6xl px-4 font-display font-bold uppercase sm:px-6"
         style={{ '--brand-length': settings.brandName.length } as React.CSSProperties}
       />
       <div className="border-t">
