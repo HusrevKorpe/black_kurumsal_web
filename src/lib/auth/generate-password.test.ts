@@ -21,8 +21,8 @@ describe('generatePassword', () => {
 
   it('en kısa uzunlukta da kuralı sağlar: üç garanti karakter birbirini ezmez', () => {
     for (let i = 0; i < 300; i++) {
-      const shortest = generatePassword(12)
-      expect(shortest).toHaveLength(12)
+      const shortest = generatePassword(6)
+      expect(shortest).toHaveLength(6)
       expectMeetsPolicy(shortest)
     }
     expect(generatePassword(72)).toHaveLength(72)
@@ -32,8 +32,8 @@ describe('generatePassword', () => {
     expect(generatePassword()).not.toBe(generatePassword())
   })
 
-  it('12–72 dışını ve tam sayı olmayanı reddeder', () => {
-    expect(() => generatePassword(11)).toThrow(RangeError)
+  it('6–72 dışını ve tam sayı olmayanı reddeder', () => {
+    expect(() => generatePassword(5)).toThrow(RangeError)
     expect(() => generatePassword(73)).toThrow(RangeError)
     expect(() => generatePassword(10.5)).toThrow(RangeError)
   })

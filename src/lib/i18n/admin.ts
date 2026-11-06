@@ -244,7 +244,7 @@ export const admin = {
       roleManagerHint: 'Dükkan Sorumlusu: yalnızca atanan dükkanları düzenler.',
       password: 'Şifre',
       passwordHint:
-        'En az 12 karakter; küçük harf, büyük harf ve rakam. Kullanıcıya siz iletirsiniz.',
+        'En az 6 karakter; küçük harf, büyük harf ve rakam. Kullanıcıya siz iletirsiniz.',
       shops: 'Yetkili olduğu dükkanlar',
       shopsHint: 'Sorumlu yalnızca işaretli dükkanları düzenleyebilir.',
       isActive: 'Hesap aktif',

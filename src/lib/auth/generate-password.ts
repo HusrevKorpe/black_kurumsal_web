@@ -8,7 +8,7 @@ const ALPHABET = UPPER + LOWER + DIGITS
  * Panelin şifre kuralının tek kaynağı. Zod şeması (`src/features/staff/schema.ts`) ve form
  * alanlarının `minLength`'i aynı sayıyı buradan okur; biri değişip diğeri unutulamaz.
  */
-export const PASSWORD_MIN_LENGTH = 12
+export const PASSWORD_MIN_LENGTH = 6
 export const PASSWORD_MAX_LENGTH = 72
 
 /**
@@ -29,7 +29,7 @@ function randomIndex(bound: number): number {
 const pick = (chars: string): string => chars.charAt(randomIndex(chars.length))
 
 /**
- * Kriptografik rastgele şifre (16 karakter ≈ 92 bit). Panelin şifre kuralını (12–72 karakter,
+ * Kriptografik rastgele şifre (16 karakter ≈ 92 bit). Panelin şifre kuralını (6–72 karakter,
  * en az bir küçük harf, bir büyük harf ve bir rakam — `src/features/staff/schema.ts` ve
  * `supabase/config.toml`) her zaman sağlar: üç ayrı konuma garanti karakter yerleştirilir.
  *

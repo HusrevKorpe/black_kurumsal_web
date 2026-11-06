@@ -188,7 +188,7 @@ enable_manual_linking = false
 # akışlarını bağlar (kendi şifresini değiştirme, e-posta ile sıfırlama). Panelden kullanıcı açma
 # `auth.admin.*` ile yapılır ve o yol bu kuralı ATLAR; oradaki asıl kapı src/features/staff/schema.ts.
 # İkisi aynı tutulur ki ileride kullanıcıya açık bir akış eklenince kural gevşemesin.
-minimum_password_length = 12
+minimum_password_length = 6
 # Passwords that do not meet the following requirements will be rejected as weak. Supported values
 # are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
 password_requirements = "lower_upper_letters_digits"
