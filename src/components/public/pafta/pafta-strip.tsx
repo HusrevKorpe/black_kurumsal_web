@@ -33,7 +33,9 @@ export function PaftaStrip({ count, week, exceptions, contact, whatsappMessage }
   return (
     <div
       className={clsx(
-        'pafta-strip -mx-[18px] mt-9 grid gap-[18px] px-[18px] py-[22px] md:mx-0 md:mt-14 md:grid-cols-[1.3fr_1fr] md:items-center md:p-6',
+        // Düğmeler tek satırda kalsın: geniş ekranda düğme sütunu içeriği kadar, kutular kalanı
+        // paylaşır; tablette ikisi alt alta, düğmeler yine yan yana.
+        'pafta-strip -mx-[18px] mt-9 grid gap-[18px] px-[18px] py-[22px] md:mx-0 md:mt-14 md:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center',
         // Telefonda düğmeler alt çubukta; kutu da yoksa şerit telefonda boş kalmasın.
         !hasTiles && !hasPhoneActions && 'hidden md:grid',
       )}
@@ -44,9 +46,9 @@ export function PaftaStrip({ count, week, exceptions, contact, whatsappMessage }
           <PaftaHourTiles week={week} exceptions={exceptions} />
         </div>
       ) : (
-        <div className="hidden md:block" />
+        <div className="hidden lg:block" />
       )}
-      {hasDesktopActions ? <div className="md:justify-self-end">{actions}</div> : null}
+      {hasDesktopActions ? <div className="min-w-0 lg:justify-self-end">{actions}</div> : null}
     </div>
   )
 }

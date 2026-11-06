@@ -36,7 +36,12 @@ export function PaftaActions({ contact, whatsappMessage }: ContactProps) {
   if (!tel && !wa && !map && !contact.instagramUrl) return null
 
   return (
-    <div className={cn('flex flex-wrap gap-2.5', !contact.instagramUrl && 'hidden md:flex')}>
+    <div
+      className={cn(
+        'flex flex-wrap gap-2.5 md:flex-nowrap',
+        !contact.instagramUrl && 'hidden md:flex',
+      )}
+    >
       {tel && contact.phone ? (
         <a href={tel} data-track="call" className={cn('pafta-btn pafta-btn-call', desktopOnly)}>
           <PhoneIcon aria-hidden />
