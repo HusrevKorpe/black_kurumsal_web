@@ -86,7 +86,6 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
     alt: g.caption ?? g.media.alt ?? shop.name,
     caption: g.caption ?? g.media.alt,
   }))
-  const itemCount = categories.reduce((sum, category) => sum + category.items.length, 0)
   const typeLabel = SHOP_TYPE_META[shop.type].label
   const whatsappMessage = tr.shop.whatsappMessage(shop.name)
   const locationLabel = shopLocationLabel(shop.location)
@@ -147,7 +146,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
         />
 
         <PaftaStrip
-          count={{ value: itemCount, label: tr.pafta.priceItems }}
+          count={null}
           week={week}
           exceptions={exceptions}
           contact={contact}

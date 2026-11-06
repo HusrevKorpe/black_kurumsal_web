@@ -92,7 +92,6 @@ export const tr = {
     closedLabel: 'bugün',
     allDay: '24 saat',
     allDayLabel: 'bugün açık',
-    priceItems: 'fiyat kalemi',
     shops: 'dükkan',
     menuJump: 'Menü bölümleri',
     stats: 'Kısa bilgi',
