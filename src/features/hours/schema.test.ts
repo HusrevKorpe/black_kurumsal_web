@@ -13,6 +13,17 @@ const week = (overrides: Partial<Record<number, object>> = {}) => ({
 })
 
 describe('weeklyHoursSchema', () => {
+  it('kendi saati kapalıyken gizli boş gün alanı devralmayı engellemez', () => {
+    const input = { ...week({ 1: { opensAt: null } }), useOwnHours: false }
+    expect(weeklyHoursSchema.safeParse(input).success).toBe(true)
+  })
+
+  it('kendi saati açıkken boş gün alanı hatayı o güne yazar', () => {
+    const result = weeklyHoursSchema.safeParse(week({ 3: { opensAt: null } }))
+    expect(result.success).toBe(false)
+    expect(result.error?.issues[0]?.path).toEqual(['days', 2, 'opensAt'])
+  })
+
   it('geçerli haftayı kabul eder', () => {
     expect(weeklyHoursSchema.safeParse(week()).success).toBe(true)
   })

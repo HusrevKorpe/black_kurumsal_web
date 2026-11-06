@@ -31,7 +31,7 @@ test.describe('Dükkan yönetimi', () => {
     await expect(page.getByText('Kapakta görünen kısım kaydedildi.')).toBeVisible()
 
     await page.goto('/black-tost-carsi')
-    await expect(page.locator('.shop-cover img')).toHaveCSS('object-position', '50% 20%')
+    await expect(page.locator('.pafta-photo-frame img')).toHaveCSS('object-position', '50% 20%')
 
     // Sonraki çalıştırmalar ve diğer testler için ortaya geri al.
     await page.goBack()

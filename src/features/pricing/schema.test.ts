@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { priceItemSchema } from './schema'
+import { priceItemSchema, reorderSchema } from './schema'
 
 const base = {
   categoryId: 'c1',
@@ -25,5 +25,18 @@ describe('priceItemSchema', () => {
   it('negatif ve sayı olmayan fiyatı reddeder', () => {
     expect(priceItemSchema.safeParse({ ...base, price: -1 }).success).toBe(false)
     expect(priceItemSchema.safeParse({ ...base, price: 'abc' }).success).toBe(false)
+  })
+})
+
+describe('reorderSchema', () => {
+  const a = '01a1a548-11b4-708d-9a88-e990c63bbb7f'
+  const b = '01a1a548-11b7-74d0-a0e1-8599f28e6ed4'
+
+  it('her kimlik bir kez geçen listeyi kabul eder', () => {
+    expect(reorderSchema.safeParse({ ids: [a, b] }).success).toBe(true)
+  })
+
+  it('aynı kimlik iki kez gelirse reddeder (diğer kayıt sırasız kalırdı)', () => {
+    expect(reorderSchema.safeParse({ ids: [a, a] }).success).toBe(false)
   })
 })

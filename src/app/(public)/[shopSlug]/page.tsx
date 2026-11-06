@@ -82,8 +82,9 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
   const gallery = shop.gallery.map((g) => ({
     id: g.id,
     url: mediaPublicUrl(g.media),
-    alt: g.media.alt ?? shop.name,
-    caption: g.media.alt,
+    // Panelde girilen açıklama önce gelir; yoksa yüklemedeki alt metin.
+    alt: g.caption ?? g.media.alt ?? shop.name,
+    caption: g.caption ?? g.media.alt,
   }))
   const itemCount = categories.reduce((sum, category) => sum + category.items.length, 0)
   const typeLabel = SHOP_TYPE_META[shop.type].label

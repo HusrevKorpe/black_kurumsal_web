@@ -1,5 +1,6 @@
 import 'server-only'
 import * as Sentry from '@sentry/nextjs'
+import { unstable_rethrow } from 'next/navigation'
 import { Prisma } from '@/generated/prisma/client'
 import { AuthorizationError } from '@/lib/auth/authorize'
 import { tr } from '@/lib/i18n/tr'
@@ -14,6 +15,8 @@ export async function runAction<T>(fn: () => Promise<ActionResult<T>>): Promise<
   try {
     return await fn()
   } catch (error) {
+    // requireStaff() pasif hesabı redirect ile çıkarır; bu Next'in kendi hatası, mesaja çevrilmez.
+    unstable_rethrow(error)
     if (error instanceof AuthorizationError) return fail(tr.errors.unauthorized)
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') return fail(tr.errors.duplicate)

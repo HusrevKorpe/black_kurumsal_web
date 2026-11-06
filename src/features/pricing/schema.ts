@@ -36,5 +36,9 @@ export const priceItemSchema = z.object({
 export type PriceItemInput = z.infer<typeof priceItemSchema>
 
 export const reorderSchema = z.object({
-  ids: z.array(idSchema).min(1).max(200),
+  ids: z
+    .array(idSchema)
+    .min(1)
+    .max(200)
+    .refine((ids) => new Set(ids).size === ids.length, 'Sıralama listesinde tekrar var'),
 })

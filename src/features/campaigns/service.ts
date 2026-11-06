@@ -52,7 +52,12 @@ export async function createCampaign(
 
   const campaign = await db.$transaction(async (tx) => {
     const created = await tx.campaign.create({
-      data: { ...toData(parsed.data), createdById: staff.id },
+      // Sıra ortak listeyi etkiler; formda yalnız patrona açık, sorumludan geleni yok say.
+      data: {
+        ...toData(parsed.data),
+        sortOrder: isOwner(staff) ? parsed.data.sortOrder : 0,
+        createdById: staff.id,
+      },
     })
     await logAudit(tx, {
       staffId: staff.id,
@@ -89,7 +94,7 @@ export async function updateCampaign(
   const { updated, oldPath } = await db.$transaction(async (tx) => {
     const result = await tx.campaign.update({
       where: { id: campaignId },
-      data: toData(parsed.data),
+      data: isOwner(staff) ? toData(parsed.data) : { ...toData(parsed.data), sortOrder: undefined },
     })
     const removed =
       parsed.data.imageId !== existing.imageId ? await deleteMediaRow(tx, existing.imageId) : null

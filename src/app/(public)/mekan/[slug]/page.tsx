@@ -65,8 +65,9 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
   const gallery = location.gallery.map((g) => ({
     id: g.id,
     url: mediaPublicUrl(g.media),
-    alt: g.media.alt ?? location.name,
-    caption: g.media.alt,
+    // Panelde girilen açıklama önce gelir; yoksa yüklemedeki alt metin.
+    alt: g.caption ?? g.media.alt ?? location.name,
+    caption: g.caption ?? g.media.alt,
   }))
   const kindLabel = isVenue ? tr.location.venue : tr.location.district
   // Semt sayfası bir dizin: iletişim çubuğu yalnız tek adresli mekânda.
