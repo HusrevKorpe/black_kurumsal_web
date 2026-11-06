@@ -11,6 +11,7 @@ model StaffUser {
   assignments StaffShopAssignment[]
   uploads     Media[]
   campaigns   Campaign[]
+  events      CalendarEvent[]
   auditLogs   AuditLog[]
 }
 

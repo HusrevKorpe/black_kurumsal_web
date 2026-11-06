@@ -127,6 +127,22 @@ export const tr = {
     scopeGlobal: 'Tüm dükkanlar',
     validUntil: (date: string) => `${date} tarihine kadar`,
   },
+  /** Ana sayfadaki etkinlik takvimi. */
+  events: {
+    title: 'Etkinlik Takvimi',
+    subtitle: 'Turnuvalar, maç geceleri ve özel günler',
+    today: 'Bugün',
+    prevMonth: 'Önceki ay',
+    nextMonth: 'Sonraki ay',
+    weekdays: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
+    upcoming: 'Yaklaşan etkinlikler',
+    noUpcoming: 'Yakında yeni etkinlikler eklenecek.',
+    noneOnDay: 'Bu gün etkinlik yok.',
+    showUpcoming: 'Yaklaşanlara dön',
+    allShops: 'Tüm dükkanlar',
+    more: (n: number) => `+${n} daha`,
+    dayLabel: (date: string, count: number) => (count > 0 ? `${date}, ${count} etkinlik` : date),
+  },
   errors: {
     unauthorized: 'Bu işlem için yetkiniz yok.',
     duplicate: 'Bu değer zaten kullanılıyor. Farklı bir değer deneyin.',

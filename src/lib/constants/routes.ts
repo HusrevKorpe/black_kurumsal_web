@@ -39,6 +39,8 @@ export const ROUTES = {
     locations: '/admin/mekanlar',
     location: (id: string): `/admin/mekanlar/${string}` => `/admin/mekanlar/${id}`,
     campaigns: '/admin/kampanyalar',
+    events: '/admin/etkinlikler',
+    event: (id: string): `/admin/etkinlikler/${string}` => `/admin/etkinlikler/${id}`,
     users: '/admin/kullanicilar',
     settings: '/admin/ayarlar',
     analytics: '/admin/istatistik',

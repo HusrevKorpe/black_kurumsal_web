@@ -14,6 +14,7 @@ export async function resetDatabase(): Promise<void> {
     'AnalyticsEvent',
     'AuditLog',
     'StaffShopAssignment',
+    'CalendarEvent',
     'Campaign',
     'PriceItem',
     'PriceCategory',

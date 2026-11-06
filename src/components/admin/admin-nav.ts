@@ -4,7 +4,15 @@ import { tr } from '@/lib/i18n/tr'
 
 /** İkonlar ada göre istemci tarafında çözülür; sunucudan istemciye fonksiyon geçmez. */
 export type AdminNavIcon =
-  'home' | 'chart' | 'store' | 'megaphone' | 'map-pin' | 'users' | 'settings' | 'clipboard-list'
+  | 'home'
+  | 'chart'
+  | 'store'
+  | 'megaphone'
+  | 'calendar'
+  | 'map-pin'
+  | 'users'
+  | 'settings'
+  | 'clipboard-list'
 
 export interface AdminNavItem {
   href: `/${string}`
@@ -19,6 +27,9 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { href: ROUTES.admin.campaigns, label: tr.admin.nav.campaigns, icon: 'megaphone' },
   { href: ROUTES.admin.locations, label: tr.admin.nav.locations, icon: 'map-pin', ownerOnly: true },
   { href: ROUTES.admin.users, label: tr.admin.nav.users, icon: 'users', ownerOnly: true },
+  // Sorumluda 4. sırada alt çubukta görünür; patronun telefonunda Kampanyalar sayfasındaki
+  // düğmeden girilir (yukarı alınırsa Kullanıcılar alt çubuktan düşerdi).
+  { href: ROUTES.admin.events, label: tr.admin.nav.events, icon: 'calendar' },
   // Telefonda alt çubuğa yalnızca ilk 5 madde sığar; buraya eklenirse Kullanıcılar düşerdi.
   // İstatistiğe telefondan özet sayfasındaki karttan girilir.
   { href: ROUTES.admin.analytics, label: tr.admin.nav.analytics, icon: 'chart', ownerOnly: true },

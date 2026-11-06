@@ -6,13 +6,24 @@ interface SectionHeadingProps {
   subtitle?: string
   action?: { href: ComponentProps<typeof Link>['href']; label: string }
   as?: 'h1' | 'h2'
+  /** Bölümün aria-labelledby'ı buna bağlanır. */
+  id?: string
 }
 
-export function SectionHeading({ title, subtitle, action, as: Tag = 'h2' }: SectionHeadingProps) {
+export function SectionHeading({
+  title,
+  subtitle,
+  action,
+  as: Tag = 'h2',
+  id,
+}: SectionHeadingProps) {
   return (
     <div className="mb-3 flex items-end justify-between gap-4 lg:mb-6">
       <div>
-        <Tag className="font-display text-3xl leading-tight font-bold uppercase lg:text-5xl">
+        <Tag
+          id={id}
+          className="font-display text-3xl leading-tight font-bold uppercase lg:text-5xl"
+        >
           {title}
         </Tag>
         {subtitle ? <p className="mt-1 text-muted-foreground lg:text-lg">{subtitle}</p> : null}

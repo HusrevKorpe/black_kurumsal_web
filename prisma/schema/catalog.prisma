@@ -61,6 +61,7 @@ model Shop {
   gallery         GalleryImage[]
   priceCategories PriceCategory[]
   campaigns       Campaign[]
+  events          CalendarEvent[]
   staff           StaffShopAssignment[]
   analyticsEvents AnalyticsEvent[]
 

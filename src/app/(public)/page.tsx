@@ -1,8 +1,11 @@
 import { CampaignStrip } from '@/components/public/campaign-strip'
+import { EventCalendar } from '@/components/public/event-calendar'
 import { LocationCard } from '@/components/public/location-card'
 import { SectionHeading } from '@/components/public/section-heading'
 import { ShopTree } from '@/components/public/shop-tree'
 import { getActiveCampaigns } from '@/features/campaigns/queries'
+import { dayKey } from '@/features/events/calendar'
+import { getCalendarEvents } from '@/features/events/queries'
 import { getActiveLocations } from '@/features/locations/queries'
 import { getSiteSettings } from '@/features/settings/queries'
 import { getActiveShops } from '@/features/shops/queries'
@@ -13,12 +16,19 @@ export const revalidate = 3600
 
 export default async function HomePage() {
   const now = new Date()
-  const [settings, campaigns, locations, shops] = await Promise.all([
+  const today = dayKey(now)
+  const [settings, campaigns, events, locations, shops] = await Promise.all([
     getSiteSettings(),
     getActiveCampaigns(now, 8),
+    getCalendarEvents(now),
     getActiveLocations(),
     getActiveShops(),
   ])
+
+  const monthStart = `${today.slice(0, 8)}01`
+  const hasCurrentEvents = events.some(
+    (e) => dayKey(new Date(e.endsAt ?? e.startsAt)) >= monthStart,
+  )
 
   return (
     <>
@@ -34,6 +44,7 @@ export default async function HomePage() {
         {campaigns.length > 0 ? (
           <section aria-labelledby="kampanyalar-baslik">
             <SectionHeading
+              id="kampanyalar-baslik"
               title={tr.home.campaignsTitle}
               action={{ href: ROUTES.campaigns, label: tr.common.seeAll }}
             />
@@ -41,9 +52,25 @@ export default async function HomePage() {
           </section>
         ) : null}
 
+        {/* Boş takvim "burada bir şey olmuyor" der: bu ay ya da ileride etkinlik yoksa bölüm çıkmaz. */}
+        {hasCurrentEvents ? (
+          <section id="etkinlikler" className="scroll-mt-16" aria-labelledby="etkinlikler-baslik">
+            <SectionHeading
+              id="etkinlikler-baslik"
+              title={tr.events.title}
+              subtitle={tr.events.subtitle}
+            />
+            <EventCalendar events={events} initialToday={today} />
+          </section>
+        ) : null}
+
         {locations.length > 0 ? (
           <section id="mekanlar" className="scroll-mt-16" aria-labelledby="mekanlar-baslik">
-            <SectionHeading title={tr.home.locationsTitle} subtitle={tr.home.locationsSubtitle} />
+            <SectionHeading
+              id="mekanlar-baslik"
+              title={tr.home.locationsTitle}
+              subtitle={tr.home.locationsSubtitle}
+            />
             <div className="grid gap-3 sm:grid-cols-2 lg:gap-6">
               {locations.map((location) => (
                 <LocationCard key={location.id} location={location} />

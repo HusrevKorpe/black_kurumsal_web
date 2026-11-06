@@ -45,3 +45,23 @@ model SiteSettings {
 
   logoImage Media? @relation(fields: [logoImageId], references: [id], onDelete: SetNull)
 }
+
+/// Ana sayfadaki etkinlik takvimi: turnuva, maç gecesi, özel gün. Dükkansız olan tüm dükkanlarındır.
+model CalendarEvent {
+  id          String    @id @default(uuid(7))
+  title       String
+  description String?
+  startsAt    DateTime
+  endsAt      DateTime?
+  shopId      String?
+  isActive    Boolean   @default(true)
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  shop      Shop?      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdBy StaffUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([isActive, startsAt])
+  @@index([shopId])
+}
