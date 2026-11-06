@@ -16,10 +16,18 @@ interface PaftaCoverProps {
 }
 
 /**
- * Bu genişliğin altındaki kapak (menüden kırpılmış dükkan logosu gibi) çerçeveyi dolduracak kadar
- * büyütülürse bulanıklaşır: kendi boyutunda, karttaki rozet gibi yuvarlak ve ortada durur.
+ * Logo kapağı karttaki rozet gibi yuvarlak ve ortada durur: kutuya kırpılırsa dairesi kesilir.
+ * İşaret başlıktır ("Sushi Go – Logo"; panelde başlık, toplu yüklemede dosya adı); kare olmak yetmez,
+ * kare çekilmiş oda fotoğrafı da var. Bu genişliğin altındaki görsel de büyütülünce bulanıklaşacağı
+ * için aynı biçimde, kendi boyutundan büyümeden durur.
  */
 const SMALL_COVER_MAX_WIDTH = 480
+const LOGO_ALT = /\blogo$/i
+
+function isLogoCover(media: Partial<Pick<Media, 'width' | 'alt'>>): boolean {
+  if (media.alt && LOGO_ALT.test(media.alt.trim())) return true
+  return media.width != null && media.width < SMALL_COVER_MAX_WIDTH
+}
 
 /**
  * Çerçeveli kapak: paspartu, 1,5 px çizgi, kaydırılmış sert gölge. Fotoğraf çerçevenin içini
@@ -27,18 +35,17 @@ const SMALL_COVER_MAX_WIDTH = 480
  * geniş ekranda 5:4.
  */
 export function PaftaCover({ media, alt, caption, galleryCount, morphSlug }: PaftaCoverProps) {
-  const small = media.width != null && media.width < SMALL_COVER_MAX_WIDTH
-  const photo = small ? (
+  const photo = isLogoCover(media) ? (
     <div className="pafta-photo-frame grid place-items-center bg-[color-mix(in_oklch,var(--brand)_14%,var(--pafta-paper))]">
       <span
         className="relative aspect-square overflow-hidden rounded-full shadow-[0_0_0_1.5px_var(--pafta-rule)]"
-        style={{ width: `min(${media.width}px, 70%)` }}
+        style={{ width: media.width ? `min(${media.width}px, 70%)` : '70%' }}
       >
         <Image
           src={mediaPublicUrl(media)}
           alt={media.alt ?? alt}
           fill
-          sizes={`${media.width}px`}
+          sizes="(min-width: 1280px) 460px, (min-width: 768px) 37vw, 70vw"
           loading="eager"
           fetchPriority="high"
           className="object-cover"
