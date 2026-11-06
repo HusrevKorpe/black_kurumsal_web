@@ -11,18 +11,19 @@ interface LocationTabsProps {
   isVenue: boolean
 }
 
-/** Bölge (DISTRICT) için saat ve galeri anlamsız; sekmeler yalnızca mekanda çıkar. */
+/**
+ * Bölge (DISTRICT) için saat anlamsız; saat sekmesi yalnızca mekanda çıkar. Galeri ikisinde de var:
+ * bölgenin kapağı ana sayfadaki mekan kartında ve bölge sayfasında görünür.
+ */
 export function LocationTabs({ locationId, isVenue }: LocationTabsProps) {
   const pathname = usePathname()
   const base = ROUTES.admin.location(locationId)
   const tabs = [
     { href: base, label: tr.admin.locations.tabs.info, exact: true },
     ...(isVenue
-      ? [
-          { href: `${base}/saatler` as const, label: tr.admin.locations.tabs.hours, exact: false },
-          { href: `${base}/galeri` as const, label: tr.admin.locations.tabs.gallery, exact: false },
-        ]
+      ? [{ href: `${base}/saatler` as const, label: tr.admin.locations.tabs.hours, exact: false }]
       : []),
+    { href: `${base}/galeri` as const, label: tr.admin.locations.tabs.gallery, exact: false },
   ]
 
   return (

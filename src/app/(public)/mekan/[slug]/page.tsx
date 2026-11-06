@@ -90,11 +90,12 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
             ) : null
           }
           cover={
-            isVenue && location.coverImage ? (
+            location.coverImage ? (
               <PaftaCover
                 media={location.coverImage}
                 alt={location.name}
-                caption={contact.address}
+                // Bölgede adres yok; alt metin kapağın ne olduğunu ve (internetten alındıysa) fotoğraf hakkını söyler.
+                caption={isVenue ? contact.address : (location.coverImage.alt ?? null)}
                 galleryCount={gallery.length}
               />
             ) : null
@@ -178,6 +179,13 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
               </section>
             ) : null}
           </div>
+        ) : gallery.length > 0 ? (
+          <section aria-labelledby="galeri" className="mt-12 min-w-0 md:mt-20">
+            <h2 id="galeri" className={SECTION_TITLE_CLASS}>
+              {tr.shop.gallery}
+            </h2>
+            <Gallery images={gallery} title={location.name} />
+          </section>
         ) : null}
       </div>
 
