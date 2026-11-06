@@ -3,6 +3,7 @@
 @import 'shadcn/tailwind.css';
 @import './shop-motion.css';
 @import './pafta.css';
+@import './renovation.css';
 
 @custom-variant dark (&:is(.dark *));
 

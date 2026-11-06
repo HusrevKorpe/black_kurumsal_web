@@ -8,6 +8,8 @@ import { SHOP_TYPE_META } from '@/lib/constants/shops'
 import { mediaPublicUrl } from '@/lib/media/url'
 import { coverFocusStyle } from '../cover-image'
 import { DisplayName } from '../display-name'
+import { isUnderRenovation } from '@/features/shops/renovation'
+import { RenovationBadge } from '../renovation-badge'
 import { OpenStatusBadge } from '../open-status-badge'
 import { ShopCoverMorph, ShopNameMorph } from '../shop-morph'
 import { ShopTypeIcon } from '../shop-type-icon'
@@ -64,7 +66,11 @@ function ShopTicket({
           <span className="truncate text-sm text-[var(--pafta-soft)]">
             {locationLabel ? `${meta.label} · ${locationLabel}` : meta.label}
           </span>
-          <OpenStatusBadge week={week} exceptions={exceptions} className="text-xs" />
+          {isUnderRenovation(shop.slug) ? (
+            <RenovationBadge className="text-xs" />
+          ) : (
+            <OpenStatusBadge week={week} exceptions={exceptions} className="text-xs" />
+          )}
         </span>
         <span className="pafta-no" aria-hidden>
           {ticketNumber(index, total)}

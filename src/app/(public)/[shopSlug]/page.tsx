@@ -12,12 +12,14 @@ import { PaftaCover } from '@/components/public/pafta/pafta-cover'
 import { PaftaHero } from '@/components/public/pafta/pafta-hero'
 import { PaftaStrip } from '@/components/public/pafta/pafta-strip'
 import { PriceList } from '@/components/public/price-list'
+import { RenovationStage } from '@/components/public/renovation/renovation-stage'
 import { resolveExceptions, resolveHours, toExceptionEntries } from '@/features/hours'
 import { isGameShelf } from '@/features/pricing/games'
 import { toPriceCategoryViews } from '@/features/pricing/view'
 import { resolveContact } from '@/features/shops/contact'
 import { buildShopJsonLd, serializeJsonLd } from '@/features/shops/json-ld'
 import { getActiveShopSlugs, getShopBySlug } from '@/features/shops/queries'
+import { isUnderRenovation } from '@/features/shops/renovation'
 import { shopLocationLabel } from '@/features/shops/view'
 import { publicEnv } from '@/lib/env'
 import { ROUTES } from '@/lib/constants/routes'
@@ -42,6 +44,21 @@ export async function generateMetadata({ params }: PageProps<'/[shopSlug]'>): Pr
   const { shopSlug } = await params
   const shop = isReservedSlug(shopSlug) ? null : await getShopBySlug(shopSlug)
   if (!shop) return {}
+  if (isUnderRenovation(shop.slug)) {
+    const title = tr.renovation.metaTitle(shop.name)
+    const description = tr.renovation.metaDescription(shop.name)
+    return {
+      title,
+      description,
+      alternates: { canonical: ROUTES.shop(shop.slug) },
+      openGraph: {
+        title,
+        description,
+        type: 'website',
+        images: shop.coverImage ? [mediaPublicUrl(shop.coverImage)] : undefined,
+      },
+    }
+  }
   const title = shop.seoTitle ?? shop.name
   const description =
     shop.seoDescription ??
@@ -65,6 +82,21 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
   if (isReservedSlug(shopSlug)) notFound()
   const shop = await getShopBySlug(shopSlug)
   if (!shop) notFound()
+
+  // Tadilattaki dükkanda fiyat, saat ve açık/kapalı yanıltır: sayfa tek ekranlık "Yakında" sahnesi.
+  if (isUnderRenovation(shop.slug)) {
+    return (
+      <article data-accent={SHOP_TYPE_META[shop.type].accent}>
+        <RenovationStage
+          name={shop.name}
+          slug={shop.slug}
+          type={shop.type}
+          cover={shop.coverImage}
+          contact={resolveContact(shop, shop.location)}
+        />
+      </article>
+    )
+  }
 
   const { week, source } = resolveHours(shop.hours, shop.location?.hours)
   const exceptions = resolveExceptions(

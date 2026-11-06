@@ -81,6 +81,23 @@ export const tr = {
     hoursFromVenue: (venue: string) => `Saatler ${venue} ile aynı`,
     whatsappMessage: (shop: string) => `Merhaba, ${shop} hakkında bilgi almak istiyorum.`,
   },
+  /** Tadilattaki dükkanın sayfası ve kart etiketi. */
+  renovation: {
+    badge: 'Tadilatta · Yakında',
+    title: 'Tadilattayız',
+    soon: 'Yakında açılıyor',
+    tape: ['Dikkat', 'Tadilat alanı', 'Yakında açılıyor', 'Ustalar iş başında'],
+    seal: (shop: string) => `${shop} · Yakında açılıyor · `,
+    body: (shop: string) =>
+      `${shop} baştan yenileniyor. Daha güzel bir mekânla çok yakında kapılarımızı açıyoruz.`,
+    progress: 'Ustalar iş başında',
+    follow: "Açılışı Instagram'dan takip et",
+    ask: "WhatsApp'tan sor",
+    others: 'Diğer dükkanlara göz at',
+    metaTitle: (shop: string) => `${shop} · Tadilatta, yakında açılıyor`,
+    metaDescription: (shop: string) =>
+      `${shop} tadilatta. Yenilenen mekânıyla çok yakında yeniden açılıyor.`,
+  },
   /** Dükkan ve mekân sayfasının bilgi şeridi (Pafta). */
   pafta: {
     cover: 'Kapak',
