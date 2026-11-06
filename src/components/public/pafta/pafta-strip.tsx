@@ -7,7 +7,7 @@ import { PaftaHourTiles } from './pafta-hour-tiles'
 import { PaftaTile } from './pafta-tile'
 
 interface PaftaStripProps {
-  /** Veriden sayılan kutu ("40 fiyat kalemi", "7 dükkan"); sıfırsa çıkmaz. */
+  /** Veriden sayılan kutu ("7 dükkan"); sıfırsa çıkmaz. */
   count: { value: number; label: string } | null
   week: WeeklyHours
   exceptions: readonly HoursExceptionEntry[]
