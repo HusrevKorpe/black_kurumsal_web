@@ -35,8 +35,8 @@ export function CoverImage({ media, alt, sizes, priority = false, className }: C
       alt={media.alt ?? alt}
       fill
       sizes={sizes}
-      priority={priority}
-      // priority yalnızca preload ekler; LCP görselinin ağ kuyruğunda öne geçmesi için gerekir.
+      // Next 16'da `priority` kalktı; ilk ekran görseli için kılavuzun önerisi eager + yüksek öncelik.
+      loading={priority ? 'eager' : undefined}
       fetchPriority={priority ? 'high' : undefined}
       className={cn('object-cover', className)}
       style={coverFocusStyle(media)}

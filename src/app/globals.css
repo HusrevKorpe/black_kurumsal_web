@@ -2,6 +2,7 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import './shop-motion.css';
+@import './pafta.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -153,7 +154,7 @@
  *
  * Altın iki görevde: `--brand` metin ve çizgi (açıkta koyu ton, zeminde 4,5:1'in üstü), `--primary`
  * düğme dolgusu (iki temada da parlak altın, üstünde koyu yazı). Süs renkleri (`--atlas-*`, `--bark-*`,
- * `--ghost`, `--sign-*`) temaya göre değişir; bileşenlerde sabit renk yok.
+ * `--ghost`) temaya göre değişir; bileşenlerde sabit renk yok.
  */
 .public-theme {
   --background: #fbfbf8;
@@ -187,9 +188,6 @@
   --atlas-drop: oklch(0 0 0 / 16%);
   --bark-mid: #8c7448;
   --bark-end: #b3a68a;
-  /* Tabela hâlesinin gücü; renk `.shop-title`'da dükkanın `--brand`'ından gelir. */
-  --sign-core: 35%;
-  --sign-halo: 30%;
 }
 .dark .public-theme,
 .public-theme.dark {
@@ -222,8 +220,6 @@
   --atlas-drop: oklch(1 0 0 / 22%);
   --bark-mid: #e0cda4;
   --bark-end: #a89d86;
-  --sign-core: 45%;
-  --sign-halo: 55%;
 }
 
 .footer-wordmark {
@@ -250,66 +246,6 @@
 .gallery-deferred {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 40rem;
-}
-
-/* Telefonda fotoğraf satırın sağında şerit; geniş ekranda listenin yanında tek büyük pano. */
-.shop-directory {
-  position: relative;
-}
-.shop-row-photo {
-  position: absolute;
-  inset-block: 0;
-  right: 0;
-  width: 5.5rem;
-  overflow: hidden;
-  mask-image: linear-gradient(to right, transparent, #000 70%);
-}
-.shop-row-plate {
-  display: none;
-}
-@media (min-width: 1024px) {
-  .shop-directory {
-    min-height: 34rem;
-    padding-right: 48%;
-  }
-  .shop-row-link {
-    position: static;
-  }
-  .shop-row-photo {
-    inset: 0 0 0 auto;
-    width: 44%;
-    opacity: 0;
-    /* Panolar üst üste durur: görünmezi tıklamayı yakalayıp başka dükkana götürmesin. */
-    pointer-events: none;
-    mask-image: none;
-    background: var(--card);
-    transition: opacity 0.35s ease;
-  }
-  .shop-row-plate {
-    display: flex;
-    height: 100%;
-    align-items: flex-end;
-    padding: 1.5rem;
-    color: var(--muted-foreground);
-    font-size: 4.5rem;
-    line-height: 1;
-  }
-  .shop-row:hover .shop-row-photo,
-  .shop-row:focus-within .shop-row-photo,
-  .shop-directory:not(:has(.shop-row:hover, .shop-row:focus-within))
-    .shop-row:first-child
-    .shop-row-photo {
-    opacity: 1;
-  }
-  .shop-row:hover .shop-row-name,
-  .shop-row:focus-within .shop-row-name {
-    color: var(--brand);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .shop-row-photo {
-    transition: none;
-  }
 }
 
 /*

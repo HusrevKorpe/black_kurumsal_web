@@ -22,6 +22,8 @@ export {
 } from './exceptions'
 export {
   getOpenStatus,
+  getTodaySchedule,
+  type TodaySchedule,
   isOvernight,
   isAllDay,
   minutesUntilClose,

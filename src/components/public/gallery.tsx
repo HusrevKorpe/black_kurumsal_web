@@ -9,6 +9,8 @@ export interface GalleryImageItem {
   id: string
   url: string
   alt: string
+  /** Panelde yazılmış açıklama; yoksa karenin altında yalnız numara durur (uydurma yazı yok). */
+  caption?: string | null
 }
 
 interface GalleryProps {
@@ -47,33 +49,40 @@ export function Gallery({ images, title }: GalleryProps) {
 
   return (
     <>
-      {/* gallery-deferred: ekrana yaklaşmadan küçük resimler inmesin (telefonda ilk yükün en büyük kalemi). */}
-      <ul className="gallery-deferred grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {/*
+        Film şeridi: parmakla yana kayar, kareler mıknatısla oturur. gallery-deferred: ekrana
+        yaklaşmadan resimler inmesin (telefonda ilk yükün en büyük kalemi).
+      */}
+      <ul className="gallery-deferred pafta-film" aria-label={`${title} – ${tr.shop.gallery}`}>
         {images.map((image, i) => (
-          <li key={image.id} className={i === 0 ? 'col-span-2 row-span-2 sm:col-span-2' : ''}>
-            <button
-              type="button"
-              data-track="gallery"
-              onPointerDown={() => {
-                loadLightbox().catch(() => undefined)
-              }}
-              onClick={() => {
-                setLightboxMounted(true)
-                setIndex(i)
-              }}
-              className="relative block aspect-[4/3] w-full overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset"
-              aria-label={`${title} – ${tr.shop.gallery} ${i + 1}`}
-            >
-              <Image
-                src={image.url}
-                alt={image.alt}
-                fill
-                sizes={
-                  i === 0 ? '(min-width: 1024px) 50vw, 100vw' : '(min-width: 1024px) 25vw, 50vw'
-                }
-                className="object-cover transition-transform duration-300 hover:scale-[1.03] motion-reduce:hover:scale-100"
-              />
-            </button>
+          <li key={image.id}>
+            <figure className="pafta-frame m-0">
+              <button
+                type="button"
+                data-track="gallery"
+                onPointerDown={() => {
+                  loadLightbox().catch(() => undefined)
+                }}
+                onClick={() => {
+                  setLightboxMounted(true)
+                  setIndex(i)
+                }}
+                className="relative block aspect-[3/4] w-full overflow-hidden focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset"
+                aria-label={`${image.caption ?? title} – ${tr.shop.gallery} ${i + 1} / ${count}`}
+              >
+                <Image
+                  src={image.url}
+                  alt={image.alt}
+                  fill
+                  sizes="(min-width: 768px) 300px, 72vw"
+                  className="object-cover transition-transform duration-300 hover:scale-[1.03] motion-reduce:hover:scale-100"
+                />
+              </button>
+              <figcaption className="line-clamp-2 pt-1.5 text-[12.5px] text-[var(--pafta-soft)]">
+                <span className="tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                {image.caption ? ` · ${image.caption}` : null}
+              </figcaption>
+            </figure>
           </li>
         ))}
       </ul>

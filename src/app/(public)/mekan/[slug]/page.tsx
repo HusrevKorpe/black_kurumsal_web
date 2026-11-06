@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CampaignCard } from '@/components/public/campaign-card'
-import { ContactButtons } from '@/components/public/contact-buttons'
-import { CoverImage } from '@/components/public/cover-image'
-import { DisplayName } from '@/components/public/display-name'
+import { ContactActionBar, hasActionBar } from '@/components/public/contact-buttons'
 import { Gallery } from '@/components/public/gallery'
 import { HoursTable } from '@/components/public/hours-table'
 import { OpenStatusBadge } from '@/components/public/open-status-badge'
-import { ShopDirectory } from '@/components/public/shop-directory'
+import { PaftaCover } from '@/components/public/pafta/pafta-cover'
+import { PaftaHero } from '@/components/public/pafta/pafta-hero'
+import { PaftaStrip } from '@/components/public/pafta/pafta-strip'
+import { PaftaShopTickets } from '@/components/public/pafta/pafta-tickets'
 import { normalizeWeek, toExceptionEntries } from '@/features/hours'
 import { getActiveLocationSlugs, getLocationBySlug } from '@/features/locations/queries'
 import { resolveContact } from '@/features/shops/contact'
@@ -20,8 +20,7 @@ import { mediaPublicUrl } from '@/lib/media/url'
 export const revalidate = 3600
 export const dynamicParams = true
 
-/** 44 px'lik dokunma hedefi; eksi dikey boşluk metin satırının dışına taşan kısmı yutar. */
-const BREADCRUMB_LINK_CLASS = 'inline-flex min-h-11 items-center hover:text-foreground'
+const SECTION_TITLE_CLASS = 'pafta-heading pafta-heading-lg mb-[18px]'
 
 export async function generateStaticParams() {
   const slugs = await getActiveLocationSlugs()
@@ -67,125 +66,122 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
     id: g.id,
     url: mediaPublicUrl(g.media),
     alt: g.media.alt ?? location.name,
+    caption: g.media.alt,
   }))
+  const kindLabel = isVenue ? tr.location.venue : tr.location.district
+  // Semt sayfası bir dizin: iletişim çubuğu yalnız tek adresli mekânda.
+  const withBar = isVenue && hasActionBar(contact)
 
   return (
-    <article>
-      {isVenue && location.coverImage ? (
-        <div className="relative aspect-[16/10] w-full overflow-hidden lg:aspect-auto lg:h-[28rem]">
-          <CoverImage media={location.coverImage} alt={location.name} sizes="100vw" priority />
-          <div
-            className="absolute inset-0 bg-gradient-to-t from-background via-background/25 via-35% to-transparent"
-            aria-hidden
+    // Mekân sayfası tabelanın yeşilini alır (Pafta kaynağı); içindeki biletler kendi dükkan rengindedir.
+    <article
+      className={withBar ? 'pafta pb-28 md:pb-24' : 'pafta pb-16 md:pb-24'}
+      data-accent={isVenue ? 'grass' : undefined}
+    >
+      <div className="mx-auto w-full max-w-7xl px-[18px] md:px-12">
+        <PaftaHero
+          crumbs={[{ href: ROUTES.home, label: tr.nav.home }]}
+          name={location.name}
+          subtitle={kindLabel}
+          lead={location.description}
+          status={
+            isVenue ? (
+              <OpenStatusBadge week={week} exceptions={exceptions} detailed className="text-sm" />
+            ) : null
+          }
+          cover={
+            isVenue && location.coverImage ? (
+              <PaftaCover
+                media={location.coverImage}
+                alt={location.name}
+                caption={contact.address}
+                galleryCount={gallery.length}
+              />
+            ) : null
+          }
+        />
+
+        {isVenue ? (
+          <PaftaStrip
+            count={{ value: location.shops.length, label: tr.pafta.shops }}
+            week={week}
+            exceptions={exceptions}
+            contact={contact}
           />
-        </div>
-      ) : null}
+        ) : null}
 
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        {/* Başlık kapağın altında başlar: "Ana Sayfa" ve ad resmin üstüne binmez. */}
-        <header className={isVenue && location.coverImage ? 'pt-3 lg:pt-4' : 'pt-4'}>
-          <nav aria-label="Konum" className="flex text-sm text-muted-foreground">
-            <Link href={ROUTES.home} className={BREADCRUMB_LINK_CLASS}>
-              {tr.nav.home}
-            </Link>
-          </nav>
-          <h1 className="mt-2 font-display text-5xl leading-[0.95] font-bold uppercase lg:text-8xl">
-            <DisplayName>{location.name}</DisplayName>
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            {isVenue ? tr.location.venue : tr.location.district}
-          </p>
-          {location.description ? (
-            <p className="mt-3 max-w-2xl leading-relaxed text-muted-foreground">
-              {location.description}
-            </p>
-          ) : null}
-          {isVenue ? (
-            <OpenStatusBadge
-              week={week}
-              exceptions={exceptions}
-              detailed
-              className="mt-3 text-sm"
-            />
-          ) : null}
-          {isVenue ? <ContactButtons contact={contact} className="mt-5" /> : null}
-        </header>
+        <section aria-labelledby="dukkanlar" className="mt-12 md:mt-20">
+          <h2 id="dukkanlar" className={SECTION_TITLE_CLASS}>
+            {isVenue ? tr.location.shopsHere : tr.location.shopsInDistrict}
+          </h2>
+          {location.shops.length === 0 ? (
+            <p className="text-[var(--pafta-soft)]">{tr.location.noShops}</p>
+          ) : (
+            <PaftaShopTickets shops={location.shops} hideLocation />
+          )}
+        </section>
 
-        <div className="mt-10 space-y-12 pb-16">
-          <section aria-labelledby="dukkanlar">
-            <h2
-              id="dukkanlar"
-              className="mb-4 font-display text-4xl font-bold uppercase lg:text-5xl"
-            >
-              {isVenue ? tr.location.shopsHere : tr.location.shopsInDistrict}
-            </h2>
-            {location.shops.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{tr.location.noShops}</p>
-            ) : (
-              <ShopDirectory shops={location.shops} hideLocation />
-            )}
-          </section>
-
-          {isVenue ? (
-            <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
-              <div className="space-y-12">
-                {gallery.length > 0 ? (
-                  <section aria-labelledby="galeri">
-                    <h2
-                      id="galeri"
-                      className="mb-4 font-display text-4xl font-bold uppercase lg:text-5xl"
-                    >
-                      {tr.shop.gallery}
-                    </h2>
-                    <Gallery images={gallery} title={location.name} />
-                  </section>
-                ) : null}
-                {location.campaigns.length > 0 ? (
-                  <section aria-labelledby="kampanyalar">
-                    <h2
-                      id="kampanyalar"
-                      className="mb-4 font-display text-4xl font-bold uppercase lg:text-5xl"
-                    >
-                      {tr.nav.campaigns}
-                    </h2>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {location.campaigns.map((campaign) => (
-                        <CampaignCard key={campaign.id} campaign={campaign} hideTarget />
-                      ))}
-                    </div>
-                  </section>
-                ) : null}
-              </div>
-              <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-                <section aria-labelledby="saatler" className="bg-card p-4">
-                  <h2 id="saatler" className="mb-3 font-display text-2xl font-bold uppercase">
-                    {tr.common.hours}
-                  </h2>
+        {isVenue ? (
+          // Telefonda tasarımdaki sıra: galeri, saatler, adres; geniş ekranda saatler sağda yapışkan sütun.
+          <div className="mt-12 grid gap-12 md:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[auto_auto_1fr] lg:gap-x-12 lg:gap-y-16">
+            {gallery.length > 0 ? (
+              <section aria-labelledby="galeri" className="min-w-0 lg:col-start-1 lg:row-start-1">
+                <h2 id="galeri" className={SECTION_TITLE_CLASS}>
+                  {tr.shop.gallery}
+                </h2>
+                <Gallery images={gallery} title={location.name} />
+              </section>
+            ) : null}
+            <aside className="grid content-start gap-10 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-start">
+              <section aria-labelledby="saatler">
+                <h2 id="saatler" className="pafta-heading mb-4">
+                  {tr.common.hours}
+                </h2>
+                <div className="pafta-box p-4">
                   <HoursTable week={week} exceptions={exceptions} />
-                </section>
-                {contact.address ? (
-                  <section aria-labelledby="adres" className="bg-card p-4">
-                    <h2 id="adres" className="mb-2 font-display text-2xl font-bold uppercase">
-                      {tr.common.address}
-                    </h2>
-                    <p className="text-sm">{contact.address}</p>
+                </div>
+              </section>
+              {contact.address ? (
+                <section aria-labelledby="adres">
+                  <h2 id="adres" className="pafta-heading mb-4">
+                    {tr.common.address}
+                  </h2>
+                  <div className="pafta-box p-4 text-[15px]">
+                    <p>{contact.address}</p>
                     {contact.mapUrl ? (
                       <a
                         href={contact.mapUrl}
+                        data-track="directions"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex min-h-11 items-center text-sm text-brand hover:underline"
+                        className="-mb-2 inline-flex min-h-12 items-center font-medium text-brand hover:underline"
                       >
                         {tr.common.directions}
                       </a>
                     ) : null}
-                  </section>
-                ) : null}
-              </aside>
-            </div>
-          ) : null}
-        </div>
+                  </div>
+                </section>
+              ) : null}
+            </aside>
+            {location.campaigns.length > 0 ? (
+              <section aria-labelledby="kampanyalar" className="min-w-0 lg:col-start-1">
+                <h2 id="kampanyalar" className={SECTION_TITLE_CLASS}>
+                  {tr.nav.campaigns}
+                </h2>
+                <ul className="grid gap-3.5 sm:grid-cols-2">
+                  {location.campaigns.map((campaign) => (
+                    <li key={campaign.id} className="pafta-frame">
+                      <CampaignCard campaign={campaign} hideTarget />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+          </div>
+        ) : null}
       </div>
+
+      {withBar ? <ContactActionBar contact={contact} /> : null}
     </article>
   )
 }

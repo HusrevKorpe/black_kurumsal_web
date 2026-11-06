@@ -38,25 +38,32 @@ export function HoursTable({ week, exceptions, note }: HoursTableProps) {
 
   return (
     <div>
-      <dl className="divide-y overflow-hidden rounded-lg border text-sm">
+      <dl className="divide-y text-[15px]">
         {week.map((entry) => {
           const isToday = now?.dayOfWeek === entry.dayOfWeek
+          // Bugün özel günse satır onu gösterir: şerit ve durum rozetiyle çelişmesin.
+          const special = isToday ? exceptions?.find((e) => e.date === now?.dateKey) : undefined
+          const shown = special ?? entry
           return (
             <div
               key={entry.dayOfWeek}
               className={clsx(
-                'flex items-center justify-between px-3 py-2',
+                '-mx-2 flex items-center justify-between px-2 py-2',
                 isToday && 'bg-accent font-semibold',
               )}
             >
               <dt className="flex items-center gap-2">
                 {DAY_NAMES[entry.dayOfWeek]}
                 {isToday ? (
-                  <span className="text-xs font-medium text-brand">{tr.common.today}</span>
+                  <span className="text-xs font-medium text-brand">
+                    {special
+                      ? `${tr.common.today} · ${special.note ?? tr.common.specialDay}`
+                      : tr.common.today}
+                  </span>
                 ) : null}
               </dt>
-              <dd className={clsx('tabular-nums', entry.isClosed && 'text-muted-foreground')}>
-                {formatHoursEntry(entry)}
+              <dd className={clsx('tabular-nums', shown.isClosed && 'text-muted-foreground')}>
+                {formatHoursEntry(shown)}
               </dd>
             </div>
           )
@@ -66,12 +73,9 @@ export function HoursTable({ week, exceptions, note }: HoursTableProps) {
       {upcoming.length > 0 ? (
         <div className="mt-4">
           <p className="mb-2 text-xs font-medium text-muted-foreground">{tr.common.specialDays}</p>
-          <dl className="divide-y overflow-hidden rounded-lg border border-dashed text-sm">
+          <dl className="divide-y divide-dashed border-t border-dashed text-sm">
             {upcoming.map((exception) => (
-              <div
-                key={exception.date}
-                className="flex items-center justify-between gap-3 px-3 py-2"
-              >
+              <div key={exception.date} className="flex items-center justify-between gap-3 py-2">
                 <dt className="min-w-0">
                   <span className="block truncate">{formatDateKey(exception.date)}</span>
                   {exception.note ? (

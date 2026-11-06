@@ -15,6 +15,13 @@
 [data-accent='ice'] {
   --brand: oklch(0.5 0.09 230);
 }
+/* Black Garden tabelasının çim yeşili: mekân sayfası (Pafta kaynağındaki "GARDEN"). */
+[data-accent='grass'] {
+  --brand: #12663a;
+}
+.dark [data-accent='grass'] {
+  --brand: #3fd46f;
+}
 .dark [data-accent='neon'] {
   --brand: oklch(0.74 0.19 288);
 }
@@ -49,52 +56,6 @@
 }
 .tree-shop-thumb {
   background: color-mix(in oklch, var(--brand) 14%, var(--card));
-}
-
-/*
- * Dükkan sayfası: kapağın altından dükkan renginde ışık vurur, adın etrafında neon hâlesi yanar.
- * Kenarda çizgi yok; ışık, kapağı zemine eriten katmanın (z-index 2) altında kalır ki alt kenarda
- * sert bir mor şerit oluşmasın.
- */
-.shop-cover::before {
-  content: '';
-  position: absolute;
-  inset: auto 0 0;
-  z-index: 1;
-  height: 45%;
-  background: radial-gradient(
-    55% 100% at 50% 100%,
-    color-mix(in oklch, var(--brand) 30%, transparent),
-    transparent
-  );
-  pointer-events: none;
-}
-/* Hâle burada hesaplanır ki `data-accent`'in `--brand`'ı (mor, buz mavisi) işlesin. */
-.shop-title {
-  --sign-glow:
-    0 0 2px color-mix(in oklch, var(--brand) var(--sign-core), transparent),
-    0 0 22px color-mix(in oklch, var(--brand) var(--sign-halo), transparent);
-  text-shadow: var(--sign-glow);
-}
-/* Sayfa açılınca tabela bir kez titreyerek yanar; sonra sabit kalır. */
-@media (prefers-reduced-motion: no-preference) {
-  .shop-title {
-    animation: sign-on 1.2s linear 0.35s backwards;
-  }
-}
-@keyframes sign-on {
-  0%,
-  9%,
-  15%,
-  31% {
-    text-shadow: none;
-  }
-  6%,
-  12%,
-  24%,
-  100% {
-    text-shadow: var(--sign-glow);
-  }
 }
 
 /* Canlı durum noktası: açıkken yavaş, kapanışa bir saat kala hızlı halka atar. Renk yazıdan gelir. */

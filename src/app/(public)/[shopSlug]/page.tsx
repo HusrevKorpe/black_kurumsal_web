@@ -1,17 +1,17 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CampaignCard } from '@/components/public/campaign-card'
-import { ContactActionBar, ContactButtons } from '@/components/public/contact-buttons'
-import { CoverImage } from '@/components/public/cover-image'
+import { ContactActionBar, hasActionBar } from '@/components/public/contact-buttons'
 import { DisplayName } from '@/components/public/display-name'
 import { FeatureChips } from '@/components/public/feature-chips'
 import { GameShelf } from '@/components/public/game-shelf'
 import { Gallery } from '@/components/public/gallery'
 import { HoursTable } from '@/components/public/hours-table'
 import { OpenStatusBadge } from '@/components/public/open-status-badge'
+import { PaftaCover } from '@/components/public/pafta/pafta-cover'
+import { PaftaHero } from '@/components/public/pafta/pafta-hero'
+import { PaftaStrip } from '@/components/public/pafta/pafta-strip'
 import { PriceList } from '@/components/public/price-list'
-import { ShopCoverMorph, ShopNameMorph } from '@/components/public/shop-morph'
 import { resolveExceptions, resolveHours, toExceptionEntries } from '@/features/hours'
 import { isGameShelf } from '@/features/pricing/games'
 import { toPriceCategoryViews } from '@/features/pricing/view'
@@ -31,11 +31,7 @@ import { ShopContactCard } from './shop-contact-card'
 export const revalidate = 3600
 export const dynamicParams = true
 
-/** 44 px'lik dokunma hedefi; eksi dikey boşluk metin satırının dışına taşan kısmı yutar. */
-const BREADCRUMB_LINK_CLASS = 'inline-flex min-h-11 items-center hover:text-foreground'
-const SECTION_TITLE_CLASS = 'mb-4 font-display text-4xl font-bold uppercase lg:text-5xl'
-const COVER_FADE_CLASS =
-  'absolute inset-0 z-[2] bg-gradient-to-t from-background via-background/25 via-35% to-transparent'
+const SECTION_TITLE_CLASS = 'pafta-heading pafta-heading-lg mb-[18px]'
 
 export async function generateStaticParams() {
   const slugs = await getActiveShopSlugs()
@@ -87,7 +83,10 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
     id: g.id,
     url: mediaPublicUrl(g.media),
     alt: g.media.alt ?? shop.name,
+    caption: g.media.alt,
   }))
+  const itemCount = categories.reduce((sum, category) => sum + category.items.length, 0)
+  const typeLabel = SHOP_TYPE_META[shop.type].label
   const whatsappMessage = tr.shop.whatsappMessage(shop.name)
   const locationLabel = shopLocationLabel(shop.location)
   const hoursNote =
@@ -105,73 +104,62 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
     exceptions,
   })
 
+  const withBar = hasActionBar(contact)
+  const crumbs = [
+    { href: ROUTES.home, label: tr.nav.home },
+    ...(shop.location
+      ? [{ href: ROUTES.location(shop.location.slug), label: shop.location.name }]
+      : []),
+  ]
+
   return (
-    // data-accent dükkanın tabela ışığını (globals.css) sayfadaki bütün vurgu rengine yayar.
-    <article className="shop-page pb-28 md:pb-0" data-accent={SHOP_TYPE_META[shop.type].accent}>
+    // data-accent dükkanın tabela rengini (shop-motion.css) sayfadaki bütün vurgulara yayar.
+    <article
+      className={withBar ? 'pafta pb-28 md:pb-24' : 'pafta pb-16 md:pb-24'}
+      data-accent={SHOP_TYPE_META[shop.type].accent}
+    >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
-      {shop.coverImage ? (
-        <ShopCoverMorph slug={shop.slug}>
-          <div className="shop-cover relative aspect-[16/10] w-full overflow-hidden lg:aspect-auto lg:h-[28rem]">
-            <CoverImage media={shop.coverImage} alt={shop.name} sizes="100vw" priority />
-            {/* Kapak zemine erir; dükkan ışığı (::before) bu katmanın altında kalır, kenarda çizgi oluşmaz. */}
-            <div className={COVER_FADE_CLASS} aria-hidden />
-          </div>
-        </ShopCoverMorph>
-      ) : null}
+      <div className="mx-auto w-full max-w-7xl px-[18px] md:px-12">
+        <PaftaHero
+          crumbs={crumbs}
+          name={shop.name}
+          morphSlug={shop.slug}
+          subtitle={locationLabel ? `${typeLabel} · ${locationLabel}` : typeLabel}
+          status={
+            <OpenStatusBadge week={week} exceptions={exceptions} detailed className="text-sm" />
+          }
+          cover={
+            shop.coverImage ? (
+              <PaftaCover
+                media={shop.coverImage}
+                alt={shop.name}
+                caption={locationLabel || typeLabel}
+                galleryCount={gallery.length}
+                morphSlug={shop.slug}
+              />
+            ) : null
+          }
+        />
 
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        {/* Başlık kapağın altında başlar: "Ana Sayfa" ve ad resmin üstüne binmez. */}
-        <header className={shop.coverImage ? 'pt-3 lg:pt-4' : 'pt-4'}>
-          <nav
-            aria-label="Konum"
-            className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground"
-          >
-            <Link href={ROUTES.home} className={BREADCRUMB_LINK_CLASS}>
-              {tr.nav.home}
-            </Link>
-            {shop.location ? (
-              <>
-                <span aria-hidden>/</span>
-                <Link href={ROUTES.location(shop.location.slug)} className={BREADCRUMB_LINK_CLASS}>
-                  {shop.location.name}
-                </Link>
-              </>
-            ) : null}
-          </nav>
-          <ShopNameMorph slug={shop.slug}>
-            <h1 className="shop-title mt-2 w-fit max-w-full font-display text-5xl leading-[0.95] font-bold uppercase lg:text-8xl">
-              <DisplayName>{shop.name}</DisplayName>
-            </h1>
-          </ShopNameMorph>
-          <p className="mt-2 text-muted-foreground">
-            {locationLabel
-              ? `${SHOP_TYPE_META[shop.type].label} · ${locationLabel}`
-              : SHOP_TYPE_META[shop.type].label}
-          </p>
-          <OpenStatusBadge week={week} exceptions={exceptions} detailed className="mt-1 text-sm" />
-          <ContactButtons
-            contact={contact}
-            whatsappMessage={whatsappMessage}
-            className="mt-4"
-            hasActionBar
-          />
-        </header>
+        <PaftaStrip
+          count={{ value: itemCount, label: tr.pafta.priceItems }}
+          week={week}
+          exceptions={exceptions}
+          contact={contact}
+          whatsappMessage={whatsappMessage}
+        />
 
-        {/*
-          Telefonda sıra: fiyat, saat ve iletişim, galeri, hakkında. Müşteri en çok fiyata bakar;
-          üstteki durum satırı "açık mı" sorusunu zaten cevaplar. Geniş ekranda sağ sütun yan panel,
-          son 1fr satırı panelin fazla yüksekliğini soldaki bölümlerin arasına dağıtmaz.
-        */}
+        {/* Oyun dükkanında kapaklı oyun listesi fiyat listesinden ayrı, kendi vitrininde. */}
         {gamePlatform
           ? gameShelves.map((shelf) => (
               <section
                 key={shelf.id}
                 aria-labelledby={`vitrin-${shelf.id}`}
-                className="mt-8 lg:mt-14"
+                className="mt-12 md:mt-20"
               >
                 <h2 id={`vitrin-${shelf.id}`} className={SECTION_TITLE_CLASS}>
                   <DisplayName>{shelf.name}</DisplayName>
@@ -181,7 +169,12 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
             ))
           : null}
 
-        <div className="mt-8 grid gap-10 lg:mt-14 lg:grid-cols-[1fr_340px] lg:grid-rows-[auto_auto_auto_auto_1fr] lg:gap-x-16">
+        {/*
+          Telefonda sıra: fiyat, saat ve iletişim, galeri, hakkında, kampanyalar. Müşteri en çok
+          fiyata, sonra saate bakar. Geniş ekranda sağ sütun yapışkan yan panel; son 1fr satırı
+          panelin fazla yüksekliğini soldaki bölümlerin arasına dağıtmaz.
+        */}
+        <div className="mt-12 grid gap-12 md:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[auto_auto_auto_auto_1fr] lg:gap-x-12 lg:gap-y-16">
           <section aria-labelledby="fiyatlar" className="min-w-0 lg:col-start-1">
             <h2 id="fiyatlar" className={SECTION_TITLE_CLASS}>
               {tr.shop.prices}
@@ -189,12 +182,14 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
             <PriceList categories={categories} />
           </section>
 
-          <aside className="space-y-6 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-5 lg:row-start-1 lg:self-start">
-            <section aria-labelledby="saatler" className="bg-card p-4">
-              <h2 id="saatler" className="mb-3 font-display text-2xl font-bold uppercase">
+          <aside className="grid content-start gap-10 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-5 lg:row-start-1 lg:self-start">
+            <section aria-labelledby="saatler">
+              <h2 id="saatler" className="pafta-heading mb-4">
                 {tr.common.hours}
               </h2>
-              <HoursTable week={week} exceptions={exceptions} note={hoursNote} />
+              <div className="pafta-box p-4">
+                <HoursTable week={week} exceptions={exceptions} note={hoursNote} />
+              </div>
             </section>
             <ShopContactCard contact={contact} />
           </aside>
@@ -208,16 +203,18 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
             </section>
           ) : null}
 
-          {shop.description ? (
+          {shop.description || shop.features.length > 0 ? (
             <section aria-labelledby="hakkinda" className="min-w-0 lg:col-start-1">
               <h2 id="hakkinda" className={SECTION_TITLE_CLASS}>
                 {tr.shop.about}
               </h2>
-              <p className="max-w-2xl leading-relaxed whitespace-pre-line text-muted-foreground">
-                {shop.description}
-              </p>
+              {shop.description ? (
+                <p className="max-w-2xl text-[17px] leading-relaxed whitespace-pre-line">
+                  {shop.description}
+                </p>
+              ) : null}
               {shop.features.length > 0 ? (
-                <div className="mt-4">
+                <div className={shop.description ? 'mt-5' : undefined}>
                   <FeatureChips features={shop.features} />
                 </div>
               ) : null}
@@ -229,11 +226,13 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
               <h2 id="kampanyalar" className={SECTION_TITLE_CLASS}>
                 {tr.shop.campaigns}
               </h2>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <ul className="grid gap-3.5 sm:grid-cols-2">
                 {campaigns.map((campaign) => (
-                  <CampaignCard key={campaign.id} campaign={campaign} hideTarget />
+                  <li key={campaign.id} className="pafta-frame">
+                    <CampaignCard campaign={campaign} hideTarget />
+                  </li>
                 ))}
-              </div>
+              </ul>
             </section>
           ) : null}
         </div>

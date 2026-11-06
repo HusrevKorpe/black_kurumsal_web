@@ -29,8 +29,8 @@ export function GalleryLightbox({
 
   return (
     <Dialog open={active !== null} onOpenChange={(open) => !open && onClose()}>
-      {/* Kapatma düğmesi siyah görsel alanının üstünde durur: iki temada da açık simge, koyu zemin. */}
-      <DialogContent className="max-w-4xl border-none bg-transparent p-0 shadow-none sm:max-w-4xl [&_[data-slot=dialog-close]]:bg-black/60 [&_[data-slot=dialog-close]]:text-white [&_[data-slot=dialog-close]]:hover:bg-black/80 [&_[data-slot=dialog-close]]:hover:text-white">
+      {/* Kapatma düğmesi siyah görsel alanının üstünde durur: iki temada da açık simge, koyu zemin; 48 px. */}
+      <DialogContent className="max-w-4xl border-none bg-transparent p-0 shadow-none sm:max-w-4xl [&_[data-slot=dialog-close]]:size-12 [&_[data-slot=dialog-close]]:bg-black/60 [&_[data-slot=dialog-close]]:text-white [&_[data-slot=dialog-close]]:hover:bg-black/80 [&_[data-slot=dialog-close]]:hover:text-white">
         <DialogTitle className="sr-only">{title}</DialogTitle>
         <DialogDescription className="sr-only">{label}</DialogDescription>
         {active ? (
@@ -41,7 +41,7 @@ export function GalleryLightbox({
               fill
               sizes="100vw"
               className="object-contain"
-              priority
+              loading="eager"
             />
           </div>
         ) : null}

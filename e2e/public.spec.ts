@@ -1,12 +1,15 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('Açık site', () => {
-  test('geniş ekranda yan pano tıklamayı başka dükkana kaçırmaz', async ({ page, isMobile }) => {
-    test.skip(isMobile, 'pano yalnızca geniş ekranda')
+  test('mekan sayfası: dükkanlar numaralı bilet, bilet dükkan sayfasına gider', async ({
+    page,
+  }) => {
     await page.goto('/mekan/carsi')
-    const photos = page.locator('.shop-row-photo')
-    const pointerEvents = await photos.last().evaluate((el) => getComputedStyle(el).pointerEvents)
-    expect(pointerEvents).toBe('none')
+    const tickets = page.locator('#dukkanlar ~ ul .pafta-ticket')
+    await expect(tickets.first()).toBeVisible()
+    await expect(tickets.first().locator('.pafta-no')).toHaveText(/^01 \/ \d{2}$/)
+    await tickets.filter({ hasText: /Lavinya Apart/i }).click()
+    await expect(page).toHaveURL(/\/lavinya-apart$/)
   })
 
   test('açılış ağacı: kökten dükkanlara, her uç dükkan sayfasına gider', async ({ page }) => {

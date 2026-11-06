@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getOpenStatus, minutesUntilClose } from './open-status'
+import { getOpenStatus, getTodaySchedule, minutesUntilClose } from './open-status'
 import { normalizeWeek } from './resolve'
 import type { HoursEntry, HoursExceptionEntry } from './types'
 
@@ -210,5 +210,25 @@ describe('minutesUntilClose', () => {
     const overnight = normalizeWeek(daily('10:00', '02:00'))
     const now = at('2026-09-05T01:10:00')
     expect(minutesUntilClose(getOpenStatus(overnight, now), now)).toBe(50)
+  })
+})
+
+describe('getTodaySchedule', () => {
+  const now = istanbul('2026-09-05T12:00:00')
+  it('saat yoksa bilinmiyor, gece yarısını geçen vardiya işaretlenir', () => {
+    expect(getTodaySchedule([], { now, timeZone: TZ })).toEqual({ kind: 'unknown' })
+    expect(getTodaySchedule(normalizeWeek(daily('10:00', '02:00')), { now, timeZone: TZ })).toEqual(
+      { kind: 'open', opensAt: '10:00', closesAt: '02:00', overnight: true },
+    )
+    expect(getTodaySchedule(normalizeWeek(daily('00:00', '00:00')), { now, timeZone: TZ })).toEqual(
+      { kind: 'allDay' },
+    )
+  })
+
+  it('özel gün haftalık satırı ezer', () => {
+    const week = normalizeWeek(daily('09:00', '23:00'))
+    expect(
+      getTodaySchedule(week, { now, timeZone: TZ, exceptions: [closedOn('2026-09-05')] }),
+    ).toEqual({ kind: 'closed' })
   })
 })

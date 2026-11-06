@@ -99,6 +99,34 @@ function findNextOpen(
   return null
 }
 
+/** Bugünün (verilen saat diliminde) geçerli saati: özel gün varsa o, yoksa haftalık satır. */
+export type TodaySchedule =
+  | { kind: 'unknown' }
+  | { kind: 'closed' }
+  | { kind: 'allDay' }
+  | { kind: 'open'; opensAt: string; closesAt: string; overnight: boolean }
+
+export function getTodaySchedule(
+  week: WeeklyHours,
+  options: OpenStatusOptions = {},
+): TodaySchedule {
+  const { now = new Date(), timeZone = ISTANBUL_TZ, exceptions = [] } = options
+  if (week.length === 0) return { kind: 'unknown' }
+  const { dayOfWeek, dateKey } = zonedNow(now, timeZone)
+  const byDay = new Map(week.map((e) => [e.dayOfWeek, e]))
+  const byDate = new Map(exceptions.map((e) => [e.date, e]))
+  const today = scheduleFor(dayOfWeek, dateKey, byDay, byDate)
+  const span = spanOf(today)
+  if (!span || !today.opensAt || !today.closesAt) return { kind: 'closed' }
+  if (isAllDay(span)) return { kind: 'allDay' }
+  return {
+    kind: 'open',
+    opensAt: today.opensAt,
+    closesAt: today.closesAt,
+    overnight: isOvernight(span),
+  }
+}
+
 /** Kapanışa bu kadar dakika (ya da daha az) kalınca site "kapanıyor" uyarısı gösterir. */
 export const CLOSING_SOON_MINUTES = 60
 

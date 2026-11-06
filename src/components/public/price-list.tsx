@@ -7,6 +7,7 @@ import { mediaPublicUrl } from '@/lib/media/url'
 import { cn } from '@/lib/utils'
 import { formatPriceWithUnit } from '@/lib/utils/format'
 import { DisplayName } from './display-name'
+import { ticketNumber } from './pafta/ticket-number'
 
 interface PriceListProps {
   categories: PriceCategoryView[]
@@ -55,34 +56,66 @@ function PriceRow({ item }: { item: PriceItemView }) {
   )
 }
 
+/** Kategori bu kadarı geçince üstte atlama bağlantıları çıkar: uzun menüde aranan bölüm uzak kalmasın. */
+const JUMP_MIN_CATEGORIES = 4
+
+/**
+ * Pafta bilet dili: her kategori çerçeveli bir bilet, sağ üstte "01 / 07". Bilet tıklanmaz, sadece
+ * okunur; kalem satırları (fotoğraf, açıklama, fiyat/birim, rozetler) eski okunaklı düzeninde kalır.
+ * Geniş sütunda biletler iki kolona dağılır.
+ */
 export function PriceList({ categories }: PriceListProps) {
   if (categories.length === 0) {
     return <p className="text-sm text-muted-foreground">{tr.shop.noPrices}</p>
   }
+  const total = categories.length
   return (
-    <div className="space-y-10">
-      {categories.map((category) => (
-        <section key={category.id} aria-labelledby={`fiyat-${category.id}`}>
-          {/* Kategori başlığı kalem adlarına karışmasın: marka rengi, versal ve ayırıcı çizgi. */}
-          <div className="flex items-center gap-3">
-            <h3
-              id={`fiyat-${category.id}`}
-              className="font-display text-2xl font-bold text-brand uppercase"
-            >
-              <DisplayName>{category.name}</DisplayName>
-            </h3>
-            <span aria-hidden className="h-px flex-1 bg-brand/30" />
-          </div>
-          {category.description ? (
-            <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
-          ) : null}
-          <ul className="mt-1 divide-y divide-border/60">
-            {category.items.map((item) => (
-              <PriceRow key={item.id} item={item} />
+    <div className="grid gap-4">
+      {total >= JUMP_MIN_CATEGORIES ? (
+        <nav
+          aria-label={tr.pafta.menuJump}
+          className="-mx-[18px] overflow-x-auto px-[18px] py-0.5 md:mx-0 md:px-0.5"
+        >
+          <ul className="flex w-max gap-2 md:w-auto md:flex-wrap">
+            {categories.map((category) => (
+              <li key={category.id}>
+                <a href={`#fiyat-${category.id}`} className="pafta-jump">
+                  <DisplayName>{category.name}</DisplayName>
+                </a>
+              </li>
             ))}
           </ul>
-        </section>
-      ))}
+        </nav>
+      ) : null}
+      <div className={total > 1 ? 'pafta-menu' : undefined}>
+        {categories.map((category, index) => (
+          <section
+            key={category.id}
+            aria-labelledby={`fiyat-${category.id}`}
+            className="pafta-box scroll-mt-24 p-4"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <h3
+                id={`fiyat-${category.id}`}
+                className="scroll-mt-24 font-display text-2xl leading-none font-bold text-brand uppercase"
+              >
+                <DisplayName>{category.name}</DisplayName>
+              </h3>
+              <span className="pafta-no pt-1" aria-hidden>
+                {ticketNumber(index, total)}
+              </span>
+            </div>
+            {category.description ? (
+              <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
+            ) : null}
+            <ul className="mt-1 divide-y divide-border">
+              {category.items.map((item) => (
+                <PriceRow key={item.id} item={item} />
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
     </div>
   )
 }

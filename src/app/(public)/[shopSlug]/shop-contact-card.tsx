@@ -15,14 +15,14 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
   if (!hasAny) return null
 
   return (
-    <section aria-labelledby="iletisim" className="bg-card p-4">
-      <h2 id="iletisim" className="mb-3 font-display text-2xl font-bold uppercase">
+    <section aria-labelledby="iletisim">
+      <h2 id="iletisim" className="pafta-heading mb-4">
         {tr.shop.contact}
       </h2>
-      <ul className="space-y-3 text-sm">
+      <ul className="pafta-box px-4 py-2 text-[15px]">
         {contact.address ? (
-          <li className="flex items-start gap-3">
-            <MapPinIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          <li className="flex items-start gap-3 py-2">
+            <MapPinIcon className="mt-1 size-4 shrink-0 text-muted-foreground" />
             <div>
               <p>{contact.address}</p>
               {contact.mapUrl ? (
@@ -31,7 +31,7 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
                   data-track="directions"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="-my-2 inline-flex min-h-11 items-center text-brand hover:underline"
+                  className="inline-flex min-h-12 items-center font-medium text-brand hover:underline"
                 >
                   {tr.common.directions}
                 </a>
@@ -42,7 +42,11 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
         {tel && contact.phone ? (
           <li className="flex items-center gap-3">
             <PhoneIcon className="size-4 shrink-0 text-muted-foreground" />
-            <a href={tel} data-track="call" className="hover:underline">
+            <a
+              href={tel}
+              data-track="call"
+              className="inline-flex min-h-12 items-center hover:underline"
+            >
               {formatTrPhone(contact.phone)}
             </a>
           </li>
@@ -55,7 +59,7 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
               data-track="whatsapp"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline"
+              className="inline-flex min-h-12 items-center hover:underline"
             >
               {tr.common.whatsapp} · {formatTrPhone(contact.whatsapp)}
             </a>
@@ -69,7 +73,7 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
               data-track="instagram"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline"
+              className="inline-flex min-h-12 items-center hover:underline"
             >
               {tr.common.instagram}
             </a>
