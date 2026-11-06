@@ -83,7 +83,7 @@ export const tr = {
   },
   /** Tadilattaki dükkanın sayfası ve kart etiketi. */
   renovation: {
-    badge: 'Tadilatta · Yakında',
+    badge: 'Tadilatta',
     title: 'Tadilattayız',
     soon: 'Yakında açılıyor',
     tape: ['Dikkat', 'Tadilat alanı', 'Yakında açılıyor', 'Ustalar iş başında'],
