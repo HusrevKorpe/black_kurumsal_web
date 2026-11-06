@@ -13,7 +13,7 @@ import {
   type DemoHours,
 } from './demo-data'
 import { renderPlaceholder } from './demo-media'
-import { SKELETON_LOCATIONS, SKELETON_SHOPS } from './skeleton-data'
+import { CORE_SHOPS, SKELETON_LOCATIONS, SKELETON_SHOPS } from './skeleton-data'
 
 const shopSlugs = new Set<string>(SKELETON_SHOPS.map((s) => s.slug))
 const locationSlugs = new Set<string>(SKELETON_LOCATIONS.map((l) => l.slug))
@@ -54,7 +54,7 @@ describe('örnek içerik verisi (demo-data)', () => {
   })
 
   it('her iskelet dükkanının demo ayrıntısı vardır ve panel formundan geçer', () => {
-    for (const shop of SKELETON_SHOPS) {
+    for (const shop of CORE_SHOPS) {
       const demo = DEMO_SHOPS[shop.slug]
       const parsed = shopDetailShape.safeParse({
         description: demo.description,
@@ -90,7 +90,7 @@ describe('örnek içerik verisi (demo-data)', () => {
 
   it('fiyat listeleri panel doğrulamasından geçer; bilgi listesi (fiyatsız) kalemler de olabilir', () => {
     let priceless = 0
-    for (const shop of SKELETON_SHOPS) {
+    for (const shop of CORE_SHOPS) {
       for (const category of DEMO_SHOPS[shop.slug].priceCategories) {
         const cat = priceCategorySchema.safeParse({
           shopId: 'x',

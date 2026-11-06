@@ -4,14 +4,14 @@ import { DEFAULT_DEMO_SHOP_SLUGS, DEMO_CAMPAIGNS, DEMO_SHOPS } from '@/features/
 import { GALLERY_COUNT } from '@/features/content/demo-fill'
 import type { ImageUploader } from '@/features/content/demo-media'
 import { ensureContentSkeleton } from '@/features/content/skeleton'
-import { SKELETON_SHOPS, type SkeletonShopSlug } from '@/features/content/skeleton-data'
+import { CORE_SHOPS, type CoreShopSlug } from '@/features/content/skeleton-data'
 import { parseMediaPath } from '@/features/media/paths'
 import { db } from '@/lib/db'
 import { createMedia, createOwner, resetDatabase } from './helpers'
 
-const DEFAULT: SkeletonShopSlug[] = [...DEFAULT_DEMO_SHOP_SLUGS]
+const DEFAULT: CoreShopSlug[] = [...DEFAULT_DEMO_SHOP_SLUGS]
 const DEFAULT_SET = new Set<string>(DEFAULT)
-const OTHERS = SKELETON_SHOPS.map((s) => s.slug).filter((slug) => !DEFAULT_SET.has(slug))
+const OTHERS = CORE_SHOPS.map((s) => s.slug).filter((slug) => !DEFAULT_SET.has(slug))
 /** Garden kampanyası (LOCATION) dükkanı seçilmeyen mekana yazılmaz. */
 const CAMPAIGN_TITLES = DEMO_CAMPAIGNS.filter((c) => c.scope !== 'LOCATION').map((c) => c.title)
 

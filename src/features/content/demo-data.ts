@@ -1,4 +1,4 @@
-import type { SkeletonLocationSlug, SkeletonShopSlug } from './skeleton-data'
+import type { CoreShopSlug, SkeletonLocationSlug, SkeletonShopSlug } from './skeleton-data'
 
 /**
  * Örnek (demo) içerik: iskeletteki mekan ve dükkanlar için uydurma ama gerçekçi ayrıntılar (açıklama, adres,
@@ -75,7 +75,7 @@ export const DEFAULT_DEMO_SHOP_SLUGS = [
   'black-espor-carsi',
   'black-tost-carsi',
   'lavinya-apart',
-] as const satisfies readonly SkeletonShopSlug[]
+] as const satisfies readonly CoreShopSlug[]
 
 export const DEMO_LOCATIONS: Record<SkeletonLocationSlug, DemoLocation> = {
   'black-garden': {
@@ -157,7 +157,7 @@ const PS_FEATURES = ['PS5', '4K TV', '12 Konsol', 'Turnuva Geceleri']
 const ESPOR_FEATURES = ['240 Hz Monitör', 'Oyuncu Koltuğu', 'VIP Oda']
 const TOST_FEATURES = ['Odun Fırını', 'Paket Servis', 'Kahvaltı']
 
-export const DEMO_SHOPS: Record<SkeletonShopSlug, DemoShop> = {
+export const DEMO_SHOPS: Record<CoreShopSlug, DemoShop> = {
   'black-playstation-carsi': {
     description: 'Çarşı merkezinde PS5 ve PS4 konsollar, 4K ekranlar ve her cuma turnuva gecesi.',
     address: 'Çarşı Merkez, Örnek Sokak No: 5',

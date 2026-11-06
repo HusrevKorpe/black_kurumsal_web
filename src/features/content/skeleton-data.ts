@@ -33,10 +33,9 @@ export interface SkeletonShop {
 
 /**
  * Patronun listesi (2026-11-04): PlayStation, Espor ve Tost'un Çarşı ve Iyaş şubeleri, Black Garden,
- * Lulu Kafe; Lavinya Apart Çarşı'da. Black Garden bir dükkan değil mekandır (yukarıda); içindeki dükkanlar
- * bilgileri gelince panelden "Black Garden" mekanına bağlanarak açılır, iskelete girmez.
+ * Lulu Kafe; Lavinya Apart Çarşı'da. Black Garden bir dükkan değil mekandır (yukarıda); içindekiler aşağıda.
  */
-export const SKELETON_SHOPS = [
+export const CORE_SHOPS = [
   {
     slug: 'black-playstation-carsi',
     name: 'Black PlayStation Çarşı',
@@ -95,7 +94,57 @@ export const SKELETON_SHOPS = [
   },
 ] as const satisfies readonly SkeletonShop[]
 
+/**
+ * Black Garden'ın içindeki markalar (2026-11-06): cephe tabelasındaki yedi logo, sitedeki
+ * "Black Garden'da neler var?" listesiyle aynı. Yalnız ad ve bağ; telefon, saat ve adres mekândan gelir,
+ * menü ve fotoğraf panelden. Demo verisi yoktur (`demo-data.ts` yalnız `CORE_SHOPS`).
+ */
+export const GARDEN_SHOPS = [
+  { slug: 'la-penne', name: 'La Penne', type: 'FOOD', locationSlug: 'black-garden', sortOrder: 9 },
+  { slug: 'sushi-go', name: 'Sushi Go', type: 'FOOD', locationSlug: 'black-garden', sortOrder: 10 },
+  {
+    slug: 'woow-burger',
+    name: 'Woow Burger',
+    type: 'FOOD',
+    locationSlug: 'black-garden',
+    sortOrder: 11,
+  },
+  {
+    slug: 'pizza-box',
+    name: 'Pizza Box',
+    type: 'FOOD',
+    locationSlug: 'black-garden',
+    sortOrder: 12,
+  },
+  {
+    slug: 'taksim-pilavcisi',
+    name: 'Taksim Pilavcısı',
+    type: 'FOOD',
+    locationSlug: 'black-garden',
+    sortOrder: 13,
+  },
+  {
+    slug: 'tavadan-soslu-tavuk',
+    name: 'Tavadan Soslu Tavuk',
+    type: 'FOOD',
+    locationSlug: 'black-garden',
+    sortOrder: 14,
+  },
+  {
+    slug: 'meshur-karakoy-balik-ekmek',
+    name: 'Meşhur Karaköy Balık Ekmek',
+    type: 'FOOD',
+    locationSlug: 'black-garden',
+    sortOrder: 15,
+  },
+] as const satisfies readonly SkeletonShop[]
+
+/** Sitede olması gereken bütün dükkanlar; `content:sync` listede olmayanı siler. */
+export const SKELETON_SHOPS = [...CORE_SHOPS, ...GARDEN_SHOPS] as const
+
 export type SkeletonShopSlug = (typeof SKELETON_SHOPS)[number]['slug']
+/** Demo verisi olan dükkanlar (Garden markaları hariç). */
+export type CoreShopSlug = (typeof CORE_SHOPS)[number]['slug']
 
 /** Ana sayfa metinleri: yalnızca sitenin ne sunduğunu söyler; iletişim ve sosyal bağlantılar panelden. */
 export const SKELETON_SETTINGS = {

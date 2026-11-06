@@ -6,6 +6,7 @@ import {
   DEMO_SHOPS,
   type DemoHours,
   type DemoPriceCategory,
+  type DemoShop,
 } from './demo-data'
 import type { SkeletonLocationSlug, SkeletonShopSlug } from './skeleton-data'
 
@@ -157,7 +158,7 @@ export function buildCleanupPlan(input: {
   const demoTitles = new Set(DEMO_CAMPAIGNS.map((campaign) => campaign.title))
 
   const shops = input.shops.flatMap((row) => {
-    const demo = DEMO_SHOPS[row.slug as SkeletonShopSlug]
+    const demo = (DEMO_SHOPS as Partial<Record<string, DemoShop>>)[row.slug]
     if (!demo) return []
     const sameFeatures =
       row.features.length > 0 &&

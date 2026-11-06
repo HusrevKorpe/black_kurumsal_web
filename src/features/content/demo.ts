@@ -18,7 +18,7 @@ import {
   writeShopDetails,
 } from './demo-fill'
 import type { ImageUploader, UploadedImage } from './demo-media'
-import { SKELETON_LOCATIONS, SKELETON_SHOPS } from './skeleton-data'
+import { CORE_SHOPS, SKELETON_LOCATIONS } from './skeleton-data'
 
 /**
  * Örnek içerik (`pnpm content:demo`): seçili dükkanları demo ayrıntılarla doldurur; bağlı oldukları mekanı
@@ -47,7 +47,8 @@ export interface ApplyDemoResult {
   campaigns: { created: string[]; skipped: boolean }
 }
 
-type ShopEntry = (typeof SKELETON_SHOPS)[number]
+/** Demo yalnız ana dükkanlar içindir; Garden markalarının örnek içeriği yok. */
+type ShopEntry = (typeof CORE_SHOPS)[number]
 type LocationEntry = (typeof SKELETON_LOCATIONS)[number]
 /** Boşluk sorguları hem ana istemciyle hem transaction içinde çalışır. */
 type Client = Pick<PrismaClient, 'location' | 'shop'>
@@ -58,7 +59,7 @@ const ACTION = 'content.demo'
 
 function selectShops(slugs: readonly string[]): ShopEntry[] {
   const wanted = new Set(slugs)
-  const selected = SKELETON_SHOPS.filter((shop) => wanted.has(shop.slug))
+  const selected = CORE_SHOPS.filter((shop) => wanted.has(shop.slug))
   const unknown = [...wanted].filter((slug) => !selected.some((shop) => shop.slug === slug))
   if (unknown.length > 0) throw new Error(`İskelette olmayan dükkan: ${unknown.join(', ')}`)
   if (selected.length === 0) throw new Error('Doldurulacak dükkan seçilmedi')

@@ -14,7 +14,7 @@ const ALL_SHOPS = SKELETON_SHOPS.map((s) => s.slug)
 beforeEach(resetDatabase)
 
 describe('içerik iskeleti kurulumu (ensureContentSkeleton)', () => {
-  it('boş veritabanında site ayarı, 3 mekan/bölge ve 8 dükkanı doğru bağlarla, aktif açar', async () => {
+  it('boş veritabanında site ayarı, 3 mekan/bölge ve 15 dükkanı (8 ana + Garden içinde 7 marka) doğru bağlarla, aktif açar', async () => {
     const result = await ensureContentSkeleton(db)
     expect(result).toEqual({
       settingsCreated: true,
@@ -49,7 +49,7 @@ describe('içerik iskeleti kurulumu (ensureContentSkeleton)', () => {
       staffId: null,
       action: 'content.skeleton',
       entityType: 'content',
-      summary: 'İçerik iskeleti kuruldu: 3 mekan/bölge, 8 dükkan',
+      summary: 'İçerik iskeleti kuruldu: 3 mekan/bölge, 15 dükkan',
     })
   })
 
@@ -62,7 +62,7 @@ describe('içerik iskeleti kurulumu (ensureContentSkeleton)', () => {
       shops: { created: [], existing: ALL_SHOPS },
     })
     expect(await db.location.count()).toBe(3)
-    expect(await db.shop.count()).toBe(8)
+    expect(await db.shop.count()).toBe(15)
     expect(await db.auditLog.count()).toBe(1)
   })
 

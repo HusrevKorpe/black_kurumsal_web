@@ -7,8 +7,8 @@ import { SKELETON_LOCATIONS, SKELETON_SETTINGS, SKELETON_SHOPS } from './skeleto
 const unique = <T>(values: readonly T[]) => new Set(values).size === values.length
 
 describe('içerik iskeleti verisi', () => {
-  it('8 dükkan ve 3 mekan/bölge: Çarşı ve Iyaş bölge, Black Garden mekan', () => {
-    expect(SKELETON_SHOPS).toHaveLength(8)
+  it('8 ana dükkan + Garden içinde 7 marka ve 3 mekan/bölge: Çarşı ve Iyaş bölge, Black Garden mekan', () => {
+    expect(SKELETON_SHOPS).toHaveLength(15)
     expect(SKELETON_LOCATIONS.map((l) => [l.slug, l.kind])).toEqual([
       ['carsi', 'DISTRICT'],
       ['iyas', 'DISTRICT'],
@@ -30,14 +30,12 @@ describe('içerik iskeleti verisi', () => {
     for (const shop of SKELETON_SHOPS) {
       if (shop.locationSlug !== null) expect(locationSlugs.has(shop.locationSlug)).toBe(true)
     }
-    // Şubeli üç marka her iki bölgede de var; Garden'ın dükkanları iskelete girmez.
+    // Şubeli üç marka her iki bölgede de var; Garden'da tabeladaki yedi yeme-içme markası.
     const typesIn = (district: string) =>
       SKELETON_SHOPS.filter((s) => s.locationSlug === district).map((s) => s.type)
     expect(typesIn('carsi')).toEqual(['PLAYSTATION', 'INTERNET_CAFE', 'FOOD', 'APART'])
     expect(typesIn('iyas')).toEqual(['PLAYSTATION', 'INTERNET_CAFE', 'FOOD'])
-    expect(SKELETON_SHOPS.some((s) => (s.locationSlug as string | null) === 'black-garden')).toBe(
-      false,
-    )
+    expect(typesIn('black-garden')).toEqual(Array(7).fill('FOOD'))
   })
 
   it('panel formlarının doğrulamasından geçer (ad, slug, tür, sıra; ayar metin uzunlukları)', () => {

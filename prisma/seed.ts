@@ -1,6 +1,11 @@
 import 'dotenv/config'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { DEMO_CAMPAIGNS, DEMO_LOCATIONS, DEMO_SHOPS } from '@/features/content/demo-data'
+import {
+  DEMO_CAMPAIGNS,
+  DEMO_LOCATIONS,
+  DEMO_SHOPS,
+  type DemoShop,
+} from '@/features/content/demo-data'
 import {
   resolveCampaignTarget,
   uploadCampaignImage,
@@ -135,10 +140,12 @@ async function seedShops(
       select: { id: true },
     })
     removed.push(...(await clearShop(saved.id)))
-    const demo = DEMO_SHOPS[shop.slug]
+    ids.set(shop.slug, saved.id)
+    // Garden markalarının örnek içeriği yok: yalnız ad ve bağ, ayrıntı mekândan gelir.
+    const demo = (DEMO_SHOPS as Partial<Record<string, DemoShop>>)[shop.slug]
+    if (!demo) continue
     const images = await uploadShopImages(upload, saved.id, { name: shop.name, hue: demo.hue })
     await writeShopDetails(db, saved.id, demo, images)
-    ids.set(shop.slug, saved.id)
   }
   return ids
 }
