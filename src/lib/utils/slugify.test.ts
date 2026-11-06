@@ -38,6 +38,7 @@ describe('isReservedSlug', () => {
     expect(isReservedSlug('admin')).toBe(true)
     expect(isReservedSlug('mekan')).toBe(true)
     expect(isReservedSlug('kampanyalar')).toBe(true)
+    expect(isReservedSlug('kvkk')).toBe(true)
     expect(isReservedSlug('black-tost-carsi')).toBe(false)
   })
 })

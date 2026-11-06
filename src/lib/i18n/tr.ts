@@ -126,6 +126,7 @@ export const tr = {
     rights: (year: number) => `© ${year} Black · Isparta. Tüm hakları saklıdır.`,
     quickLinks: 'Hızlı Bağlantılar',
     contact: 'İletişim',
+    privacy: 'KVKK ve Gizlilik',
   },
 } as const
 

@@ -5,6 +5,7 @@ export const RESERVED_SLUGS = new Set<string>([
   'api',
   'mekan',
   'kampanyalar',
+  'kvkk',
   'hakkimizda',
   'iletisim',
   'giris',
@@ -27,6 +28,7 @@ export const ROUTES = {
   shop: (slug: string): `/${string}` => `/${slug}`,
   location: (slug: string): `/mekan/${string}` => `/mekan/${slug}`,
   campaigns: '/kampanyalar',
+  privacy: '/kvkk',
   homeSection: (id: string): `/#${string}` => `/#${id}`,
   admin: {
     root: '/admin',

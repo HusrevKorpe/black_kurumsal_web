@@ -85,9 +85,15 @@ export function SiteFooter({ settings }: SiteFooterProps) {
         style={{ '--brand-length': settings.brandName.length } as React.CSSProperties}
       />
       <div className="border-t">
-        <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-muted-foreground sm:px-6">
-          {tr.footer.rights(new Date().getFullYear())}
-        </p>
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 px-4 py-2 text-xs text-muted-foreground sm:px-6">
+          <p className="py-2">{tr.footer.rights(new Date().getFullYear())}</p>
+          <Link
+            href={ROUTES.privacy}
+            className="inline-flex min-h-11 items-center underline-offset-4 hover:text-foreground hover:underline"
+          >
+            {tr.footer.privacy}
+          </Link>
+        </div>
       </div>
     </footer>
   )
