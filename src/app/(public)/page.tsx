@@ -25,11 +25,6 @@ export default async function HomePage() {
     getActiveShops(),
   ])
 
-  const monthStart = `${today.slice(0, 8)}01`
-  const hasCurrentEvents = events.some(
-    (e) => dayKey(new Date(e.endsAt ?? e.startsAt)) >= monthStart,
-  )
-
   return (
     <>
       <ShopTree
@@ -52,17 +47,15 @@ export default async function HomePage() {
           </section>
         ) : null}
 
-        {/* Boş takvim "burada bir şey olmuyor" der: bu ay ya da ileride etkinlik yoksa bölüm çıkmaz. */}
-        {hasCurrentEvents ? (
-          <section id="etkinlikler" className="scroll-mt-16" aria-labelledby="etkinlikler-baslik">
-            <SectionHeading
-              id="etkinlikler-baslik"
-              title={tr.events.title}
-              subtitle={tr.events.subtitle}
-            />
-            <EventCalendar events={events} initialToday={today} />
-          </section>
-        ) : null}
+        {/* Patron isteği: etkinlik olmasa da takvim hep görünür; boşken "yakında eklenecek" yazar. */}
+        <section id="etkinlikler" className="scroll-mt-16" aria-labelledby="etkinlikler-baslik">
+          <SectionHeading
+            id="etkinlikler-baslik"
+            title={tr.events.title}
+            subtitle={tr.events.subtitle}
+          />
+          <EventCalendar events={events} initialToday={today} />
+        </section>
 
         {locations.length > 0 ? (
           <section id="mekanlar" className="scroll-mt-16" aria-labelledby="mekanlar-baslik">
