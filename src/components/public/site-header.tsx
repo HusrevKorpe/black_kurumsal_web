@@ -4,6 +4,7 @@ import { ROUTES } from '@/lib/constants/routes'
 import { tr } from '@/lib/i18n/tr'
 import { formatTrPhone, telHref } from '@/lib/utils/format'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { BrandLockup } from './brand-mark'
 import { MobileNav, type NavContact, type NavItem } from './mobile-nav'
 
 interface SiteHeaderProps {
@@ -24,25 +25,29 @@ export function SiteHeader({ brandName, logoUrl, contact }: SiteHeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
-      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link
           href={ROUTES.home}
           // Her sayfada ana sayfayı önceden indirmesin (~19 KB); gezinme yine çalışır.
           prefetch={false}
-          className="-ml-1 flex min-h-12 items-center gap-2.5 px-1 font-display text-3xl font-bold uppercase"
+          className="-ml-1 flex min-h-12 items-center gap-3 px-1 font-display text-3xl font-bold uppercase"
         >
           {logoUrl ? (
-            // Logonun en/boy oranı bilinmiyor: yükseklik sabit, genişlik görsele göre.
-            <Image
-              src={logoUrl}
-              alt=""
-              width={160}
-              height={40}
-              priority
-              className="h-9 w-auto max-w-40 object-contain sm:h-10"
-            />
-          ) : null}
-          {brandName}
+            <>
+              {/* Logonun en/boy oranı bilinmiyor: yükseklik sabit, genişlik görsele göre. */}
+              <Image
+                src={logoUrl}
+                alt=""
+                width={160}
+                height={40}
+                priority
+                className="h-9 w-auto max-w-40 object-contain sm:h-10"
+              />
+              {brandName}
+            </>
+          ) : (
+            <BrandLockup name={brandName} />
+          )}
         </Link>
 
         <nav aria-label="Ana menü" className="ml-auto hidden items-center gap-1 md:flex">

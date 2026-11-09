@@ -678,3 +678,14 @@ body:has(> .public-theme) {
 .dark body:has(> .public-theme) {
   background-color: #0a0a0a;
 }
+
+/* Üst satırdaki marka adı: koyuda gümüş, açıkta grafit degrade. */
+.brand-lockup-name {
+  background: linear-gradient(180deg, #3a3a3a 0%, #111 55%, #4a4a4a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.dark .brand-lockup-name {
+  background-image: linear-gradient(180deg, #ffffff 0%, #e4e4e4 45%, #9a9a9a 100%);
+}
