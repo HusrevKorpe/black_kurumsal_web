@@ -350,6 +350,29 @@
     flex-basis: 300px;
   }
 }
+/* Film şeridinin okları: resim alanının ortası (alttaki ~34 px yazı ve kaydırma çubuğu hariç). */
+.pafta-film-arrow {
+  position: absolute;
+  top: calc(50% - 22px);
+  transform: translateY(-50%);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  background: rgb(0 0 0 / 62%);
+  color: #fff;
+  box-shadow: 0 0 0 1.5px rgb(255 255 255 / 35%);
+  transition: background-color 150ms;
+}
+.pafta-film-arrow:hover {
+  background: rgb(0 0 0 / 82%);
+}
+.pafta-film-arrow:focus-visible {
+  outline: 3px solid var(--pafta-strip);
+  outline-offset: 2px;
+}
 .pafta-frame {
   padding: 6px;
   background: var(--pafta-paper);
