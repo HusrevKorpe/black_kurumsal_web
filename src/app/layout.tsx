@@ -19,7 +19,13 @@ export const metadata: Metadata = {
   title: { default: SITE_TITLE, template: SITE_TITLE_TEMPLATE },
   description: SITE_DESCRIPTION,
   // Açık site panelden yüklenen logo varsa bunu ezer ((public)/layout.tsx).
-  icons: { icon: '/favicon.ico' },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/apple-icon.png',
+  },
   openGraph: { siteName: 'Black', locale: 'tr_TR', type: 'website' },
 }
 
