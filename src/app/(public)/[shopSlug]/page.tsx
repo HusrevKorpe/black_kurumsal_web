@@ -25,7 +25,7 @@ import { shopLocationLabel } from '@/features/shops/view'
 import { publicEnv } from '@/lib/env'
 import { ROUTES } from '@/lib/constants/routes'
 import { SHOP_TYPE_META } from '@/lib/constants/shops'
-import { pageDescription } from '@/lib/constants/site'
+import { DEFAULT_OG_IMAGE, pageDescription } from '@/lib/constants/site'
 import { tr } from '@/lib/i18n/tr'
 import { mediaPublicUrl } from '@/lib/media/url'
 import { telHref, whatsappHref } from '@/lib/utils/format'
@@ -47,7 +47,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<'/[shopSlug]'>): Promise<Metadata> {
   const { shopSlug } = await params
   const shop = isReservedSlug(shopSlug) ? null : await getShopBySlug(shopSlug)
-  if (!shop) return {}
+  if (!shop) return { title: tr.common.notFoundTitle }
   if (isUnderRenovation(shop.slug)) {
     const title = tr.renovation.metaTitle(shop.name)
     const description = tr.renovation.metaDescription(shop.name)
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: PageProps<'/[shopSlug]'>): Pr
         title,
         description,
         type: 'website',
-        images: shop.coverImage ? [mediaPublicUrl(shop.coverImage)] : undefined,
+        images: shop.coverImage ? [mediaPublicUrl(shop.coverImage)] : [DEFAULT_OG_IMAGE],
       },
     }
   }
@@ -76,7 +76,7 @@ export async function generateMetadata({ params }: PageProps<'/[shopSlug]'>): Pr
       title,
       description,
       type: 'website',
-      images: shop.coverImage ? [mediaPublicUrl(shop.coverImage)] : undefined,
+      images: shop.coverImage ? [mediaPublicUrl(shop.coverImage)] : [DEFAULT_OG_IMAGE],
     },
   }
 }

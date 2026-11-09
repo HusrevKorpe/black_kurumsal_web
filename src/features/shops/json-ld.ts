@@ -30,6 +30,36 @@ export interface ShopJsonLdInput {
   address: string | null
   week: WeeklyHours
   exceptions?: readonly HoursExceptionEntry[]
+  /** İçindeki dükkanlar (Black Garden gibi mekân): `containsPlace` olarak yazılır. */
+  places?: readonly PlaceRef[]
+}
+
+/** Başka bir sayfaya bağlanan yer: yalnız ad ve adres. */
+export interface PlaceRef {
+  name: string
+  url: string
+}
+
+function placeList(places: readonly PlaceRef[] | undefined) {
+  return places && places.length > 0
+    ? {
+        containsPlace: places.map((place) => ({
+          '@type': 'LocalBusiness',
+          name: place.name,
+          url: place.url,
+        })),
+      }
+    : {}
+}
+
+function cityAddress(street: string | null) {
+  // Sokak adresi girilmemiş olsa da şehir bilinir; Google işletmeyi doğru şehre bağlar.
+  return {
+    '@type': 'PostalAddress',
+    ...(street ? { streetAddress: street } : {}),
+    addressLocality: SITE_CITY,
+    addressCountry: 'TR',
+  }
 }
 
 /**
@@ -65,17 +95,88 @@ export function buildShopJsonLd(input: ShopJsonLdInput): Record<string, unknown>
     ...(input.description ? { description: input.description } : {}),
     ...(input.image ? { image: input.image } : {}),
     ...(input.phone ? { telephone: input.phone } : {}),
-    // Sokak adresi girilmemiş olsa da şehir bilinir; Google işletmeyi doğru şehre bağlar.
-    address: {
-      '@type': 'PostalAddress',
-      ...(input.address ? { streetAddress: input.address } : {}),
-      addressLocality: SITE_CITY,
-      addressCountry: 'TR',
-    },
+    address: cityAddress(input.address),
     ...(openingHoursSpecification.length > 0 ? { openingHoursSpecification } : {}),
     ...(input.exceptions && input.exceptions.length > 0
       ? { specialOpeningHoursSpecification: specialHoursSpecification(input.exceptions) }
       : {}),
+    ...placeList(input.places),
+  }
+}
+
+export interface DistrictJsonLdInput {
+  name: string
+  description: string | null
+  url: string
+  image: string | null
+  places: readonly PlaceRef[]
+}
+
+/** Semt sayfası (Çarşı, Iyaş): tek adresi yok, içindeki dükkanları sayan bir yer. */
+export function buildDistrictJsonLd(input: DistrictJsonLdInput): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Place',
+    name: input.name,
+    url: input.url,
+    ...(input.description ? { description: input.description } : {}),
+    ...(input.image ? { image: input.image } : {}),
+    address: cityAddress(null),
+    ...placeList(input.places),
+  }
+}
+
+export interface OrganizationJsonLdInput {
+  name: string
+  siteUrl: string
+  logo: string
+  description: string
+  phone: string | null
+  email: string | null
+  sameAs: readonly (string | null)[]
+  places: readonly PlaceRef[]
+}
+
+/**
+ * Ana sayfa: marka (Organization) ve site (WebSite) tek `@graph` içinde. Dükkanlar ve mekânlar
+ * `subOrganization` olarak bağlanır; her birinin ayrıntısı kendi sayfasının verisindedir.
+ */
+export function buildOrganizationJsonLd(input: OrganizationJsonLdInput): Record<string, unknown> {
+  const orgId = `${input.siteUrl}/#organization`
+  const sameAs = input.sameAs.filter((url): url is string => Boolean(url))
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': orgId,
+        name: input.name,
+        url: input.siteUrl,
+        logo: input.logo,
+        description: input.description,
+        ...(input.phone ? { telephone: input.phone } : {}),
+        ...(input.email ? { email: input.email } : {}),
+        ...(sameAs.length > 0 ? { sameAs } : {}),
+        address: cityAddress(null),
+        ...(input.places.length > 0
+          ? {
+              subOrganization: input.places.map((place) => ({
+                '@type': 'LocalBusiness',
+                name: place.name,
+                url: place.url,
+              })),
+            }
+          : {}),
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${input.siteUrl}/#website`,
+        name: input.name,
+        url: input.siteUrl,
+        inLanguage: 'tr-TR',
+        publisher: { '@id': orgId },
+      },
+    ],
   }
 }
 

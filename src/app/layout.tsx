@@ -1,6 +1,11 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
-import { SITE_DESCRIPTION, SITE_TITLE, SITE_TITLE_TEMPLATE } from '@/lib/constants/site'
+import {
+  DEFAULT_OG_IMAGE,
+  SITE_DESCRIPTION,
+  SITE_TITLE,
+  SITE_TITLE_TEMPLATE,
+} from '@/lib/constants/site'
 import { InlineScript } from '@/components/inline-script'
 import { DEFAULT_THEME, THEME_SCRIPT } from '@/lib/browser/theme'
 import { publicEnv } from '@/lib/env'
@@ -26,7 +31,15 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon.png',
   },
-  openGraph: { siteName: 'Black', locale: 'tr_TR', type: 'website' },
+  // Sayfa kendi openGraph'ını verirse bu nesnenin yerine geçer (birleşmez): o sayfalar da
+  // fotoğraf yoksa DEFAULT_OG_IMAGE'ı kendisi koyar.
+  openGraph: {
+    siteName: 'Black',
+    locale: 'tr_TR',
+    type: 'website',
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: { card: 'summary_large_image' },
 }
 
 // theme-color'ı tema betiği kurar ve tercihe göre günceller (src/lib/browser/theme.ts).

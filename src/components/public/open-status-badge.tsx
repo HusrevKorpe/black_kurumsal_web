@@ -19,7 +19,26 @@ interface OpenStatusBadgeProps {
   exceptions?: readonly HoursExceptionEntry[]
   /** Kartta kısa, detay sayfasında açıklamalı. */
   detailed?: boolean
+  /**
+   * Saat girilmemişse yazılacak nötr metin (gri nokta ile). Verilmezse rozet hiç çıkmaz. Liste
+   * kartlarında yan yana dükkanlardan birinde durum yazıp ötekinde boş kalmasın diye.
+   */
+  fallback?: string
   className?: string
+}
+
+function NeutralBadge({ label, className }: { label: string; className?: string }) {
+  return (
+    <span
+      className={clsx(
+        'inline-flex items-center gap-1.5 font-medium text-muted-foreground',
+        className,
+      )}
+    >
+      <span className="size-2 shrink-0 rounded-full border border-current" aria-hidden />
+      {label}
+    </span>
+  )
 }
 
 /**
@@ -32,6 +51,7 @@ export function OpenStatusBadge({
   week,
   exceptions,
   detailed = false,
+  fallback,
   className,
 }: OpenStatusBadgeProps) {
   const tick = useMinuteTick()
@@ -42,7 +62,9 @@ export function OpenStatusBadge({
     return { status, left: minutesUntilClose(status, { now }) }
   }, [week, exceptions, tick])
 
-  if (week.length === 0) return null
+  if (week.length === 0) {
+    return fallback ? <NeutralBadge label={fallback} className={className} /> : null
+  }
 
   if (!view) {
     // Yer ayrılır, metin göstermez: gerçek durum gelince satır oynamaz, gri yazı da görünmez.
@@ -50,7 +72,9 @@ export function OpenStatusBadge({
   }
 
   const { status, left } = view
-  if (status.kind === 'unknown') return null
+  if (status.kind === 'unknown') {
+    return fallback ? <NeutralBadge label={fallback} className={className} /> : null
+  }
 
   const isOpen = status.kind === 'open'
   const soonLeft = left !== null && left <= CLOSING_SOON_MINUTES ? left : null

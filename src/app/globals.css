@@ -689,3 +689,24 @@ body:has(> .public-theme) {
 .dark .brand-lockup-name {
   background-image: linear-gradient(180deg, #ffffff 0%, #e4e4e4 45%, #9a9a9a 100%);
 }
+
+/* Gerçek görseli olmayan kampanya kartının afişi (campaign-card.tsx): ortada altın ışık, ince ızgara. */
+.campaign-poster {
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      color-mix(in oklch, var(--brand) 20%, transparent),
+      transparent 62%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in oklch, var(--foreground) 5%, transparent) 0 1px,
+      transparent 1px 32px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in oklch, var(--foreground) 5%, transparent) 0 1px,
+      transparent 1px 32px
+    ),
+    var(--card);
+}

@@ -49,4 +49,9 @@ describe('OpenStatusBadge', () => {
     const { container } = render(<OpenStatusBadge week={[]} />)
     expect(container).toBeEmptyDOMElement()
   })
+
+  it('saat bilgisi yoksa ve yedek metin verildiyse onu gri yazar', () => {
+    render(<OpenStatusBadge week={[]} fallback="Saatler yakında" />)
+    expect(screen.getByText('Saatler yakında')).toBeInTheDocument()
+  })
 })

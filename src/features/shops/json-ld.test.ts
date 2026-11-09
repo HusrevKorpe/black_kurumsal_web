@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { buildShopJsonLd, serializeJsonLd } from './json-ld'
+import {
+  buildDistrictJsonLd,
+  buildOrganizationJsonLd,
+  buildShopJsonLd,
+  serializeJsonLd,
+} from './json-ld'
 
 describe('buildShopJsonLd', () => {
   it('türü schema.org tipine çevirir ve saatleri yazar', () => {
@@ -57,5 +62,47 @@ describe('buildShopJsonLd', () => {
 
   it('script kapanışını kaçırır', () => {
     expect(serializeJsonLd({ a: '</script>' })).toBe('{"a":"\\u003c/script>"}')
+  })
+})
+
+describe('buildDistrictJsonLd', () => {
+  it('semti Place olarak, dükkanlarını containsPlace ile yazar', () => {
+    const data = buildDistrictJsonLd({
+      name: 'Çarşı',
+      description: null,
+      url: 'https://black.example/mekan/carsi',
+      image: null,
+      places: [{ name: 'Black Tost Çarşı', url: 'https://black.example/black-tost-carsi' }],
+    })
+    expect(data['@type']).toBe('Place')
+    expect(data).not.toHaveProperty('description')
+    expect(data.containsPlace).toEqual([
+      {
+        '@type': 'LocalBusiness',
+        name: 'Black Tost Çarşı',
+        url: 'https://black.example/black-tost-carsi',
+      },
+    ])
+  })
+})
+
+describe('buildOrganizationJsonLd', () => {
+  it('marka ve siteyi tek grafikte yazar, boş bağlantıları atar', () => {
+    const data = buildOrganizationJsonLd({
+      name: 'Black',
+      siteUrl: 'https://black.example',
+      logo: 'https://black.example/apple-icon.png',
+      description: 'Isparta',
+      phone: null,
+      email: null,
+      sameAs: ['https://instagram.com/black', null],
+      places: [],
+    })
+    const [org, site] = data['@graph'] as Record<string, unknown>[]
+    expect(org?.['@type']).toBe('Organization')
+    expect(org?.sameAs).toEqual(['https://instagram.com/black'])
+    expect(org).not.toHaveProperty('telephone')
+    expect(org).not.toHaveProperty('subOrganization')
+    expect(site?.publisher).toEqual({ '@id': 'https://black.example/#organization' })
   })
 })

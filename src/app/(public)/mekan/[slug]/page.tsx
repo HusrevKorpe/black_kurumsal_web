@@ -12,8 +12,10 @@ import { PaftaShopTickets } from '@/components/public/pafta/pafta-tickets'
 import { normalizeWeek, toExceptionEntries } from '@/features/hours'
 import { getActiveLocationSlugs, getLocationBySlug } from '@/features/locations/queries'
 import { resolveContact } from '@/features/shops/contact'
+import { buildDistrictJsonLd, buildShopJsonLd, serializeJsonLd } from '@/features/shops/json-ld'
+import { publicEnv } from '@/lib/env'
 import { ROUTES } from '@/lib/constants/routes'
-import { pageDescription } from '@/lib/constants/site'
+import { DEFAULT_OG_IMAGE, pageDescription } from '@/lib/constants/site'
 import { tr } from '@/lib/i18n/tr'
 import { mediaPublicUrl } from '@/lib/media/url'
 
@@ -30,7 +32,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<'/mekan/[slug]'>): Promise<Metadata> {
   const { slug } = await params
   const location = await getLocationBySlug(slug)
-  if (!location) return {}
+  if (!location) return { title: tr.common.notFoundTitle }
   const description =
     location.description ??
     pageDescription(
@@ -45,7 +47,7 @@ export async function generateMetadata({ params }: PageProps<'/mekan/[slug]'>): 
       title: location.name,
       description,
       type: 'website',
-      images: location.coverImage ? [mediaPublicUrl(location.coverImage)] : undefined,
+      images: location.coverImage ? [mediaPublicUrl(location.coverImage)] : [DEFAULT_OG_IMAGE],
     },
   }
 }
@@ -73,12 +75,46 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
   // Semt sayfası bir dizin: iletişim çubuğu yalnız tek adresli mekânda.
   const withBar = isVenue && hasActionBar(contact)
 
+  const siteUrl = publicEnv.NEXT_PUBLIC_SITE_URL
+  const pageUrl = `${siteUrl}${ROUTES.location(location.slug)}`
+  const image = location.coverImage ? mediaPublicUrl(location.coverImage) : null
+  const places = location.shops.map((shop) => ({
+    name: shop.name,
+    url: `${siteUrl}${ROUTES.shop(shop.slug)}`,
+  }))
+  // Mekân (Black Garden) gerçek adresli bir işletme: adres, telefon, saat ve içindeki dükkanlar.
+  // Semt yalnız bir yer: içindeki dükkanları sayar.
+  const jsonLd = isVenue
+    ? buildShopJsonLd({
+        name: location.name,
+        description: location.description,
+        url: pageUrl,
+        type: 'FOOD',
+        image,
+        phone: contact.phone,
+        address: contact.address,
+        week,
+        exceptions,
+        places,
+      })
+    : buildDistrictJsonLd({
+        name: location.name,
+        description: location.description,
+        url: pageUrl,
+        image,
+        places,
+      })
+
   return (
     // Mekân sayfası tabelanın yeşilini alır (Pafta kaynağı); içindeki biletler kendi dükkan rengindedir.
     <article
       className={withBar ? 'pafta pb-28 md:pb-24' : 'pafta pb-16 md:pb-24'}
       data-accent={isVenue ? 'grass' : undefined}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
+      />
       <div className="mx-auto w-full max-w-7xl px-[18px] md:px-12">
         <PaftaHero
           crumbs={[{ href: ROUTES.home, label: tr.nav.home }]}

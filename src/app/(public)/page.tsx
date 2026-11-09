@@ -9,7 +9,10 @@ import { getCalendarEvents } from '@/features/events/queries'
 import { getActiveLocations } from '@/features/locations/queries'
 import { getSiteSettings } from '@/features/settings/queries'
 import { getActiveShops } from '@/features/shops/queries'
+import { buildOrganizationJsonLd, serializeJsonLd } from '@/features/shops/json-ld'
 import { ROUTES } from '@/lib/constants/routes'
+import { SITE_DESCRIPTION } from '@/lib/constants/site'
+import { publicEnv } from '@/lib/env'
 import { tr } from '@/lib/i18n/tr'
 
 export const revalidate = 3600
@@ -25,8 +28,32 @@ export default async function HomePage() {
     getActiveShops(),
   ])
 
+  const siteUrl = publicEnv.NEXT_PUBLIC_SITE_URL
+  const jsonLd = buildOrganizationJsonLd({
+    name: settings.brandName,
+    siteUrl,
+    logo: `${siteUrl}/apple-icon.png`,
+    description: SITE_DESCRIPTION,
+    phone: settings.contactPhone,
+    email: settings.contactEmail,
+    sameAs: [settings.instagramUrl, settings.facebookUrl],
+    places: [
+      ...shops.map((shop) => ({ name: shop.name, url: `${siteUrl}${ROUTES.shop(shop.slug)}` })),
+      ...locations
+        .filter((location) => location.kind === 'VENUE')
+        .map((location) => ({
+          name: location.name,
+          url: `${siteUrl}${ROUTES.location(location.slug)}`,
+        })),
+    ],
+  })
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
+      />
       <ShopTree
         brandName={settings.brandName}
         title={settings.heroTitle}

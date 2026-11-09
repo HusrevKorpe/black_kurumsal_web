@@ -6,6 +6,7 @@ import type { Media } from '@/generated/prisma/client'
 import { ROUTES } from '@/lib/constants/routes'
 import { tr } from '@/lib/i18n/tr'
 import { cn } from '@/lib/utils'
+import { isPlaceholderCampaignImage } from '@/features/campaigns/placeholder'
 import { formatDateTr } from '@/lib/utils/format'
 import { CoverImage } from './cover-image'
 
@@ -13,7 +14,7 @@ export interface CampaignCardInput {
   id: string
   title: string
   description: string | null
-  image: Pick<Media, 'bucket' | 'path' | 'alt'>
+  image: Pick<Media, 'bucket' | 'path' | 'alt'> & Partial<Pick<Media, 'uploadedById'>>
   scope: CampaignScope
   ctaLabel: string | null
   ctaUrl: string | null
@@ -48,6 +49,36 @@ function scopeLine(campaign: CampaignCardInput) {
  * karta yayılır. İç içe bağlantı doğmaz, düğme z-10 ile üstte kalır. Odak halkası içeri
  * çizilir (-outline-offset): kartın overflow-hidden'ı dışarıdaki halkayı kırpardı.
  */
+/**
+ * Gerçek görseli olmayan kampanyanın kapağı: yer tutucu renk geçişinin yerine siyah zeminde altın
+ * taç ve kampanyanın sahibi (dükkan, mekân ya da marka). Başlık kartın altında zaten yazar.
+ */
+function CampaignPoster({ label }: { label: string }) {
+  return (
+    <div
+      aria-hidden
+      className="campaign-poster absolute inset-0 flex flex-col items-center justify-center gap-2.5 px-6 text-center"
+    >
+      <svg viewBox="0 0 24 14" className="h-7 w-auto text-brand" focusable="false">
+        <path
+          d="M2 3.5 7 8l5-7 5 7 5-4.5L20 13H4Z"
+          fill="currentColor"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
+        <circle cx="2" cy="3" r="1.6" fill="currentColor" />
+        <circle cx="12" cy="1.2" r="1.6" fill="currentColor" />
+        <circle cx="22" cy="3" r="1.6" fill="currentColor" />
+      </svg>
+      <span className="font-display text-3xl leading-none font-bold tracking-wide uppercase">
+        {label}
+      </span>
+      <span className="h-0.5 w-14 bg-brand" />
+    </div>
+  )
+}
+
 const STRETCHED =
   'after:absolute after:inset-0 after:content-[""] hover:underline focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-ring'
 
@@ -59,6 +90,7 @@ export function CampaignCard({
   headingLevel: Heading = 'h3',
 }: CampaignCardProps) {
   const scope = scopeLine(campaign)
+  const placeholder = isPlaceholderCampaignImage(campaign.image, campaign.title)
   // Kartın her yeri tıklanır: dükkan/mekan kampanyası doğrudan o sayfaya gider. Dükkanın
   // kendi sayfasındaysak (hideTarget) hedef yoktur — zaten oradayız — ve kart varsa düğme
   // bağlantısına gider.
@@ -81,13 +113,17 @@ export function CampaignCard({
   return (
     <article className={cn('group relative flex h-full flex-col overflow-hidden bg-card')}>
       <div className="relative aspect-video overflow-hidden">
-        <CoverImage
-          media={campaign.image}
-          alt={campaign.title}
-          sizes="(min-width: 1024px) 40vw, (min-width: 640px) 60vw, 85vw"
-          priority={priority}
-          className={cn(linked && 'transition-transform duration-500 group-hover:scale-[1.03]')}
-        />
+        {placeholder ? (
+          <CampaignPoster label={scope.href ? scope.label : tr.common.brand} />
+        ) : (
+          <CoverImage
+            media={campaign.image}
+            alt={campaign.title}
+            sizes="(min-width: 1024px) 40vw, (min-width: 640px) 60vw, 85vw"
+            priority={priority}
+            className={cn(linked && 'transition-transform duration-500 group-hover:scale-[1.03]')}
+          />
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         {!hideTarget ? (

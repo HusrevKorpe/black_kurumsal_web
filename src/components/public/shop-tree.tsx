@@ -168,7 +168,12 @@ function TreeShop({ shop, parent }: { shop: ShopCardData; parent: string }) {
           {isUnderRenovation(shop.slug) ? (
             <RenovationBadge className="shrink-0 text-xs" />
           ) : (
-            <OpenStatusBadge week={week} exceptions={exceptions} className="shrink-0 text-xs" />
+            <OpenStatusBadge
+              week={week}
+              exceptions={exceptions}
+              fallback={tr.common.hoursSoon}
+              className="shrink-0 text-xs"
+            />
           )}
           <span className="min-w-0 truncate">{meta.label}</span>
         </span>
@@ -212,8 +217,12 @@ function TreeVenue({ venue, shopCount }: { venue: LocationCardData; shopCount: n
         <span className="line-clamp-2 block w-fit max-w-full text-base leading-tight font-semibold">
           {venue.name}
         </span>
-        <span className="mt-0.5 block truncate text-sm text-muted-foreground">
-          {shopCount > 0 ? `${tr.location.venue} · ${shopCount} dükkan` : tr.location.venue}
+        {/* Dar sütunda kesilmesin ("Mekan · 7 dü…"): sığmazsa sayı alt satıra iner. */}
+        <span className="mt-0.5 flex flex-wrap gap-x-1.5 text-sm text-muted-foreground">
+          <span>{tr.location.venue}</span>
+          {shopCount > 0 ? (
+            <span className="whitespace-nowrap">· {tr.home.shopCount(shopCount)}</span>
+          ) : null}
         </span>
       </span>
       <ChevronRightIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden />

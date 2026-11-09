@@ -22,6 +22,7 @@ export const tr = {
     closingIn: (minutes: number) => `${minutes} dk sonra kapanıyor`,
     hoursUnknown: 'Saat bilgisi yok',
     everyDay: 'Her gün',
+    hoursSoon: 'Saatler yakında',
     allDay: '24 saat açık',
     closesAt: 'Kapanış',
     opensAt: 'Açılış',
@@ -57,6 +58,7 @@ export const tr = {
     menu: 'Menü',
     closeMenu: 'Menüyü kapat',
     adminPanel: 'Yönetim',
+    skipToContent: 'Ana içeriğe geç',
   },
   home: {
     campaignsTitle: 'Kampanyalar',
