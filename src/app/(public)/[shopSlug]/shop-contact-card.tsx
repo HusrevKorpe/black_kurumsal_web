@@ -6,13 +6,38 @@ import { formatTrPhone, telHref, whatsappHref } from '@/lib/utils/format'
 
 interface ShopContactCardProps {
   contact: ResolvedContact
+  /** Dükkanın bağlı olduğu mekân: telefon oradan geliyorsa "X ortak hattı" yazılır. */
+  venueName?: string | null
 }
 
-export function ShopContactCard({ contact }: ShopContactCardProps) {
+/** Kartta gösterilecek bir şey var mı? Yoksa kart (ve atlama şeridindeki bağlantısı) çıkmaz. */
+export function hasContactCard(contact: ResolvedContact): boolean {
+  return Boolean(
+    (contact.phone && telHref(contact.phone)) ||
+    (contact.whatsapp && whatsappHref(contact.whatsapp)) ||
+    contact.address ||
+    contact.instagramUrl,
+  )
+}
+
+function SharedLineNote({ venueName }: { venueName: string }) {
+  return (
+    <span className="-mt-2.5 block pb-2 text-xs text-muted-foreground">
+      {tr.shop.sharedLine(venueName)}
+    </span>
+  )
+}
+
+export function ShopContactCard({ contact, venueName }: ShopContactCardProps) {
   const tel = contact.phone ? telHref(contact.phone) : null
   const wa = contact.whatsapp ? whatsappHref(contact.whatsapp) : null
-  const hasAny = tel || wa || contact.address || contact.instagramUrl
-  if (!hasAny) return null
+  if (!hasContactCard(contact)) return null
+  const phoneShared = Boolean(venueName) && contact.phoneSource === 'location'
+  // WhatsApp telefonla aynı numaraysa etiket bir kez, telefonun altında yazılır.
+  const whatsappShared =
+    Boolean(venueName) &&
+    contact.whatsappSource === 'location' &&
+    !(phoneShared && contact.whatsapp === contact.phone)
 
   return (
     <section aria-labelledby="iletisim">
@@ -42,27 +67,33 @@ export function ShopContactCard({ contact }: ShopContactCardProps) {
         {tel && contact.phone ? (
           <li className="flex items-center gap-3">
             <PhoneIcon className="size-4 shrink-0 text-muted-foreground" />
-            <a
-              href={tel}
-              data-track="call"
-              className="inline-flex min-h-12 items-center hover:underline"
-            >
-              {formatTrPhone(contact.phone)}
-            </a>
+            <div>
+              <a
+                href={tel}
+                data-track="call"
+                className="inline-flex min-h-12 items-center hover:underline"
+              >
+                {formatTrPhone(contact.phone)}
+              </a>
+              {phoneShared && venueName ? <SharedLineNote venueName={venueName} /> : null}
+            </div>
           </li>
         ) : null}
         {wa && contact.whatsapp ? (
           <li className="flex items-center gap-3">
             <MessageCircleIcon className="size-4 shrink-0 text-muted-foreground" />
-            <a
-              href={wa}
-              data-track="whatsapp"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-12 items-center hover:underline"
-            >
-              {tr.common.whatsapp} · {formatTrPhone(contact.whatsapp)}
-            </a>
+            <div>
+              <a
+                href={wa}
+                data-track="whatsapp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-12 items-center hover:underline"
+              >
+                {tr.common.whatsapp} · {formatTrPhone(contact.whatsapp)}
+              </a>
+              {whatsappShared && venueName ? <SharedLineNote venueName={venueName} /> : null}
+            </div>
           </li>
         ) : null}
         {contact.instagramUrl ? (

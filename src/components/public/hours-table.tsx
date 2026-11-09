@@ -23,6 +23,14 @@ interface HoursTableProps {
   note?: string
 }
 
+/** Haftanın yedi günü de aynı saatle mi açık? */
+export function isUniformWeek(week: WeeklyHours): boolean {
+  const [head] = week
+  if (week.length !== 7 || !head) return false
+  const first = formatHoursEntry(head)
+  return week.every((entry) => formatHoursEntry(entry) === first)
+}
+
 export function HoursTable({ week, exceptions, note }: HoursTableProps) {
   const tick = useMinuteTick()
   // "Bugün" ve yaklaşan günler tarayıcıda hesaplanır: sayfa statik üretildiği için sunucu bilemez.
@@ -36,39 +44,55 @@ export function HoursTable({ week, exceptions, note }: HoursTableProps) {
     return <p className="text-sm text-muted-foreground">{tr.common.hoursUnknown}</p>
   }
 
+  // Yedi gün aynıysa yedi satır yerine tek satır: "Her gün 11:00 – 23:30". Bugün özel günse
+  // tablo açılır ki bugünün farklı saati görünsün.
+  const todaySpecial = now ? exceptions?.find((e) => e.date === now.dateKey) : undefined
+  const uniformDay = isUniformWeek(week) && !todaySpecial ? week[0] : undefined
+
   return (
     <div>
-      <dl className="divide-y text-[15px]">
-        {week.map((entry) => {
-          const isToday = now?.dayOfWeek === entry.dayOfWeek
-          // Bugün özel günse satır onu gösterir: şerit ve durum rozetiyle çelişmesin.
-          const special = isToday ? exceptions?.find((e) => e.date === now?.dateKey) : undefined
-          const shown = special ?? entry
-          return (
-            <div
-              key={entry.dayOfWeek}
-              className={clsx(
-                '-mx-2 flex items-center justify-between px-2 py-2',
-                isToday && 'bg-accent font-semibold',
-              )}
-            >
-              <dt className="flex items-center gap-2">
-                {DAY_NAMES[entry.dayOfWeek]}
-                {isToday ? (
-                  <span className="text-xs font-medium text-brand">
-                    {special
-                      ? `${tr.common.today} · ${special.note ?? tr.common.specialDay}`
-                      : tr.common.today}
-                  </span>
-                ) : null}
-              </dt>
-              <dd className={clsx('tabular-nums', shown.isClosed && 'text-muted-foreground')}>
-                {formatHoursEntry(shown)}
-              </dd>
-            </div>
-          )
-        })}
-      </dl>
+      {uniformDay ? (
+        <dl className="text-[15px]">
+          <div className="-mx-2 flex items-center justify-between bg-accent px-2 py-2 font-semibold">
+            <dt>{tr.common.everyDay}</dt>
+            <dd className={clsx('tabular-nums', uniformDay.isClosed && 'text-muted-foreground')}>
+              {formatHoursEntry(uniformDay)}
+            </dd>
+          </div>
+        </dl>
+      ) : (
+        <dl className="divide-y text-[15px]">
+          {week.map((entry) => {
+            const isToday = now?.dayOfWeek === entry.dayOfWeek
+            // Bugün özel günse satır onu gösterir: şerit ve durum rozetiyle çelişmesin.
+            const special = isToday ? exceptions?.find((e) => e.date === now?.dateKey) : undefined
+            const shown = special ?? entry
+            return (
+              <div
+                key={entry.dayOfWeek}
+                className={clsx(
+                  '-mx-2 flex items-center justify-between px-2 py-2',
+                  isToday && 'bg-accent font-semibold',
+                )}
+              >
+                <dt className="flex items-center gap-2">
+                  {DAY_NAMES[entry.dayOfWeek]}
+                  {isToday ? (
+                    <span className="text-xs font-medium text-brand">
+                      {special
+                        ? `${tr.common.today} · ${special.note ?? tr.common.specialDay}`
+                        : tr.common.today}
+                    </span>
+                  ) : null}
+                </dt>
+                <dd className={clsx('tabular-nums', shown.isClosed && 'text-muted-foreground')}>
+                  {formatHoursEntry(shown)}
+                </dd>
+              </div>
+            )
+          })}
+        </dl>
+      )}
 
       {upcoming.length > 0 ? (
         <div className="mt-4">

@@ -22,6 +22,8 @@ describe('resolveContact', () => {
     expect(result.phone).toBe(garden.phone)
     expect(result.address).toBe(garden.address)
     expect(result.addressSource).toBe('location')
+    expect(result.phoneSource).toBe('location')
+    expect(result.whatsappSource).toBe('location')
   })
 
   it('dükkanda dolu alan mekanı ezer, boş alan devralınır', () => {
@@ -33,6 +35,8 @@ describe('resolveContact', () => {
     expect(result.whatsapp).toBe(garden.whatsapp)
     expect(result.address).toBe('Kendi adresi')
     expect(result.addressSource).toBe('shop')
+    expect(result.phoneSource).toBe('shop')
+    expect(result.whatsappSource).toBe('location')
   })
 
   it('mekan yoksa yalnız dükkan', () => {

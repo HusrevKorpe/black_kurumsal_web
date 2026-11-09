@@ -1,3 +1,4 @@
+import { MessageCircleIcon, PhoneIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { CampaignCard } from '@/components/public/campaign-card'
@@ -27,13 +28,16 @@ import { SHOP_TYPE_META } from '@/lib/constants/shops'
 import { pageDescription } from '@/lib/constants/site'
 import { tr } from '@/lib/i18n/tr'
 import { mediaPublicUrl } from '@/lib/media/url'
+import { telHref, whatsappHref } from '@/lib/utils/format'
 import { isReservedSlug } from '@/lib/utils/slugify'
-import { ShopContactCard } from './shop-contact-card'
+import { hasContactCard, ShopContactCard } from './shop-contact-card'
 
 export const revalidate = 3600
 export const dynamicParams = true
 
 const SECTION_TITLE_CLASS = 'pafta-heading pafta-heading-lg mb-[18px]'
+/** Atlama şeridinden gelinen bölümün başlığı yapışkan üst çubuğun altında kalmasın. */
+const SECTION_CLASS = 'min-w-0 scroll-mt-24 lg:col-start-1'
 
 export async function generateStaticParams() {
   const slugs = await getActiveShopSlugs()
@@ -110,7 +114,11 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
   // Oyun dükkanında kapaklı oyun listesi fiyat listesinden çıkar, kendi vitrininde afiş olarak durur.
   const gameShelves = gamePlatform ? allCategories.filter(isGameShelf) : []
   const categories = allCategories.filter((category) => !gameShelves.includes(category))
-  const campaigns = [...shop.campaigns, ...(shop.location?.campaigns ?? [])]
+  // Dükkanın kendi kampanyası ile bağlı olduğu mekânınki ayrı başlık altında: mekân kampanyası
+  // "bu dükkana özel" değildir.
+  const shopCampaigns = shop.campaigns
+  const venueCampaigns = shop.location?.campaigns ?? []
+  const venueName = shop.location?.name ?? null
   const gallery = shop.gallery.map((g) => ({
     id: g.id,
     url: mediaPublicUrl(g.media),
@@ -137,6 +145,21 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
   })
 
   const withBar = hasActionBar(contact)
+  const tel = contact.phone ? telHref(contact.phone) : null
+  const wa = contact.whatsapp ? whatsappHref(contact.whatsapp, whatsappMessage) : null
+  // Boş bölüm sayfayı terk edilmiş gösterir: fiyat yoksa tek satır + "Fiyat için ara" (o da
+  // yoksa hiç), saat yoksa saat bölümü hiç çıkmaz.
+  const hasPrices = categories.length > 0
+  const showPriceCall = !hasPrices && Boolean(tel || wa)
+  const showPrices = hasPrices || showPriceCall
+  const showHours = week.length > 0
+  const showContact = hasContactCard(contact)
+  const jumpLinks = [
+    showPrices ? { href: '#fiyatlar', label: tr.shop.prices } : null,
+    gameShelves[0] ? { href: `#vitrin-${gameShelves[0].id}`, label: tr.shop.games } : null,
+    showHours ? { href: '#saatler', label: tr.common.hours } : null,
+    showContact ? { href: '#iletisim', label: tr.shop.contact } : null,
+  ].filter((link) => link !== null)
   const crumbs = [
     { href: ROUTES.home, label: tr.nav.home },
     ...(shop.location
@@ -185,13 +208,31 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
           whatsappMessage={whatsappMessage}
         />
 
+        {/* Uzun sayfada (oyun vitrini, 40 kalemlik menü) aranan bölüme tek dokunuşla gidilsin. */}
+        {jumpLinks.length >= 2 ? (
+          <nav
+            aria-label={tr.shop.sectionJump}
+            className="-mx-[18px] mt-6 overflow-x-auto px-[18px] py-0.5 md:mx-0 md:mt-8 md:px-0.5"
+          >
+            <ul className="flex w-max gap-2 md:w-auto md:flex-wrap">
+              {jumpLinks.map((link) => (
+                <li key={link.href}>
+                  <a href={link.href} className="pafta-jump">
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
+
         {/* Oyun dükkanında kapaklı oyun listesi fiyat listesinden ayrı, kendi vitrininde. */}
         {gamePlatform
           ? gameShelves.map((shelf) => (
               <section
                 key={shelf.id}
                 aria-labelledby={`vitrin-${shelf.id}`}
-                className="mt-12 md:mt-20"
+                className="mt-12 scroll-mt-24 md:mt-20"
               >
                 <h2 id={`vitrin-${shelf.id}`} className={SECTION_TITLE_CLASS}>
                   <DisplayName>{shelf.name}</DisplayName>
@@ -207,27 +248,56 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
           panelin fazla yüksekliğini soldaki bölümlerin arasına dağıtmaz.
         */}
         <div className="mt-12 grid gap-12 md:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[auto_auto_auto_auto_1fr] lg:gap-x-12 lg:gap-y-16">
-          <section aria-labelledby="fiyatlar" className="min-w-0 lg:col-start-1">
-            <h2 id="fiyatlar" className={SECTION_TITLE_CLASS}>
-              {tr.shop.prices}
-            </h2>
-            <PriceList categories={categories} />
-          </section>
-
-          <aside className="grid content-start gap-10 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-5 lg:row-start-1 lg:self-start">
-            <section aria-labelledby="saatler">
-              <h2 id="saatler" className="pafta-heading mb-4">
-                {tr.common.hours}
+          {hasPrices ? (
+            <section aria-labelledby="fiyatlar" className={SECTION_CLASS}>
+              <h2 id="fiyatlar" className={SECTION_TITLE_CLASS}>
+                {tr.shop.prices}
               </h2>
-              <div className="pafta-box p-4">
-                <HoursTable week={week} exceptions={exceptions} note={hoursNote} />
-              </div>
+              <PriceList categories={categories} />
             </section>
-            <ShopContactCard contact={contact} />
-          </aside>
+          ) : showPriceCall ? (
+            <section
+              id="fiyatlar"
+              aria-label={tr.shop.prices}
+              className={`${SECTION_CLASS} pafta-box flex flex-wrap items-center justify-between gap-4 p-4`}
+            >
+              <p className="text-[15px]">{tr.shop.pricesOnCall}</p>
+              {tel ? (
+                <a href={tel} data-track="call" className="pafta-btn pafta-btn-call">
+                  <PhoneIcon aria-hidden /> {tr.shop.callForPrices}
+                </a>
+              ) : wa ? (
+                <a
+                  href={wa}
+                  data-track="whatsapp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pafta-btn pafta-btn-wa"
+                >
+                  <MessageCircleIcon aria-hidden /> {tr.shop.pricesOnWhatsapp}
+                </a>
+              ) : null}
+            </section>
+          ) : null}
+
+          {showHours || showContact ? (
+            <aside className="grid content-start gap-10 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-5 lg:row-start-1 lg:self-start">
+              {showHours ? (
+                <section aria-labelledby="saatler" className="scroll-mt-24">
+                  <h2 id="saatler" className="pafta-heading mb-4">
+                    {tr.common.hours}
+                  </h2>
+                  <div className="pafta-box p-4">
+                    <HoursTable week={week} exceptions={exceptions} note={hoursNote} />
+                  </div>
+                </section>
+              ) : null}
+              <ShopContactCard contact={contact} venueName={venueName} />
+            </aside>
+          ) : null}
 
           {gallery.length > 0 ? (
-            <section aria-labelledby="galeri" className="min-w-0 lg:col-start-1">
+            <section aria-labelledby="galeri" className={SECTION_CLASS}>
               <h2 id="galeri" className={SECTION_TITLE_CLASS}>
                 {tr.shop.gallery}
               </h2>
@@ -236,7 +306,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
           ) : null}
 
           {shop.description || shop.features.length > 0 ? (
-            <section aria-labelledby="hakkinda" className="min-w-0 lg:col-start-1">
+            <section aria-labelledby="hakkinda" className={SECTION_CLASS}>
               <h2 id="hakkinda" className={SECTION_TITLE_CLASS}>
                 {tr.shop.about}
               </h2>
@@ -253,13 +323,28 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
             </section>
           ) : null}
 
-          {campaigns.length > 0 ? (
-            <section aria-labelledby="kampanyalar" className="min-w-0 lg:col-start-1">
+          {shopCampaigns.length > 0 ? (
+            <section aria-labelledby="kampanyalar" className={SECTION_CLASS}>
               <h2 id="kampanyalar" className={SECTION_TITLE_CLASS}>
                 {tr.shop.campaigns}
               </h2>
               <ul className="grid gap-3.5 sm:grid-cols-2">
-                {campaigns.map((campaign) => (
+                {shopCampaigns.map((campaign) => (
+                  <li key={campaign.id} className="pafta-frame">
+                    <CampaignCard campaign={campaign} hideTarget />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {venueCampaigns.length > 0 && venueName ? (
+            <section aria-labelledby="mekan-kampanyalari" className={SECTION_CLASS}>
+              <h2 id="mekan-kampanyalari" className={SECTION_TITLE_CLASS}>
+                {tr.shop.venueCampaigns(venueName)}
+              </h2>
+              <ul className="grid gap-3.5 sm:grid-cols-2">
+                {venueCampaigns.map((campaign) => (
                   <li key={campaign.id} className="pafta-frame">
                     <CampaignCard campaign={campaign} hideTarget />
                   </li>

@@ -11,6 +11,9 @@ export type ContactSource = 'shop' | 'location' | null
 export interface ResolvedContact extends ContactFields {
   /** Adres nereden geldi? Mekandan geldiyse sayfada "X içinde" yazılır. */
   addressSource: ContactSource
+  /** Telefon ve WhatsApp mekandan geldiyse sayfada "X ortak hattı" yazılır. */
+  phoneSource: ContactSource
+  whatsappSource: ContactSource
 }
 
 function pick<K extends keyof ContactFields>(
@@ -29,12 +32,16 @@ export function resolveContact(
   location: ContactFields | null | undefined,
 ): ResolvedContact {
   const address = pick('address', shop, location)
+  const phone = pick('phone', shop, location)
+  const whatsapp = pick('whatsapp', shop, location)
   return {
-    phone: pick('phone', shop, location).value,
-    whatsapp: pick('whatsapp', shop, location).value,
+    phone: phone.value,
+    whatsapp: whatsapp.value,
     address: address.value,
     mapUrl: pick('mapUrl', shop, location).value,
     instagramUrl: pick('instagramUrl', shop, location).value,
     addressSource: address.source,
+    phoneSource: phone.source,
+    whatsappSource: whatsapp.source,
   }
 }
