@@ -5,6 +5,7 @@ import { tr } from '@/lib/i18n/tr'
 import { formatTrPhone, telHref } from '@/lib/utils/format'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { BrandLockup } from './brand-mark'
+import type { NavShopGroup } from '@/features/shops/nav'
 import { MobileNav, type NavContact, type NavItem } from './mobile-nav'
 
 interface SiteHeaderProps {
@@ -12,6 +13,8 @@ interface SiteHeaderProps {
   /** Panelden yüklenen logo; yoksa yalnız marka adı yazılır. */
   logoUrl?: string | null
   contact: NavContact
+  /** Telefon menüsündeki dükkan rehberi. */
+  shopGroups: NavShopGroup[]
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -20,7 +23,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: ROUTES.campaigns, label: tr.nav.campaigns },
 ]
 
-export function SiteHeader({ brandName, logoUrl, contact }: SiteHeaderProps) {
+export function SiteHeader({ brandName, logoUrl, contact, shopGroups }: SiteHeaderProps) {
   const phoneHref = contact.phone ? telHref(contact.phone) : null
 
   return (
@@ -73,7 +76,12 @@ export function SiteHeader({ brandName, logoUrl, contact }: SiteHeaderProps) {
 
         <div className="flex items-center md:ml-1">
           <ThemeToggle />
-          <MobileNav items={NAV_ITEMS} brandName={brandName} contact={contact} />
+          <MobileNav
+            items={NAV_ITEMS}
+            brandName={brandName}
+            contact={contact}
+            shopGroups={shopGroups}
+          />
         </div>
       </div>
     </header>

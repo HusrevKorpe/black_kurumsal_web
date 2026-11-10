@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import { SiteFooter } from '@/components/public/site-footer'
 import { SiteHeader } from '@/components/public/site-header'
 import { getSiteLogoUrl, getSiteSettings } from '@/features/settings/queries'
+import { getNavShopGroups } from '@/features/shops/nav'
 import { tr } from '@/lib/i18n/tr'
 
 export const revalidate = 3600
@@ -26,7 +27,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PublicLayout({ children }: LayoutProps<'/'>) {
-  const [settings, logoUrl] = await Promise.all([getSiteSettings(), getSiteLogoUrl()])
+  const [settings, logoUrl, shopGroups] = await Promise.all([
+    getSiteSettings(),
+    getSiteLogoUrl(),
+    getNavShopGroups(),
+  ])
   return (
     <div
       className={`${display.variable} public-theme flex min-h-full flex-1 flex-col bg-background text-foreground`}
@@ -42,6 +47,7 @@ export default async function PublicLayout({ children }: LayoutProps<'/'>) {
         brandName={settings.brandName}
         logoUrl={logoUrl}
         contact={{ phone: settings.contactPhone, instagramUrl: settings.instagramUrl }}
+        shopGroups={shopGroups}
       />
       <main id="icerik" tabIndex={-1} className="flex-1 scroll-mt-16 outline-none">
         {children}

@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import type { NavShopGroup } from '@/features/shops/nav'
 import type { NavContact, NavItem } from './mobile-nav'
 import { MobileNavSheet } from './mobile-nav-sheet'
 
@@ -8,7 +9,7 @@ const items: NavItem[] = [
   { href: '/kampanyalar', label: 'Kampanyalar' },
 ]
 
-function renderSheet(contact: NavContact) {
+function renderSheet(contact: NavContact, shopGroups: NavShopGroup[] = []) {
   return render(
     <MobileNavSheet
       id="mobil-menu"
@@ -17,6 +18,7 @@ function renderSheet(contact: NavContact) {
       items={items}
       brandName="Black"
       contact={contact}
+      shopGroups={shopGroups}
       finalFocus={{ current: null }}
     />,
   )
@@ -43,5 +45,37 @@ describe('MobileNavSheet', () => {
     renderSheet({ phone: null, instagramUrl: null })
     expect(screen.queryByRole('region', { name: 'İletişim' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /Ara/ })).not.toBeInTheDocument()
+  })
+
+  it('dükkan rehberi varsa dükkanlar bölgeleriyle listelenir, ana sayfa bölümü satırı düşer', () => {
+    renderSheet({ phone: null, instagramUrl: null }, [
+      {
+        key: 'carsi',
+        title: { href: '/mekan/carsi', label: 'Çarşı' },
+        links: [{ href: '/black-tost-carsi', label: 'Black Tost Çarşı', type: 'FOOD', note: null }],
+      },
+      {
+        key: 'garden',
+        title: null,
+        links: [
+          { href: '/mekan/black-garden', label: 'Black Garden', type: null, note: '7 dükkan' },
+          { href: '/lulu-kafe', label: 'Lulu Kafe', type: 'FOOD', note: 'Tadilatta' },
+        ],
+      },
+    ])
+    const directory = screen.getByRole('region', { name: 'Dükkanlar' })
+    expect(screen.getByRole('link', { name: 'Çarşı' })).toHaveAttribute('href', '/mekan/carsi')
+    expect(screen.getByRole('link', { name: 'Black Tost Çarşı' })).toHaveAttribute(
+      'href',
+      '/black-tost-carsi',
+    )
+    expect(directory).toHaveTextContent('Black Garden7 dükkan')
+    expect(directory).toHaveTextContent('Lulu KafeTadilatta')
+    expect(screen.queryByRole('link', { name: 'Dükkanlar' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Kampanyalar' })).toHaveAttribute(
+      'href',
+      '/kampanyalar',
+    )
+    expect(screen.getByRole('link', { name: 'KVKK ve Gizlilik' })).toHaveAttribute('href', '/kvkk')
   })
 })

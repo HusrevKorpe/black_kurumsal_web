@@ -4,6 +4,7 @@ import { MenuIcon } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
 import { whenIdleAfterLoad } from '@/lib/browser/idle'
+import type { NavShopGroup } from '@/features/shops/nav'
 import { tr } from '@/lib/i18n/tr'
 
 export interface NavItem {
@@ -21,6 +22,7 @@ interface MobileNavProps {
   items: NavItem[]
   brandName: string
   contact: NavContact
+  shopGroups?: NavShopGroup[]
 }
 
 const SHEET_ID = 'mobil-menu'
@@ -35,7 +37,7 @@ const preloadSheet = () => {
 }
 const MobileNavSheet = dynamic(() => loadSheet().then((m) => m.MobileNavSheet), { ssr: false })
 
-export function MobileNav({ items, brandName, contact }: MobileNavProps) {
+export function MobileNav({ items, brandName, contact, shopGroups }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   // İlk açılıştan sonra takılı kalır: kapanış animasyonu oynar, ikinci açılış anında olur.
   const [mounted, setMounted] = useState(false)
@@ -79,6 +81,7 @@ export function MobileNav({ items, brandName, contact }: MobileNavProps) {
           items={items}
           brandName={brandName}
           contact={contact}
+          shopGroups={shopGroups}
           finalFocus={triggerRef}
         />
       ) : null}
