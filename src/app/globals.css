@@ -340,7 +340,30 @@
 }
 .tree-root {
   position: relative;
+  isolation: isolate;
   padding-bottom: 0.5rem;
+}
+/*
+ * Başlık ve alt yazının arkası sayfa renginde: düşen eşyalar, ızgara ve yol yazının içinden geçmesin.
+ * Kenarları yumuşak söner, zeminde kutu gibi durmaz. Alt kenar kökün düğümüne değmez.
+ */
+.tree-root::before {
+  content: '';
+  position: absolute;
+  inset: -1rem -1.5rem 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--background);
+  mask-image:
+    linear-gradient(to right, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent),
+    linear-gradient(to bottom, transparent, #000 1rem, #000 calc(100% - 0.5rem), transparent);
+  mask-composite: intersect;
+}
+@media (min-width: 1024px) {
+  /* Geniş ekranda yazı ortada ve dar: zemin yalnız onun arkasında, ızgara iki yanda sürer. */
+  .tree-root::before {
+    inset-inline: max(-1.5rem, calc(50% - 22rem));
+  }
 }
 .tree,
 .tree-twigs {
