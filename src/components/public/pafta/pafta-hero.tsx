@@ -44,19 +44,22 @@ export function PaftaHero({
       }
     >
       <div className="pafta-title-box grid min-w-0 content-start gap-3 md:gap-5 md:pt-10">
-        <nav
-          aria-label="Konum"
-          className="-mb-2 flex flex-wrap items-center gap-1.5 text-sm text-[var(--pafta-soft)]"
-        >
-          {crumbs.map((crumb, index) => (
-            <Fragment key={crumb.href}>
-              {index > 0 ? <span aria-hidden>/</span> : null}
-              <Link href={crumb.href} className={CRUMB_LINK_CLASS}>
-                {crumb.label}
-              </Link>
-            </Fragment>
-          ))}
-        </nav>
+        {/* Tek halkalı yol ("Ana Sayfa") bir şey söylemez; logo zaten ana sayfaya götürür. */}
+        {crumbs.length > 1 ? (
+          <nav
+            aria-label="Konum"
+            className="-mb-2 flex flex-wrap items-center gap-1.5 text-sm text-[var(--pafta-soft)]"
+          >
+            {crumbs.map((crumb, index) => (
+              <Fragment key={crumb.href}>
+                {index > 0 ? <span aria-hidden>/</span> : null}
+                <Link href={crumb.href} className={CRUMB_LINK_CLASS}>
+                  {crumb.label}
+                </Link>
+              </Fragment>
+            ))}
+          </nav>
+        ) : null}
         {morphSlug ? <ShopNameMorph slug={morphSlug}>{heading}</ShopNameMorph> : heading}
         <p className="font-medium">{subtitle}</p>
         {lead ? <p className="max-w-[40ch] text-[17px] leading-relaxed">{lead}</p> : null}

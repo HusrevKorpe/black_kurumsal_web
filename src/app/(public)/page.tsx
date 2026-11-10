@@ -62,7 +62,7 @@ export default async function HomePage() {
         locations={locations}
       />
 
-      <div className="mx-auto w-full max-w-6xl space-y-14 px-4 pt-12 sm:px-6 lg:space-y-24 lg:pt-20">
+      <div className="mx-auto w-full max-w-7xl space-y-14 px-4 pt-12 md:px-6 lg:space-y-24 lg:px-12 lg:pt-20">
         {campaigns.length > 0 ? (
           <section aria-labelledby="kampanyalar-baslik">
             <SectionHeading
@@ -91,7 +91,15 @@ export default async function HomePage() {
               title={tr.home.locationsTitle}
               subtitle={tr.home.locationsSubtitle}
             />
-            <div className="grid gap-3 sm:grid-cols-2 lg:gap-6">
+            {/* Tek sayıda kart: geniş ekranda üç sütun, tablette sondaki tek kart tam satır; köşede
+                yalnız kalan kart ve yanındaki boşluk olmasın. */}
+            <div
+              className={
+                locations.length % 2 === 1 && locations.length > 1
+                  ? 'grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6 sm:[&>:last-child]:col-span-2 sm:[&>:last-child]:aspect-[21/9] lg:[&>:last-child]:col-span-1 lg:[&>:last-child]:aspect-[16/10]'
+                  : 'grid gap-3 sm:grid-cols-2 lg:gap-6'
+              }
+            >
               {locations.map((location) => (
                 <LocationCard key={location.id} location={location} />
               ))}

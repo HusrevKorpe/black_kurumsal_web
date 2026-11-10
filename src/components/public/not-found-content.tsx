@@ -13,7 +13,7 @@ const NOT_FOUND_TITLE = SITE_TITLE_TEMPLATE.replace('%s', tr.common.notFoundTitl
 
 export function NotFoundContent() {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col px-4 py-16 sm:px-6 sm:py-24">
+    <div className="mx-auto flex w-full max-w-7xl flex-col px-4 py-16 sm:py-24 md:px-6 lg:px-12">
       <title>{NOT_FOUND_TITLE}</title>
       <p aria-hidden className="font-display text-[9rem] leading-[0.85] font-bold sm:text-[14rem]">
         404

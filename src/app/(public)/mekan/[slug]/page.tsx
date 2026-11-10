@@ -113,7 +113,7 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
-      <div className="mx-auto w-full max-w-7xl px-[18px] md:px-12">
+      <div className="mx-auto w-full max-w-7xl px-[18px] md:px-6 lg:px-12">
         <PaftaHero
           crumbs={[{ href: ROUTES.home, label: tr.nav.home }]}
           name={location.name}
@@ -121,7 +121,13 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
           lead={location.description}
           status={
             isVenue ? (
-              <OpenStatusBadge week={week} exceptions={exceptions} detailed className="text-sm" />
+              <OpenStatusBadge
+                week={week}
+                exceptions={exceptions}
+                detailed
+                omitTodayClose
+                className="text-sm"
+              />
             ) : null
           }
           cover={

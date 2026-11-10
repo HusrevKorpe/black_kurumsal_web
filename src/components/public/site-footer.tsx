@@ -14,21 +14,17 @@ interface SiteFooterProps {
  * Telefonda 44 px'lik dokunma hedefi; geniş ekranda eski sıkı satır aralığı. Listenin eksi dikey
  * boşluğu, satır yüksekliğinin fazlasını yutar ki başlıkla ilk bağlantının arası değişmesin.
  */
-const LIST_CLASS = '-my-3 text-sm text-muted-foreground sm:my-0 sm:space-y-2'
-const LINK_CLASS = 'inline-flex min-h-12 items-center gap-2 hover:text-foreground sm:min-h-0'
+const LIST_CLASS = '-my-2.5 text-sm text-muted-foreground sm:my-0 sm:space-y-2'
+const LINK_CLASS = 'inline-flex min-h-11 items-center gap-2 hover:text-foreground sm:min-h-0'
 
 export function SiteFooter({ settings }: SiteFooterProps) {
   const phoneHref = settings.contactPhone ? telHref(settings.contactPhone) : null
 
   return (
     <footer className="mt-16 overflow-hidden border-t">
-      <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3 sm:px-6">
-        <div>
-          {settings.heroSubtitle ? (
-            <p className="text-sm leading-relaxed text-muted-foreground">{settings.heroSubtitle}</p>
-          ) : null}
-        </div>
-
+      {/* Bağlantılar ve iletişim yan yana; marka alttaki dev yazıda. Açılıştaki tanıtım cümlesi
+          burada tekrar edilmez. */}
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-x-6 gap-y-8 px-4 py-10 sm:grid-cols-3 md:px-6 lg:px-12">
         <nav aria-label={tr.footer.quickLinks}>
           <p className="mb-3 text-sm font-semibold">{tr.footer.quickLinks}</p>
           <ul className={LIST_CLASS}>
@@ -91,11 +87,11 @@ export function SiteFooter({ settings }: SiteFooterProps) {
       <div
         aria-hidden
         data-wordmark={settings.brandName}
-        className="footer-wordmark pointer-events-none mx-auto w-full max-w-6xl px-4 font-display font-bold uppercase sm:px-6"
+        className="footer-wordmark pointer-events-none mx-auto w-full max-w-7xl px-4 font-display font-bold uppercase md:px-6 lg:px-12"
         style={{ '--brand-length': settings.brandName.length } as React.CSSProperties}
       />
       <div className="border-t">
-        <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-muted-foreground sm:px-6">
+        <p className="mx-auto w-full max-w-7xl px-4 py-4 text-xs text-muted-foreground md:px-6 lg:px-12">
           {tr.footer.rights(new Date().getFullYear())}
         </p>
       </div>

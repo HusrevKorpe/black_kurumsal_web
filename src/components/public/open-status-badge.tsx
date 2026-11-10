@@ -6,7 +6,11 @@ import {
   CLOSING_SOON_MINUTES,
   DAY_NAMES,
   getOpenStatus,
+  getTodaySchedule,
+  ISTANBUL_TZ,
   minutesUntilClose,
+  parseHm,
+  zonedNow,
   type HoursExceptionEntry,
   type WeeklyHours,
 } from '@/features/hours'
@@ -19,6 +23,11 @@ interface OpenStatusBadgeProps {
   exceptions?: readonly HoursExceptionEntry[]
   /** Kartta kısa, detay sayfasında açıklamalı. */
   detailed?: boolean
+  /**
+   * Sayfada bugünün saat kutuları (Pafta şeridi) varsa açıkken "Kapanış 02:00" tekrar yazılmaz.
+   * Dünün gece yarısını geçen vardiyasındaysa (kutular bugünü gösterir) yine yazılır.
+   */
+  omitTodayClose?: boolean
   /**
    * Saat girilmemişse yazılacak nötr metin (gri nokta ile). Verilmezse rozet hiç çıkmaz. Liste
    * kartlarında yan yana dükkanlardan birinde durum yazıp ötekinde boş kalmasın diye.
@@ -51,6 +60,7 @@ export function OpenStatusBadge({
   week,
   exceptions,
   detailed = false,
+  omitTodayClose = false,
   fallback,
   className,
 }: OpenStatusBadgeProps) {
@@ -59,8 +69,15 @@ export function OpenStatusBadge({
     if (tick === null) return null
     const now = new Date()
     const status = getOpenStatus(week, { now, exceptions })
-    return { status, left: minutesUntilClose(status, { now }) }
-  }, [week, exceptions, tick])
+    const today = omitTodayClose ? getTodaySchedule(week, { now, exceptions }) : null
+    // Bugünün açılışı geçmediyse dünün vardiyasındayız: kutulardaki kapanış o vardiyanın değil.
+    const closeShownElsewhere =
+      status.kind === 'open' &&
+      today?.kind === 'open' &&
+      today.closesAt === status.closesAt &&
+      (parseHm(today.opensAt) ?? 0) <= zonedNow(now, ISTANBUL_TZ).minutes
+    return { status, left: minutesUntilClose(status, { now }), closeShownElsewhere }
+  }, [week, exceptions, tick, omitTodayClose])
 
   if (week.length === 0) {
     return fallback ? <NeutralBadge label={fallback} className={className} /> : null
@@ -71,7 +88,7 @@ export function OpenStatusBadge({
     return <span aria-hidden className={clsx('inline-block h-[1lh] w-20', className)} />
   }
 
-  const { status, left } = view
+  const { status, left, closeShownElsewhere } = view
   if (status.kind === 'unknown') {
     return fallback ? <NeutralBadge label={fallback} className={className} /> : null
   }
@@ -82,9 +99,11 @@ export function OpenStatusBadge({
   let detail = ''
   if (detailed) {
     if (status.kind === 'open') {
-      detail = status.closesAt
-        ? ` · ${tr.common.closesAt} ${status.closesAt}`
-        : ` · ${tr.common.allDay}`
+      if (closeShownElsewhere) detail = ''
+      else
+        detail = status.closesAt
+          ? ` · ${tr.common.closesAt} ${status.closesAt}`
+          : ` · ${tr.common.allDay}`
     } else if (status.nextOpen) {
       detail = ` · ${tr.common.opensAt} ${DAY_NAMES[status.nextOpen.dayOfWeek]} ${status.nextOpen.opensAt}`
     }

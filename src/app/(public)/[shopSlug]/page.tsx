@@ -187,14 +187,20 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
-      <div className="mx-auto w-full max-w-7xl px-[18px] md:px-12">
+      <div className="mx-auto w-full max-w-7xl px-[18px] md:px-6 lg:px-12">
         <PaftaHero
           crumbs={crumbs}
           name={shop.name}
           morphSlug={shop.slug}
           subtitle={locationLabel ? `${typeLabel} · ${locationLabel}` : typeLabel}
           status={
-            <OpenStatusBadge week={week} exceptions={exceptions} detailed className="text-sm" />
+            <OpenStatusBadge
+              week={week}
+              exceptions={exceptions}
+              detailed
+              omitTodayClose
+              className="text-sm"
+            />
           }
           cover={
             shop.coverImage ? (

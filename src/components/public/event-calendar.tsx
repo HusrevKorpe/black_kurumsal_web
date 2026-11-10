@@ -2,7 +2,7 @@
 
 import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   addMonths,
   CALENDAR_TIME_ZONE,
@@ -65,6 +65,7 @@ export function EventCalendar({ events, initialToday }: EventCalendarProps) {
   const [offset, setOffset] = useState(0)
   const month = useMemo(() => addMonths(baseMonth, offset), [baseMonth, offset])
   const [selected, setSelected] = useState<DayKey | null>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   const byDay = useMemo(() => groupByDay(events), [events])
   const cells = useMemo(() => monthGrid(month), [month])
@@ -194,7 +195,7 @@ export function EventCalendar({ events, initialToday }: EventCalendarProps) {
               </>
             )
             const base = cn(
-              'flex h-full min-h-14 w-full flex-col items-center p-1 sm:min-h-24 sm:items-start sm:p-1.5',
+              'flex h-full min-h-11 w-full flex-col items-center p-1 sm:min-h-24 sm:items-start sm:p-1.5',
               !cell.inMonth && 'opacity-35',
               isPast && cell.inMonth && !has && 'text-muted-foreground',
             )
@@ -209,7 +210,15 @@ export function EventCalendar({ events, initialToday }: EventCalendarProps) {
                 {has ? (
                   <button
                     type="button"
-                    onClick={() => setSelected(isSelected ? null : cell.key)}
+                    onClick={() => {
+                      setSelected(isSelected ? null : cell.key)
+                      // Telefonda liste takvimin üstünde: seçilen günün etkinlikleri görünsün.
+                      if (!isSelected && window.matchMedia('(max-width: 1023px)').matches) {
+                        requestAnimationFrame(() =>
+                          listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }),
+                        )
+                      }
+                    }}
                     aria-pressed={isSelected}
                     aria-label={label}
                     className={cn(
@@ -230,7 +239,8 @@ export function EventCalendar({ events, initialToday }: EventCalendarProps) {
         </ol>
       </div>
 
-      <div aria-live="polite">
+      {/* Telefonda önce liste: boş ay ızgarası yaklaşan etkinlikleri ekranın altına itmesin. */}
+      <div ref={listRef} aria-live="polite" className="scroll-mt-20 max-lg:order-first">
         <div className="mb-3 flex items-baseline justify-between gap-3 border-l-4 border-brand pl-3">
           <h3 className="font-display text-2xl leading-none font-bold uppercase">
             {selected ? fullDate.format(keyDate(selected)) : t.upcoming}

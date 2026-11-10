@@ -54,4 +54,18 @@ describe('OpenStatusBadge', () => {
     render(<OpenStatusBadge week={[]} fallback="Saatler yakında" />)
     expect(screen.getByText('Saatler yakında')).toBeInTheDocument()
   })
+
+  it('omitTodayClose: bugünün kutuları kapanışı gösteriyorsa tekrar yazmaz', () => {
+    vi.setSystemTime(new Date('2026-09-05T12:00:00+03:00'))
+    render(<OpenStatusBadge week={daily('10:00', '02:00')} detailed omitTodayClose />)
+    expect(screen.getByText('Şu an açık')).toBeInTheDocument()
+    expect(screen.queryByText(/Kapanış/)).not.toBeInTheDocument()
+  })
+
+  it('omitTodayClose: dünün gece vardiyasındayken kapanışı yine yazar', () => {
+    // 01:00: dünün 10:00–02:00 vardiyası; bugünün kutuları henüz açılmamış günü gösterir.
+    vi.setSystemTime(new Date('2026-09-05T01:00:00+03:00'))
+    render(<OpenStatusBadge week={daily('10:00', '03:00')} detailed omitTodayClose />)
+    expect(screen.getByText(/Kapanış 03:00/)).toBeInTheDocument()
+  })
 })

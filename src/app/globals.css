@@ -225,19 +225,32 @@
 }
 
 .footer-wordmark {
-  /* Harf sayısına göre genişliği doldurur; ad panelden değişse de taşmaz. */
-  font-size: calc((min(100vw, 72rem) - 3rem) / (var(--brand-length) * 0.47));
+  /* Harf sayısına göre kabın iç genişliğini doldurur; ad panelden değişse de taşmaz. */
+  --wordmark-pad: 2rem;
+  font-size: calc((min(100vw, 80rem) - var(--wordmark-pad)) / (var(--brand-length) * 0.47));
   line-height: 0.8;
-}
-/* line-height 0.8'de taban çizgisi kutunun altına oturur; harfler alt çizgiye değmesin diye boşluk. */
-.footer-wordmark {
+  /* line-height 0.8'de taban çizgisi kutunun altına oturur; harfler alt çizgiye değmesin. */
   margin-bottom: 0.05em;
   white-space: nowrap;
 }
-/* Süs yazısı: metin değil sözde öğe, ekran okuyucuya ve kontrast denetimine girmez. */
+@media (min-width: 768px) {
+  .footer-wordmark {
+    --wordmark-pad: 3rem;
+  }
+}
+@media (min-width: 1024px) {
+  .footer-wordmark {
+    --wordmark-pad: 6rem;
+  }
+}
+/*
+ * Süs yazısı: metin değil sözde öğe, ekran okuyucuya ve kontrast denetimine girmez. Dolu gri blok
+ * yerine ince kontur: üstteki logo ve açılıştaki dev adla yarışmaz, imza gibi durur.
+ */
 .footer-wordmark::before {
   content: attr(data-wordmark);
-  color: var(--ghost);
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in oklch, var(--foreground) 16%, transparent);
 }
 
 /*
@@ -354,15 +367,24 @@
   z-index: -1;
   pointer-events: none;
   background: var(--background);
+  --halo-fade: 1.5rem;
   mask-image:
-    linear-gradient(to right, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent),
+    linear-gradient(
+      to right,
+      transparent,
+      #000 var(--halo-fade),
+      #000 calc(100% - var(--halo-fade)),
+      transparent
+    ),
     linear-gradient(to bottom, transparent, #000 1rem, #000 calc(100% - 0.5rem), transparent);
   mask-composite: intersect;
 }
 @media (min-width: 1024px) {
   /* Geniş ekranda yazı ortada ve dar: zemin yalnız onun arkasında, ızgara iki yanda sürer. */
   .tree-root::before {
-    inset-inline: max(-1.5rem, calc(50% - 22rem));
+    /* Kenar geniş söner: zeminde kutu sınırı seçilmez. */
+    --halo-fade: 7rem;
+    inset-inline: max(-1.5rem, calc(50% - 30rem));
   }
 }
 .tree,

@@ -20,7 +20,7 @@ export function LocationCard({ location }: LocationCardProps) {
       <CoverImage
         media={location.coverImage}
         alt={location.name}
-        sizes="(min-width: 1024px) 50vw, 100vw"
+        sizes="(min-width: 1024px) 40vw, (min-width: 640px) 50vw, 100vw"
         className="transition-transform duration-500 group-hover:scale-[1.03]"
       />
       <div
@@ -28,7 +28,7 @@ export function LocationCard({ location }: LocationCardProps) {
         aria-hidden
       />
       <div className="relative p-4 lg:p-6">
-        <h3 className="font-display text-4xl leading-none font-bold uppercase lg:text-6xl">
+        <h3 className="font-display text-4xl leading-none font-bold uppercase lg:text-5xl">
           <DisplayName>{location.name}</DisplayName>
         </h3>
         <p className="mt-1.5 text-sm text-muted-foreground">

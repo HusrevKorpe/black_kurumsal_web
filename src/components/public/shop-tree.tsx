@@ -46,7 +46,7 @@ export function ShopTree({ brandName, title, subtitle, shops, locations }: ShopT
       aria-labelledby="acilis-baslik"
     >
       <ShopTreeAtlas />
-      <div className="relative isolate mx-auto w-full max-w-7xl px-4 pt-8 pb-12 sm:px-6 lg:pt-16 lg:pb-20">
+      <div className="relative isolate mx-auto w-full max-w-7xl px-4 pt-8 pb-12 md:px-6 lg:px-12 lg:pt-16 lg:pb-20">
         <ShopTreeBranches />
         <div className="tree-root" data-tree-node="root">
           <HeroWordmark name={brandName} />
@@ -120,6 +120,10 @@ function openAt(step: number) {
   return { '--open': step } as React.CSSProperties
 }
 
+/**
+ * Kutuların yüksekliği (`min-h-[4.875rem]`): durum ile tür alt satıra kayan kutuya (ör. "Saatler
+ * yakında · Espor Salonu") göre; tek satırda kalanlar aynı boyda durur, liste dalgalanmaz.
+ */
 function TreeShop({ shop, parent }: { shop: ShopCardData; parent: string }) {
   const { week, source } = resolveHours(shop.hours, shop.location?.hours)
   const exceptions = resolveExceptions(
@@ -136,7 +140,7 @@ function TreeShop({ shop, parent }: { shop: ShopCardData; parent: string }) {
       data-tree-node={shop.id}
       data-tree-parent={parent}
       data-accent={meta.accent}
-      className="tree-shop flex min-h-16 items-center gap-3 border border-border bg-card py-2 pr-3 pl-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring active:bg-accent"
+      className="tree-shop flex min-h-[4.875rem] items-center gap-3 border border-border bg-card py-2 pr-3 pl-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring active:bg-accent"
     >
       {/* Kapağın küçüğü: dokununca büyüyüp dükkan sayfasının kapağı olur (`ShopCoverMorph`). */}
       <ShopCoverMorph slug={shop.slug}>
@@ -195,7 +199,7 @@ function TreeVenue({ venue, shopCount }: { venue: LocationCardData; shopCount: n
       data-tree-node={venue.id}
       data-tree-parent="root"
       data-accent="amber"
-      className="tree-shop flex min-h-16 items-center gap-3 border border-border bg-card py-2 pr-3 pl-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring active:bg-accent"
+      className="tree-shop flex min-h-[4.875rem] items-center gap-3 border border-border bg-card py-2 pr-3 pl-2 transition-colors focus-visible:outline-2 focus-visible:outline-ring active:bg-accent"
     >
       <span className="tree-shop-thumb relative size-12 shrink-0 overflow-hidden" aria-hidden>
         {venue.coverImage ? (
