@@ -221,6 +221,8 @@
   line-height: 0.9;
   font-size: 44px;
   overflow-wrap: anywhere;
+  /* Atlama şeridi başlığa gider; yapışkan üst çubuğun altında kalmasın. */
+  scroll-margin-top: 6rem;
 }
 @media (min-width: 768px) {
   .pafta-heading-lg {
@@ -383,5 +385,15 @@
   .pafta-btn,
   .pafta-ticket {
     transition: none;
+  }
+}
+
+/*
+ * Telefonda alt çubuk (Ara / WhatsApp / Yol) en alttaki alt bilgiyi örtmesin. Boşluk sayfanın en
+ * sonunda durur; içerikle alt bilgi arasına girip boş bir şerit bırakmaz.
+ */
+@media (max-width: 767px) {
+  .public-theme:has(.contact-action-bar) {
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
 }

@@ -8,6 +8,7 @@ import { OpenStatusBadge } from '@/components/public/open-status-badge'
 import { PaftaCover } from '@/components/public/pafta/pafta-cover'
 import { PaftaHero } from '@/components/public/pafta/pafta-hero'
 import { PaftaStrip } from '@/components/public/pafta/pafta-strip'
+import { paftaSideRows } from '@/components/public/pafta/side-rows'
 import { PaftaShopTickets } from '@/components/public/pafta/pafta-tickets'
 import { normalizeWeek, toExceptionEntries } from '@/features/hours'
 import { getActiveLocationSlugs, getLocationBySlug } from '@/features/locations/queries'
@@ -107,10 +108,7 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
 
   return (
     // Mekân sayfası tabelanın yeşilini alır (Pafta kaynağı); içindeki biletler kendi dükkan rengindedir.
-    <article
-      className={withBar ? 'pafta pb-28 md:pb-24' : 'pafta pb-16 md:pb-24'}
-      data-accent={isVenue ? 'grass' : undefined}
-    >
+    <article className="pafta pb-16 md:pb-24" data-accent={isVenue ? 'grass' : undefined}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
@@ -161,16 +159,25 @@ export default async function LocationPage({ params }: PageProps<'/mekan/[slug]'
 
         {isVenue ? (
           // Telefonda tasarımdaki sıra: galeri, saatler, adres; geniş ekranda saatler sağda yapışkan sütun.
-          <div className="mt-12 grid gap-12 md:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[auto_auto_1fr] lg:gap-x-12 lg:gap-y-16">
+          <div
+            className="mt-12 grid gap-12 md:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-(--side-rows) lg:gap-x-12 lg:gap-y-16"
+            style={
+              {
+                '--side-rows': paftaSideRows(
+                  Number(gallery.length > 0) + Number(location.campaigns.length > 0),
+                ),
+              } as React.CSSProperties
+            }
+          >
             {gallery.length > 0 ? (
-              <section aria-labelledby="galeri" className="min-w-0 lg:col-start-1 lg:row-start-1">
+              <section aria-labelledby="galeri" className="min-w-0 lg:col-start-1">
                 <h2 id="galeri" className={SECTION_TITLE_CLASS}>
                   {tr.shop.gallery}
                 </h2>
                 <Gallery images={gallery} title={location.name} />
               </section>
             ) : null}
-            <aside className="grid content-start gap-10 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-start">
+            <aside className="grid content-start gap-10 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-full lg:self-start">
               <section aria-labelledby="saatler">
                 <h2 id="saatler" className="pafta-heading mb-4">
                   {tr.common.hours}

@@ -2,7 +2,7 @@ import { MessageCircleIcon, PhoneIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { CampaignCard } from '@/components/public/campaign-card'
-import { ContactActionBar, hasActionBar } from '@/components/public/contact-buttons'
+import { ContactActionBar } from '@/components/public/contact-buttons'
 import { DisplayName } from '@/components/public/display-name'
 import { FeatureChips } from '@/components/public/feature-chips'
 import { GameShelf } from '@/components/public/game-shelf'
@@ -12,6 +12,7 @@ import { OpenStatusBadge } from '@/components/public/open-status-badge'
 import { PaftaCover } from '@/components/public/pafta/pafta-cover'
 import { PaftaHero } from '@/components/public/pafta/pafta-hero'
 import { PaftaStrip } from '@/components/public/pafta/pafta-strip'
+import { paftaSideRows } from '@/components/public/pafta/side-rows'
 import { PriceList } from '@/components/public/price-list'
 import { RenovationStage } from '@/components/public/renovation/renovation-stage'
 import { resolveExceptions, resolveHours, toExceptionEntries } from '@/features/hours'
@@ -144,7 +145,6 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
     exceptions,
   })
 
-  const withBar = hasActionBar(contact)
   const tel = contact.phone ? telHref(contact.phone) : null
   const wa = contact.whatsapp ? whatsappHref(contact.whatsapp, whatsappMessage) : null
   // Boş bölüm sayfayı terk edilmiş gösterir: fiyat yoksa tek satır + "Fiyat için ara" (o da
@@ -154,12 +154,24 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
   const showPrices = hasPrices || showPriceCall
   const showHours = week.length > 0
   const showContact = hasContactCard(contact)
+  const showGallery = gallery.length > 0
+  const showAbout = Boolean(shop.description) || shop.features.length > 0
+  // Şerit sayfadaki sırayla gider. "Fiyat için ara" kutusunun başlığı yok, oraya atlanmaz.
   const jumpLinks = [
-    showPrices ? { href: '#fiyatlar', label: tr.shop.prices } : null,
     gameShelves[0] ? { href: `#vitrin-${gameShelves[0].id}`, label: tr.shop.games } : null,
+    hasPrices ? { href: '#fiyatlar', label: tr.shop.prices } : null,
     showHours ? { href: '#saatler', label: tr.common.hours } : null,
     showContact ? { href: '#iletisim', label: tr.shop.contact } : null,
+    showGallery ? { href: '#galeri', label: tr.shop.gallery } : null,
   ].filter((link) => link !== null)
+  // Geniş ekranda sol sütunun satırları; boş satır (ve arasındaki boşluk) kalmasın.
+  const leftSections = [
+    showPrices,
+    showGallery,
+    showAbout,
+    shopCampaigns.length > 0,
+    venueCampaigns.length > 0 && Boolean(venueName),
+  ].filter(Boolean).length
   const crumbs = [
     { href: ROUTES.home, label: tr.nav.home },
     ...(shop.location
@@ -169,10 +181,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
 
   return (
     // data-accent dükkanın tabela rengini (shop-motion.css) sayfadaki bütün vurgulara yayar.
-    <article
-      className={withBar ? 'pafta pb-28 md:pb-24' : 'pafta pb-16 md:pb-24'}
-      data-accent={SHOP_TYPE_META[shop.type].accent}
-    >
+    <article className="pafta pb-16 md:pb-24" data-accent={SHOP_TYPE_META[shop.type].accent}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
@@ -244,10 +253,13 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
 
         {/*
           Telefonda sıra: fiyat, saat ve iletişim, galeri, hakkında, kampanyalar. Müşteri en çok
-          fiyata, sonra saate bakar. Geniş ekranda sağ sütun yapışkan yan panel; son 1fr satırı
-          panelin fazla yüksekliğini soldaki bölümlerin arasına dağıtmaz.
+          fiyata, sonra saate bakar. Geniş ekranda sağ sütun yapışkan yan panel; satır sayısı soldaki
+          bölüm kadar, sonuncusu 1fr: panelin fazla yüksekliği bölümlerin arasına dağılmaz.
         */}
-        <div className="mt-12 grid gap-12 md:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[auto_auto_auto_auto_1fr] lg:gap-x-12 lg:gap-y-16">
+        <div
+          className="mt-12 grid gap-12 md:mt-20 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-(--side-rows) lg:gap-x-12 lg:gap-y-16"
+          style={{ '--side-rows': paftaSideRows(leftSections) } as React.CSSProperties}
+        >
           {hasPrices ? (
             <section aria-labelledby="fiyatlar" className={SECTION_CLASS}>
               <h2 id="fiyatlar" className={SECTION_TITLE_CLASS}>
@@ -281,7 +293,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
           ) : null}
 
           {showHours || showContact ? (
-            <aside className="grid content-start gap-10 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-5 lg:row-start-1 lg:self-start">
+            <aside className="grid content-start gap-10 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-full lg:self-start">
               {showHours ? (
                 <section aria-labelledby="saatler" className="scroll-mt-24">
                   <h2 id="saatler" className="pafta-heading mb-4">
@@ -296,7 +308,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
             </aside>
           ) : null}
 
-          {gallery.length > 0 ? (
+          {showGallery ? (
             <section aria-labelledby="galeri" className={SECTION_CLASS}>
               <h2 id="galeri" className={SECTION_TITLE_CLASS}>
                 {tr.shop.gallery}
@@ -305,7 +317,7 @@ export default async function ShopPage({ params }: PageProps<'/[shopSlug]'>) {
             </section>
           ) : null}
 
-          {shop.description || shop.features.length > 0 ? (
+          {showAbout ? (
             <section aria-labelledby="hakkinda" className={SECTION_CLASS}>
               <h2 id="hakkinda" className={SECTION_TITLE_CLASS}>
                 {tr.shop.about}

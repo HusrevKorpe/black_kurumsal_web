@@ -32,7 +32,9 @@ export function hasActionBar(contact: ResolvedContact): boolean {
  */
 export function PaftaActions({ contact, whatsappMessage }: ContactProps) {
   const { tel, wa, map } = contactLinks({ contact, whatsappMessage })
-  const desktopOnly = 'hidden md:inline-flex'
+  // `!`: .pafta-btn katmansız CSS'te `display: inline-flex` der ve katmanlı `hidden`ı ezer; telefonda
+  // aynı düğmeler alt çubukla birlikte iki kez çıkıyordu.
+  const desktopOnly = 'max-md:hidden!'
   if (!tel && !wa && !map && !contact.instagramUrl) return null
 
   return (
@@ -95,7 +97,8 @@ export function ContactActionBar({ contact, whatsappMessage }: ContactProps) {
   if (!tel && !wa && !map) return null
 
   return (
-    <div className="pafta fixed inset-x-0 bottom-0 z-30 border-t-[1.5px] border-[var(--pafta-strip-rule)] bg-none! p-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] md:hidden">
+    // `contact-action-bar`: sayfanın altına çubuk kadar boşluk bırakır (pafta.css).
+    <div className="contact-action-bar pafta fixed inset-x-0 bottom-0 z-30 border-t-[1.5px] border-[var(--pafta-strip-rule)] bg-none! p-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] md:hidden">
       <div className="mx-auto flex max-w-6xl gap-2">
         {tel ? (
           <a href={tel} data-track="call" className="pafta-btn pafta-btn-call flex-1 px-3">
